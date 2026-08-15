@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Map, Ship, Bot } from "lucide-react";
+import { LayoutDashboard, Map, Ship, Compass, MessageSquare } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,10 +17,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const items = [
-  { title: "Dashboard", url: "#dashboard", icon: LayoutDashboard },
-  { title: "Route Planner", url: "/", icon: Map },
-  { title: "Ferry Schedules", url: "#schedules", icon: Ship },
-  { title: "Smart Agent", url: "#agent", icon: Bot },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Route Planner", url: "/planner", icon: Map },
+  { title: "Ferry Schedules", url: "/schedules", icon: Ship },
+  { title: "Logistics Oracle", url: "/oracle", icon: MessageSquare },
 ];
 
 export function AppSidebar() {
