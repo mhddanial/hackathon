@@ -16,32 +16,32 @@
 
 ## 🕒 JAM 1–3 — Data Collection & Backend Skeleton
 - [x] Buat tabel Supabase sesuai skema: `road_segments`, `congestion_multipliers`, `ferry_schedules`, `route_query_log`, `profiles` (Bisa run script SQL)
-- [ ] Setup Row Level Security (RLS) di Supabase untuk mengamankan data user
+- [x] Setup Row Level Security (RLS) di Supabase untuk mengamankan data user
 - [x] Setup koneksi Supabase client di FastAPI
 - [x] Test query sederhana untuk memastikan koneksi ke Supabase berhasil
 - [x] Import data awal dari Hustler (bisa placeholder dulu)
 
 ## 🕒 JAM 3–6 — Backend Inti: Congestion API & Auth
-- [ ] Buat Auth Dependency (`get_current_user`) di FastAPI untuk verifikasi JWT
-- [ ] Implement `GET /user/history`
-- [ ] Buat script training model ML (`train_model.py`) untuk generate data sintetik kemacetan dan export `rf_model.joblib`
+- [x] Buat Auth Dependency (`get_current_user`) di FastAPI untuk verifikasi JWT
+- [x] Implement `GET /user/history`
+- [ ] Buat script training model ML (`train_model.ipynb`) untuk generate data sintetik kemacetan dan export `rf_model.joblib`
 - [ ] Implement `GET /congestion?segment_id=&day_type=&hour=`
     - Load model ML, prediksi level kemacetan & multiplier
     - Buat fallback ke query `congestion_multipliers` di Supabase jika model gagal dimuat
-- [ ] Implement helper function `calculate_emission_score(multipliers: list)`
+- [x] Implement helper function `calculate_emission_score(multipliers: list)`
 - [ ] Unit test manual: cek 2-3 kombinasi segment/waktu dengan Postman/curl
 
 ## 🕒 JAM 6–9 — Persiapan Agent
-- [ ] Susun *System Prompt* di file terpisah agar prompt agent rapi
-- [ ] Definisikan file struktur *Tool Schema* untuk persiapan integrasi Gemini
+- [x] Susun *System Prompt* di file terpisah agar prompt agent rapi
+- [x] Definisikan file struktur *Tool Schema* untuk persiapan integrasi Gemini
 
 ## 🕒 JAM 9–11 — Integrasi Agent (Gemini Function Calling)
-- [ ] Tetap di branch `main`
-- [ ] Definisikan JSON tool schema (3 tools: `get_congestion_level`, `get_optimal_route`, `get_ferry_schedule`)
-- [ ] Implement `POST /agent/chat` untuk handle request natural language dari *ChatWidget* frontend
-- [ ] Buat alur logika eksekusi *function calling* dari respon Gemini ke fungsi internal FastAPI
-- [ ] Implement fallback rule-based jika Gemini API gagal, timeout, atau limit habis
-- [ ] Test agent dengan minimal 5 skenario chat berbeda
+- [x] Tetap di branch `main`
+- [x] Definisikan JSON tool schema (3 tools: `get_congestion_level`, `get_optimal_route`, `get_ferry_schedule`)
+- [x] Implement `POST /agent/chat` untuk handle request natural language dari *ChatWidget* frontend
+- [x] Buat alur logika eksekusi *function calling* dari respon Gemini ke fungsi internal FastAPI
+- [x] Implement fallback rule-based jika Gemini API gagal, timeout, atau limit habis
+- [x] Test agent dengan minimal 5 skenario chat berbeda
 
 ## 🕒 JAM 11–13 — Integrasi Penuh, Bug Fixing, Robustness
 - [ ] Tes integrasi penuh frontend ↔ backend ↔ agent
