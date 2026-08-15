@@ -29,34 +29,59 @@ class ChatRequest(BaseModel):
     message: str
 
 # ---------------------------------------------------------
-# Mock Tool Functions (Until Database/OSRM are ready)
+# Real Tool Functions 
 # ---------------------------------------------------------
+from routers.congestion import get_congestion
+from database import get_supabase_client
+
 def execute_tool(function_name: str, args: dict):
-    """Router to execute the correct mock tool based on Gemini's request"""
+    """Router to execute the correct tool based on Gemini's request"""
     if function_name == "get_congestion_level":
-        return {
-            "segment_id": args.get("segment_id"),
-            "hour": args.get("hour"),
-            "day_type": args.get("day_type"),
-            "congestion_level": "High", 
-            "multiplier": 1.8,
-            "note": "This is mock data from backend."
-        }
+        try:
+            # Reusing the logic from our actual endpoint
+            result = get_congestion(
+                segment_id=args.get("segment_id"),
+                day_type=args.get("day_type", "weekday").lower(),
+                hour=int(args.get("hour"))
+            )
+            return result
+        except Exception as e:
+            return {"error": f"Failed to get congestion level: {str(e)}"}
+            
     elif function_name == "get_optimal_route":
+        # Keep mock for now, implement routing later
         return {
             "origin": args.get("origin"),
             "destination": args.get("destination"),
             "recommended_departure": "08:00",
             "estimated_duration_min": 45,
             "emission_score": "Medium",
-            "note": "This is mock data from backend."
+            "note": "This is mock routing data. Real integration pending."
         }
+        
     elif function_name == "get_ferry_schedule":
-        return {
-            "terminal": args.get("terminal"),
-            "departures": ["08:00", "10:00", "12:00", "14:00", "16:00"],
-            "note": "This is mock data from backend."
-        }
+        try:
+            supabase = get_supabase_client()
+            terminal_name = args.get("terminal")
+            # Query the database
+            response = supabase.table("ferry_schedules").select("*").ilike("terminal_name", f"%{terminal_name}%").execute()
+            if not response.data:
+                return {"error": f"No ferry schedules found for terminal '{terminal_name}'"}
+            
+            schedules = response.data
+            formatted_results = []
+            for s in schedules:
+                formatted_results.append({
+                    "terminal": s['terminal_name'],
+                    "destination": s['destination'],
+                    "departures": s['departure_times'],
+                    "vessel_type": s.get('vessel_type'),
+                    "cargo_capacity": s.get('cargo_capacity_tons')
+                })
+            return {"schedules": formatted_results}
+        except Exception as e:
+             return {"error": f"Failed to fetch ferry schedules: {str(e)}"}
+             
     else:
         return {"error": f"Unknown function: {function_name}"}
 

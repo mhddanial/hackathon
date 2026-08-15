@@ -34,5 +34,5 @@ def test_db_connection():
 
 # Include routers
 app.include_router(user.router, prefix="/user", tags=["User"])
-# app.include_router(congestion.router, prefix="/congestion", tags=["Congestion"])
+app.include_router(congestion.router, prefix="/congestion", tags=["Congestion"])
 app.include_router(agent.router, prefix="/agent", tags=["Agent"])
