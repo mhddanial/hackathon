@@ -96,6 +96,7 @@ def get_ml_congestion(segment_id: str, day_type: str, hour: int) -> dict:
     # Fallback default
     return {"level": "LOW", "multiplier": 1.0}
 
+@router.post("")
 @router.post("/")
 def calculate_route(req: RouteRequest) -> Dict[str, Any]:
     try:

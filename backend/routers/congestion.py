@@ -30,6 +30,7 @@ def is_peak_hour(hour: int) -> int:
     """Helper derived from train_model.ipynb"""
     return 1 if (6 <= hour <= 9) or (16 <= hour <= 19) else 0
 
+@router.get("")
 @router.get("/")
 def get_congestion(
     segment_id: str = Query(..., description="Road segment ID (e.g. SEG001)"),

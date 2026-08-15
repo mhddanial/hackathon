@@ -4,6 +4,7 @@ from database import get_supabase_client
 
 router = APIRouter()
 
+@router.get("")
 @router.get("/")
 def get_all_schedules():
     """
