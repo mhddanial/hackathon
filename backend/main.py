@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import congestion, agent, user, route
+from routers import congestion, agent, user, route, schedules
 from database import get_supabase_client
 
 app = FastAPI(title="Batam Cross-Border SmartFlow API", version="1.0.0")
@@ -37,3 +37,4 @@ app.include_router(user.router, prefix="/user", tags=["User"])
 app.include_router(congestion.router, prefix="/congestion", tags=["Congestion"])
 app.include_router(agent.router, prefix="/agent", tags=["Agent"])
 app.include_router(route.router, prefix="/route", tags=["Routing"])
+app.include_router(schedules.router, prefix="/schedules", tags=["Schedules"])
