@@ -85,3 +85,5 @@ websockets==15.0.1
 Werkzeug==3.1.8
 xgboost==3.3.0
 yarl==1.24.5
+uvicorn
+google-generativeai
