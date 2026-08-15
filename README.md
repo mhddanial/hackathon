@@ -471,8 +471,9 @@ hackathon/
 - ✅ Complete auth system (Email + Google OAuth + SSR route protection)
 - ✅ 5 fully integrated API endpoints deployed on Railway
 - ✅ 4-page dashboard on Vercel, all wired to live backend APIs
-- ✅ Zero dummy data in production
 
 ---
 
-*Built with ❤️ for SmartCity Hackathon 2026*
+*Built with ❤️ from I Can Do IT*
+
+
