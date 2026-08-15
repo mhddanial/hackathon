@@ -46,11 +46,11 @@ TOOL_SCHEMAS = [
             "properties": {
                 "origin": {
                     "type": "STRING",
-                    "description": "Origin point (e.g., 'Kawasan Industri Batamindo', 'Muka Kuning')"
+                    "description": "Origin point coordinates strictly as 'latitude, longitude' (e.g., '1.129, 104.049')"
                 },
                 "destination": {
                     "type": "STRING",
-                    "description": "Destination port or terminal (e.g., 'Batam Center', 'Batu Ampar')"
+                    "description": "Destination point coordinates strictly as 'latitude, longitude' (e.g., '1.163, 104.004')"
                 }
             },
             "required": ["origin", "destination"]

@@ -33,6 +33,8 @@ class ChatRequest(BaseModel):
 # ---------------------------------------------------------
 from routers.congestion import get_congestion
 from database import get_supabase_client
+from routers.route import calculate_route, RouteRequest, Point
+from datetime import datetime
 
 def execute_tool(function_name: str, args: dict):
     """Router to execute the correct tool based on Gemini's request"""
@@ -49,15 +51,36 @@ def execute_tool(function_name: str, args: dict):
             return {"error": f"Failed to get congestion level: {str(e)}"}
             
     elif function_name == "get_optimal_route":
-        # Keep mock for now, implement routing later
-        return {
-            "origin": args.get("origin"),
-            "destination": args.get("destination"),
-            "recommended_departure": "08:00",
-            "estimated_duration_min": 45,
-            "emission_score": "Medium",
-            "note": "This is mock routing data. Real integration pending."
-        }
+        try:
+            origin_str = args.get("origin", "")
+            dest_str = args.get("destination", "")
+            
+            # Parse "lat, lng"
+            origin_lat, origin_lng = map(float, [x.strip() for x in origin_str.split(',')])
+            dest_lat, dest_lng = map(float, [x.strip() for x in dest_str.split(',')])
+            
+            now = datetime.now()
+            time_str = f"{now.hour:02d}:{now.minute:02d}"
+            
+            req = RouteRequest(
+                origin=Point(lat=origin_lat, lng=origin_lng),
+                destination=Point(lat=dest_lat, lng=dest_lng),
+                time=time_str,
+                day_type="weekday"
+            )
+            
+            # Get real routing data
+            result = calculate_route(req)
+            
+            # CRITICAL: strip out route_geometry GeoJSON so we don't blow up Gemini's context window!
+            if "route_geometry" in result:
+                del result["route_geometry"]
+                
+            return result
+        except ValueError:
+            return {"error": "Could not parse coordinates. Please provide origin and destination exactly as 'latitude, longitude'."}
+        except Exception as e:
+            return {"error": f"Failed to get optimal route: {str(e)}"}
         
     elif function_name == "get_ferry_schedule":
         try:
