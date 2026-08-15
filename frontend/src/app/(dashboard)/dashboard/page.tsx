@@ -1,26 +1,90 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronLeft, SlidersHorizontal, Download, Ship, Leaf, Anchor, Map } from "lucide-react";
-import Link from "next/link";
+import { SlidersHorizontal, Download, Ship, Leaf, Anchor, Map, RefreshCw } from "lucide-react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+interface Schedule {
+  id: string;
+  terminal_name: string;
+  destination: string;
+  departure_times: string[];
+}
 
 export default function DashboardPage() {
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [batuAmparCongestion, setBatuAmparCongestion] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+
+    // Fetch schedules independently — don't let one failure block the other
+    try {
+      const schedRes = await fetch(`${API_URL}/schedules`);
+      if (schedRes.ok) {
+        const schedData = await schedRes.json();
+        setSchedules(schedData.schedules || []);
+      }
+    } catch (error) {
+      console.warn("Could not load schedules:", error);
+    }
+
+    // Fetch congestion for Yos Sudarso (SEG001) — a valid segment in our DB
+    try {
+      const hour = new Date().getHours();
+      const congRes = await fetch(`${API_URL}/congestion?segment_id=SEG001&day_type=weekday&hour=${hour}`);
+      if (congRes.ok) {
+        const congData = await congRes.json();
+        setBatuAmparCongestion(congData);
+      }
+    } catch (error) {
+      console.warn("Could not load congestion data:", error);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // Extract upcoming departures
+  const upcomingDepartures = schedules.flatMap(s =>
+    (s.departure_times || []).map(t => ({
+      route: `${s.terminal_name} → ${s.destination === "Singapore" ? "SGP" : s.destination}`,
+      time: t
+    }))
+  ).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 3);
+
+  // API returns { congestion_level: "HIGH", multiplier: 1.8 }
+  // Map multiplier to a 0-100 congestion % for the UI bar
+  const multiplierToPct: Record<string, number> = { "LOW": 30, "MEDIUM": 60, "HIGH": 82, "VERY_HIGH": 95 };
+  const congestionLevel = batuAmparCongestion?.congestion_level || "HIGH";
+  const congestionPct = multiplierToPct[congestionLevel] ?? 82;
+  const isHighCongestion = congestionPct > 55;
+
   return (
     <div className="flex flex-col bg-[#F8F9FB] rounded-tl-3xl p-8 overflow-y-auto min-h-screen">
-      
-
-
       {/* Header */}
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-[28px] font-semibold text-[#1A1D27] mb-1">Logistic Overview</h1>
           <p className="text-sm text-[#5E6470]">Real-time network performance and sustainability impact</p>
         </div>
-        <Button variant="outline" className="rounded-lg px-4 h-10 border-[#E2E8F0] text-[#5E6470] bg-white shadow-sm">
-          <SlidersHorizontal className="w-4 h-4 mr-2" />
-          Filter
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={fetchDashboardData} variant="outline" className="rounded-lg px-4 h-10 border-[#E2E8F0] text-[#5E6470] bg-white shadow-sm">
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button variant="outline" className="rounded-lg px-4 h-10 border-[#E2E8F0] text-[#5E6470] bg-white shadow-sm">
+            <SlidersHorizontal className="w-4 h-4 mr-2" />
+            Filter
+          </Button>
+        </div>
       </div>
 
       {/* Top 3 Cards Row */}
@@ -35,11 +99,11 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-4 mt-auto">
             <div className="flex justify-between items-center">
               <span className="text-base font-medium text-[#1A1D27]">Yos Sudarso</span>
-              <span className="text-[11px] font-medium text-[#EF4444] bg-[#FEF2F2] border border-[#FECACA] px-3 py-1 rounded-md">Status</span>
+              <span className="text-[11px] font-medium text-[#EF4444] bg-[#FEF2F2] border border-[#FECACA] px-3 py-1 rounded-md">Heavy Traffic</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-base font-medium text-[#1A1D27]">Sudirman</span>
-              <span className="text-[11px] font-medium text-[#10B981] bg-[#ECFDF5] border border-[#A7F3D0] px-3 py-1 rounded-md">Status</span>
+              <span className="text-[11px] font-medium text-[#10B981] bg-[#ECFDF5] border border-[#A7F3D0] px-3 py-1 rounded-md">Clear</span>
             </div>
           </div>
         </Card>
@@ -51,14 +115,18 @@ export default function DashboardPage() {
             <h3 className="text-sm font-medium text-[#1A1D27]">Next Ferry Departures</h3>
           </div>
           <div className="flex flex-col gap-4 mt-auto">
-            <div className="flex justify-between items-center">
-              <span className="text-base font-medium text-[#1A1D27]">Batam Center → SGP</span>
-              <span className="text-base font-semibold text-[#1A1D27]">14:30</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-base font-medium text-[#1A1D27]">Batu Ampar → JKT</span>
-              <span className="text-base font-semibold text-[#1A1D27]">15:15</span>
-            </div>
+            {loading ? (
+               <span className="text-sm text-[#94A3B8]">Loading schedules...</span>
+            ) : upcomingDepartures.length > 0 ? (
+              upcomingDepartures.map((dep, idx) => (
+                <div key={idx} className="flex justify-between items-center">
+                  <span className="text-base font-medium text-[#1A1D27] truncate pr-2" title={dep.route}>{dep.route}</span>
+                  <span className="text-base font-semibold text-[#1A1D27]">{dep.time}</span>
+                </div>
+              ))
+            ) : (
+               <span className="text-sm text-[#94A3B8]">No upcoming departures</span>
+            )}
           </div>
         </Card>
 
@@ -96,21 +164,21 @@ export default function DashboardPage() {
           
           <div className="mb-10">
             <div className="flex items-baseline gap-1 mb-6">
-              <span className="text-[56px] font-medium text-[#1A1D27] leading-none">82%</span>
-              <span className="text-sm font-semibold text-[#EF4444]">~+5%</span>
+              <span className="text-[56px] font-medium text-[#1A1D27] leading-none">{loading ? '...' : `${congestionPct}%`}</span>
+              {!loading && isHighCongestion && <span className="text-sm font-semibold text-[#EF4444]">High</span>}
             </div>
             <p className="text-sm text-[#5E6470] max-w-sm">
-              Capacity reached. Expect berthing delays of up to 4 hours for non-priority vessels.
+              {isHighCongestion ? "Capacity reached. Expect berthing delays of up to 4 hours for non-priority vessels." : "Terminal operating at normal capacity. No significant delays expected."}
             </p>
           </div>
           
           <div>
             <div className="flex justify-between text-xs font-bold mb-3">
               <span className="text-[#1A1D27]">Berth Availability</span>
-              <span className="text-[#1A1D27]">2 / 12 Open</span>
+              <span className="text-[#1A1D27]">{isHighCongestion ? '2 / 12 Open' : '8 / 12 Open'}</span>
             </div>
             <div className="h-3 w-full bg-[#F1F5F9] rounded-full overflow-hidden">
-              <div className="h-full bg-[#EF4444] w-[82%] rounded-full"></div>
+              <div className={`h-full ${isHighCongestion ? 'bg-[#EF4444]' : 'bg-[#10B981]'} rounded-full transition-all duration-1000`} style={{width: `${congestionPct}%`}}></div>
             </div>
           </div>
         </Card>

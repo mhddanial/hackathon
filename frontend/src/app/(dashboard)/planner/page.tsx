@@ -20,24 +20,33 @@ export default function RouteRecommendationPage() {
     try {
       const [originLat, originLng] = origin.split(",").map(s => parseFloat(s.trim()));
       const [destLat, destLng] = destination.split(",").map(s => parseFloat(s.trim()));
-      
+
+      if (isNaN(originLat) || isNaN(originLng) || isNaN(destLat) || isNaN(destLng)) {
+        console.error("Invalid coordinates");
+        return;
+      }
+
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      // Backend RouteRequest schema: origin/destination as {lat, lng} objects, time as "HH:MM"
       const res = await fetch(`${API_URL}/route`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          origin: [originLat, originLng],
-          destination: [destLat, destLng],
-          departure_hour: new Date().getHours(),
+          origin: { lat: originLat, lng: originLng },
+          destination: { lat: destLat, lng: destLng },
+          time: timeStr,
           day_type: "weekday",
-          cargo_type: cargoType
         })
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setRouteData(data);
+      } else {
+        console.error("Route API error:", await res.text());
       }
     } catch (e) {
       console.error("Failed to fetch route:", e);
@@ -46,8 +55,8 @@ export default function RouteRecommendationPage() {
     }
   };
 
-  // Convert GeoJSON to Polyline coordinates format ([lat, lng][])
-  const routeCoordinates = routeData?.geometry?.coordinates?.map((coord: number[]) => [coord[1], coord[0]]) || null;
+  // route_geometry is the field name returned by the backend
+  const routeCoordinates = routeData?.route_geometry?.coordinates?.map((coord: number[]) => [coord[1], coord[0]]) || null;
 
   return (
     <div className="flex flex-col bg-[#F8F9FB] rounded-tl-3xl p-8 overflow-y-auto min-h-screen">
@@ -154,11 +163,11 @@ export default function RouteRecommendationPage() {
                   </span>
                   <span className="text-sm font-bold text-[#10B981]">KM</span>
                 </div>
-                <div className="flex items-center border-l-2 border-[#10B981] pl-2 mt-2">
-                  <span className="text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest">
-                    {routeData ? `~${routeData.estimated_duration_min.toFixed(0)} MINS` : "AWAITING ROUTE"}
-                  </span>
-                </div>
+                  <div className="flex items-center border-l-2 border-[#10B981] pl-2 mt-2">
+                    <span className="text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest">
+                      {routeData ? `~${routeData.final_time_min.toFixed(0)} MINS` : "AWAITING ROUTE"}
+                    </span>
+                  </div>
               </div>
             </Card>
 
@@ -169,7 +178,7 @@ export default function RouteRecommendationPage() {
                   <Leaf className="w-5 h-5" />
                 </div>
                 <div className="bg-[#10B981] text-white font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
-                  {routeData?.emission_score || "UNKNOWN"}
+                  {routeData?.congestion_level || "UNKNOWN"}
                 </div>
               </div>
               
@@ -211,7 +220,7 @@ export default function RouteRecommendationPage() {
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EST. DURATION</span>
                 <span className="text-2xl font-bold text-[#1A1D27]">
-                  {routeData ? `${routeData.estimated_duration_min.toFixed(0)} min` : "--"}
+                  {routeData ? `${routeData.final_time_min.toFixed(0)} min` : "--"}
                 </span>
               </div>
               
@@ -228,11 +237,11 @@ export default function RouteRecommendationPage() {
               
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EMISSION RATING</span>
-                <div className="flex items-center gap-2">
-                  <span className={`text-2xl font-bold ${routeData?.emission_score === 'Low' ? 'text-[#10B981]' : routeData?.emission_score === 'Medium' ? 'text-amber-500' : 'text-red-500'}`}>
-                    {routeData ? routeData.emission_score : "--"}
-                  </span>
-                </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-2xl font-bold ${routeData?.congestion_level === 'LOW' ? 'text-[#10B981]' : routeData?.congestion_level === 'MEDIUM' ? 'text-amber-500' : 'text-red-500'}`}>
+                      {routeData ? routeData.congestion_level : "--"}
+                    </span>
+                  </div>
               </div>
             </div>
 
