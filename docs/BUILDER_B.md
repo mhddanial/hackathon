@@ -26,26 +26,29 @@
 - [x] Pengaturan *overlay* status perjalanan (*Action Bar*) agar mengambang estetik di atas peta
 - [x] *Push* kode akhir ke cabang (branch) `main`
 
-## 🕒 JAM 6–9 — Interaktivitas Frontend (Mock State) & Halaman Pendukung
-- [ ] Implementasi State Management: Menghubungkan klik pada rute Alpha/Beta/Gamma agar langsung merubah jalur Polyline di Peta Leaflet
-- [ ] Buat halaman **Dashboard** (`/dashboard`) berisi metrik logistik dan grafik
-- [ ] Buat halaman **Ferry Schedules** (`/schedules`) menggunakan Shadcn Table
+## 🕒 JAM 3–6 — Routing Wrapper & API Internal (Next.js)
+- [ ] Implement endpoint `GET /route` (Memanggil OSRM, me-loop opsi jam berangkat, menggabungkan data kemacetan, dan mengembalikan `route_geometry`)
+- [ ] Implement endpoint `GET /ferry-schedule` (API internal mengambil data Supabase)
 
-## 🕒 JAM 9–11 — Penyempurnaan Chat Widget & Responsivitas
-- [ ] Perbaiki logika expand/collapse pada `ChatWidget.tsx`
-- [ ] Tambahkan animasi *typing indicator* (loading) saat menunggu balasan AI
-- [ ] Audit tampilan mobile/tablet (pastikan Sidebar dan Peta tetap berfungsi baik di layar kecil)
+## 🕒 JAM 6–9 — Form Pencarian & Panel Hasil Rute
+- [ ] Implementasi komponen **`RouteForm`** (Input origin, destination, time window)
+- [ ] Implementasi komponen **`ResultPanel`** (Menampilkan durasi, jam rekomendasi, dan *emission score*)
+- [ ] Menghubungkan `MapView.tsx` dengan data asli (menampilkan `route_geometry` OSRM dan warna rute kemacetan)
 
-## 🕒 JAM 11–13 — Integrasi Frontend ↔ Backend (Bersama Builder A & C)
-- [ ] Hubungkan form pencarian rute ke API `/congestion` dan OSRM
-- [ ] Hubungkan `ChatWidget.tsx` ke endpoint POST `/agent/chat`
-- [ ] Tampilkan hasil rute dinamis dari backend langsung ke `react-leaflet`
+## 🕒 JAM 9–11 — Integrasi Agent (Logistics Oracle)
+- [ ] Refactor `ChatWidget.tsx` agar memiliki kotak obrolan penuh dan gelembung pesan
+- [ ] Sambungkan antarmuka chat dengan endpoint `POST /agent/chat` milik Builder A
 
-## 🕒 JAM 13–15 — Polish & Bug Fixing
-- [ ] Cek *edge case* (misal: bagaimana jika server mati, apakah UI memberikan *feedback* loading/error yang jelas?)
-- [ ] Bantu dokumentasi fitur frontend di `README.md`
-- [ ] Deployment Vercel (pastikan build berhasil tanpa error linting)
+## 🕒 JAM 11–13 — Integrasi Penuh & Robustness (Bersama Builder A)
+- [ ] Tes integrasi penuh dari *frontend* ↔ *backend* tanpa bug fatal
+- [ ] Uji *edge cases* (input kosong, tujuan tidak valid, atau OSRM *timeout*)
+- [ ] Perbaikan UI/UX akhir berdasarkan hasil pengujian
+
+## 🕒 JAM 13–15 — Polish & Deployment
+- [ ] Pastikan deployment (Vercel) sinkron dan bebas error
+- [ ] Tulis bagian dokumentasi teknis *frontend* di `README.md`
+- [ ] Finalisasi asumsi data pada `PRD.md` dan `TECH.md`
 
 ## 🕒 JAM 15–16 — Buffer & Submit
-- [ ] Final UI QA (Quality Assurance) bersama tim
+- [ ] Final UI QA (Quality Assurance)
 - [ ] Submit repository
