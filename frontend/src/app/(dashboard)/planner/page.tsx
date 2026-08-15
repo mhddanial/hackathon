@@ -325,22 +325,33 @@ export default function RouteRecommendationPage() {
                 <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white">
                   <Leaf className="w-5 h-5" />
                 </div>
-                <div className="bg-[#10B981] text-white font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
+                <div className={`text-white font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full ${
+                  routeData?.congestion_level === 'LOW' ? 'bg-[#10B981]' : 
+                  routeData?.congestion_level === 'MEDIUM' ? 'bg-[#F59E0B]' : 
+                  routeData?.congestion_level === 'HIGH' ? 'bg-[#EF4444]' : 'bg-[#10B981]'
+                }`}>
                   {routeData?.congestion_level || "UNKNOWN"}
                 </div>
               </div>
               
               <div>
-                <h3 className="text-[20px] font-semibold text-white mb-1">Congestion</h3>
-                <p className="text-xs text-[#93C5FD]">Traffic multiplier applied to this route.</p>
+                <h3 className="text-[20px] font-semibold text-white mb-1">Emissions Impact</h3>
+                <p className="text-xs text-[#93C5FD]">Calculated CO₂ based on distance and live traffic multiplier.</p>
               </div>
               
               <div className="mt-6 flex justify-between items-end">
                 <div>
                   <span className="text-[36px] font-bold text-white leading-none block mb-1">
-                    {routeData ? `x${routeData.congestion_multiplier}` : "-"}
+                    {routeData ? `${routeData.emission_kg}` : "-"}
                   </span>
-                  <span className="text-[9px] font-bold text-white uppercase tracking-widest">MULTIPLIER</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-bold text-[#93C5FD] uppercase tracking-widest">KG CO₂</span>
+                    {routeData && (
+                      <span className="text-[9px] font-bold text-white uppercase tracking-widest opacity-60">
+                        • MULTIPLIER x{routeData.congestion_multiplier}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </Card>
@@ -385,11 +396,20 @@ export default function RouteRecommendationPage() {
               
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EMISSIONS</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-2xl font-bold ${routeData?.congestion_level === 'LOW' ? 'text-[#10B981]' : routeData?.congestion_level === 'MEDIUM' ? 'text-amber-500' : 'text-red-500'}`}>
-                      {routeData ? routeData.congestion_level : "--"}
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-[#1A1D27]">
+                    {routeData ? `${routeData.emission_kg} kg` : "--"}
+                  </span>
+                  {routeData && (
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                      routeData.congestion_level === 'LOW' ? 'bg-[#D1FAE5] text-[#059669]' : 
+                      routeData.congestion_level === 'MEDIUM' ? 'bg-[#FEF3C7] text-[#D97706]' : 
+                      'bg-[#FEE2E2] text-[#DC2626]'
+                    }`}>
+                      {routeData.congestion_level}
                     </span>
-                  </div>
+                  )}
+                </div>
               </div>
 
               <div className="w-px h-10 bg-[#E2E8F0]"></div>
