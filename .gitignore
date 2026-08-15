@@ -57,5 +57,6 @@ yarn-error.log*
 
 # ML Models
 *.joblib
+!backend/rf_model.joblib
 *.pkl
 *.model
