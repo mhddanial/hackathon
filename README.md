@@ -305,6 +305,42 @@ Historical route query store for analytics.
 
 ---
 
+## 📊 Data Engineering & Scientific Basis
+
+SmartFlow is built on top of empirical traffic data and standardized emission models to ensure real-world applicability in the Batam-Singapore logistics corridor.
+
+### 1. Road Segments & Corridors
+We mapped 6 primary logistics segments in Batam based on GIS data and Perwako Batam No. 60/2021:
+- **SEG001 (Jl. Yos Sudarso)**: 15.2 km (Industrial Arterial) - Primary route to Batu Ampar Port.
+- **SEG002 (Jl. Jendral Sudirman)**: 14.5 km (Urban Arterial)
+- **SEG003 (Jl. Ahmad Yani)**: 6.8 km (Industrial Arterial)
+- **SEG004 (Jl. Brigjen Katamso)**: 11.2 km (Industrial Arterial)
+- **SEG005 (Jl. Trans Barelang)**: 8.5 km (Access Road)
+- **SEG006 (Jl. Hang Jebat)**: 16.8 km (Urban Arterial)
+
+### 2. Congestion Multiplier Model
+We apply dynamic time-window multipliers calibrated from empirical traffic research (Universitas Brawijaya, 2023). 
+- **Peak Hours (Weekday 06:00-09:00 & 15:00-19:00)**: Multiplier up to **1.85x - 2.1x** (HIGH congestion) due to heavy transport and factory shift changes.
+- **Off-Peak & Weekends**: Multiplier **1.0x - 1.25x** (LOW congestion) due to minimal factory operations.
+
+*Formula for Real Travel Time:*
+`T_actual = (Distance_km / Free_Flow_Speed_kmh) * 60_mins * Congestion_Multiplier`
+
+### 3. Carbon Emission Calculus
+Our carbon emission engine utilizes the **2006 IPCC Guidelines** and **US DOE** standards for heavy-duty diesel vehicles.
+- **Base Emission Factor**: 2.68 kg CO₂ per liter of diesel fuel.
+- **Fuel Consumption**: 0.25 L/km (Moving) + 2.25 L/hour (Idling in congestion).
+
+*Formula for Carbon Emission:*
+`Carbon_Emission (kg CO₂) = [(Distance * 0.25) + (Idle_Hours * 2.25)] * 2.68`
+
+### 4. Ferry Scheduling & Terminal Cut-offs
+Our dataset aggregates official schedules from BatamFast, Sindo Ferry, and Majestic Fast Ferry, synchronized with Pelindo Batu Ampar's gate-in cut-off SOP.
+- **Terminals**: Batu Ampar (Cargo), Batam Center (Fast Ferry), Sekupang (Fast Ferry).
+- **Enforcement**: strict cut-off times (e.g. 15 mins before departure) are accounted for in the routing logic.
+
+---
+
 ## 🤖 Machine Learning Model
 
 **File:** `backend/rf_model.joblib` (310 KB)  
