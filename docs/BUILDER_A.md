@@ -15,12 +15,15 @@
 - [x] Tetap di branch `main` (kesepakatan tim)
 
 ## 🕒 JAM 1–3 — Data Collection & Backend Skeleton
-- [x] Buat tabel Supabase sesuai skema: `road_segments`, `congestion_multipliers`, `ferry_schedules`, `route_query_log` (Bisa run script SQL)
+- [x] Buat tabel Supabase sesuai skema: `road_segments`, `congestion_multipliers`, `ferry_schedules`, `route_query_log`, `profiles` (Bisa run script SQL)
+- [ ] Setup Row Level Security (RLS) di Supabase untuk mengamankan data user
 - [x] Setup koneksi Supabase client di FastAPI
 - [x] Test query sederhana untuk memastikan koneksi ke Supabase berhasil
 - [x] Import data awal dari Hustler (bisa placeholder dulu)
 
-## 🕒 JAM 3–6 — Backend Inti: Congestion API
+## 🕒 JAM 3–6 — Backend Inti: Congestion API & Auth
+- [ ] Buat Auth Dependency (`get_current_user`) di FastAPI untuk verifikasi JWT
+- [ ] Implement `GET /user/history`
 - [ ] Buat script training model ML (`train_model.py`) untuk generate data sintetik kemacetan dan export `rf_model.joblib`
 - [ ] Implement `GET /congestion?segment_id=&day_type=&hour=`
     - Load model ML, prediksi level kemacetan & multiplier

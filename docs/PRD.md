@@ -38,12 +38,13 @@ Data pendukung:
 - Jadwal ferry statis untuk 2–3 terminal utama
 - Chat agent (Gemini, function calling) sebagai antarmuka natural language di atas sistem inti
 - Fallback rule-based jika API agent gagal/limit habis
+- Autentikasi user (Supabase Auth) untuk menyimpan profil dan riwayat pencarian rute
 
 **Out of scope (untuk hackathon ini):**
 - Data lalu lintas real-time/sensor IoT
 - Integrasi API resmi pelabuhan/ferry (kemungkinan besar tidak tersedia publik)
 - Dashboard cross-border Batam–Singapura sebagai fitur live (ditampilkan sebagai visual/mock di pitch deck saja)
-- Autentikasi user, multi-tenant, billing
+- Multi-tenant, billing
 
 ## 5. User Stories
 
@@ -51,6 +52,7 @@ Data pendukung:
 2. *Sebagai* operator logistik, *saya ingin* bertanya dalam bahasa natural ("jam berapa paling aman ke Batu Ampar?"), *agar* saya tidak perlu memahami antarmuka teknis.
 3. *Sebagai* juri/pengguna, *saya ingin* melihat peta kemacetan koridor Batam, *agar* saya memahami konteks masalah secara visual.
 4. *Sebagai* pengguna, *saya ingin* melihat estimasi dampak emisi dari rute yang dipilih, *agar* saya memahami manfaat sustainability dari rekomendasi tsb.
+5. *Sebagai* pengguna, *saya ingin* login ke sistem *agar* saya dapat menyimpan riwayat pencarian rute dan data profil saya.
 
 ## 6. Metrik Keberhasilan (untuk demo, bukan produksi)
 
@@ -74,7 +76,7 @@ Data pendukung:
 - Jam peak/offpeak: 06:00–09:00 dan 16:00–19:00 hari kerja (asumsi umum, sesuaikan jika ada data lebih spesifik dari jurnal riset)
 - Terminal ferry yang dicover: Batam Center, Sekupang, Batu Ampar
 - Ruas jalan yang dicover: minimal Yos Sudarso dan Sudirman, ditambah 3-6 ruas penghubung kawasan industri lain
-- Tidak ada login/akun — semua fitur dapat diakses langsung tanpa autentikasi
+- Ada fitur login/akun opsional untuk menyimpan riwayat rute.
 
 ## 9. Tim & Peran
 

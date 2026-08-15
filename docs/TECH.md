@@ -33,9 +33,17 @@
 | Routing engine | OSRM public demo server (`router.project-osrm.org`) | Self-host hanya jika ada waktu sisa dan public server tidak reliable |
 | ML Model | scikit-learn (Random Forest Regressor/Classifier) | Model kemacetan dilatih dari data sintetis berbasis pola riset, di-serialize (joblib), dimuat saat backend start |
 | AI Agent | Gemini 2.5 Flash-Lite (free tier), function calling | Fallback rule-based jika API gagal/limit |
+| Auth | Supabase Auth (Google OAuth) | Validasi token via dependency di FastAPI |
 | Hosting/CI | GitHub + Vercel + Railway | Branching: `main` + feature branch per builder |
 
 ## 3. Skema Database (Supabase / PostgreSQL)
+
+### `profiles`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| id | uuid (PK) | FK → auth.users.id |
+| email | text | |
+| default_origin | text | (opsional) lokasi gudang default |
 
 ### `road_segments`
 | Kolom | Tipe | Keterangan |
@@ -68,6 +76,7 @@
 | Kolom | Tipe | Keterangan |
 |---|---|---|
 | id | uuid (PK) | |
+| user_id | uuid | (opsional) FK → profiles.id |
 | origin, destination | text | |
 | requested_at | timestamptz | default now() |
 | recommended_departure | time | |
@@ -120,6 +129,11 @@ Response:
 ### `GET /ferry-schedule`
 Query: `terminal`
 Response: list jadwal keberangkatan
+
+### `GET /user/history`
+Headers: `Authorization: Bearer <jwt>`
+Logika: verifikasi token JWT dari Supabase Auth, ambil data `route_query_log` milik user tersebut dari database.
+Response: list riwayat pencarian rute user.
 
 ### `POST /agent/chat`
 Body: `{ "message": "..." }`

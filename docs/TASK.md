@@ -35,7 +35,8 @@ Legenda prioritas: 🔴 Wajib (fitur inti) · 🟡 Penting (agent layer) · ⚪ 
 - [ ] Rapikan semua data di satu spreadsheet/CSV untuk diimpor ke Supabase oleh Builder A
 
 **Builder A:** 🔴
-- [ ] Buat tabel Supabase sesuai skema TECH.md: `road_segments`, `congestion_multipliers`, `ferry_schedules`, `route_query_log`
+- [ ] Buat tabel Supabase sesuai skema TECH.md: `road_segments`, `congestion_multipliers`, `ferry_schedules`, `route_query_log`, `profiles`
+- [ ] Setup Row Level Security (RLS) di Supabase untuk mengamankan data log user
 - [ ] Setup koneksi Supabase client di FastAPI, test query sederhana
 - [ ] Import data awal dari Hustler (boleh placeholder dulu, disempurnakan berkala)
 
@@ -54,6 +55,8 @@ Legenda prioritas: 🔴 Wajib (fitur inti) · 🟡 Penting (agent layer) · ⚪ 
 ### Fitur: `GET /congestion`, `GET /route`, emission scoring 🔴
 
 **Builder A:**
+- [ ] Implement JWT dependency (`get_current_user`) untuk FastAPI memvalidasi token Supabase
+- [ ] Implement `GET /user/history` untuk mengambil riwayat rute user yang sedang login
 - [ ] Implement `GET /congestion?segment_id=&day_type=&hour=` — query Supabase, return level + multiplier
 - [ ] Implement fungsi `calculate_emission_score(multipliers: list)` — logika sederhana, konsisten, bisa dijelaskan
 - [ ] Unit test manual: cek 2-3 kombinasi segment/waktu, pastikan hasil masuk akal
@@ -75,6 +78,7 @@ Legenda prioritas: 🔴 Wajib (fitur inti) · 🟡 Penting (agent layer) · ⚪ 
 ### Fitur: Heatmap kemacetan + form rute + panel hasil 🔴
 
 **Builder B:**
+- [ ] Buat tombol Login sederhana menggunakan Supabase Google OAuth
 - [ ] `MapView`: render peta Batam (Leaflet), overlay warna per ruas jalan berdasarkan level congestion saat ini (panggil `/congestion` untuk tiap segmen)
 - [ ] `RouteForm`: input origin (dropdown/autocomplete gudang/kawasan industri), destination (dropdown terminal/pelabuhan), time window
 - [ ] `ResultPanel`: tampilkan hasil dari `/route` — jam berangkat rekomendasi, durasi, emission badge, penjelasan singkat
