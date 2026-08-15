@@ -54,7 +54,8 @@
 ## 🕒 JAM 11–13 — Integrasi Penuh, Bug Fixing, Robustness
 - [x] Implement `GET /congestion` endpoint — **DONE, sekarang live di `/congestion`**
 - [x] Agent tools `get_congestion_level` → real ML | `get_ferry_schedule` → real Supabase query
-- [ ] Tes integrasi penuh frontend ↔ backend (**Builder B sudah push**: register page, sidebar, planner, oracle, schedules — perlu connect ke API)
+- [x] Tes integrasi penuh frontend ↔ backend: Auth (Email/Password & Google OAuth) + SSR Middleware Route Protection (Selesai)
+- [ ] Implement `POST /route` — Routing OSRM digabung dengan model ML kemacetan (Fallback Haversine)
 - [ ] Test end-to-end minimal 3 skenario origin-destination bersama Builder B
 - [ ] Cek edge case: input kosong, OSRM timeout, pastikan endpoint tidak 500
 

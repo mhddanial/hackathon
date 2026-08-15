@@ -2,22 +2,85 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Eye, EyeOff, Check } from "lucide-react";
+import { Eye, EyeOff, Check, Loader2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const supabase = createClient();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
   const passwordMatch = password === confirm && confirm.length > 0;
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordMatch || !hasMinLength || !hasUppercase || !hasNumber) {
+      setError("Please ensure your password meets all requirements.");
+      return;
+    }
+    if (!fullname || !email) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullname,
+          }
+        }
+      });
+      
+      if (signUpError) throw signUpError;
+      
+      setSuccess(true);
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
+      
+    } catch (err: any) {
+      setError(err.message || "An error occurred during registration.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setError(err.message || "An error occurred with Google Sign-Up.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F7FA] relative flex flex-col items-center justify-center p-4">
-      
       {/* Background Brand Watermark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0">
         <div className="relative flex items-center justify-center opacity-30">
@@ -45,6 +108,7 @@ export default function RegisterPage() {
         {/* Google Sign Up */}
         <button
           type="button"
+          onClick={handleGoogleLogin}
           className="w-full h-12 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm border border-slate-200 transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md mb-5"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -59,13 +123,24 @@ export default function RegisterPage() {
         {/* Divider */}
         <div className="flex items-center gap-3 mb-5">
           <div className="flex-1 h-px bg-slate-200"></div>
-          <span className="text-xs text-slate-400 font-medium">or register with email</span>
+          <span className="text-xs text-slate-400 font-medium">register with email</span>
           <div className="flex-1 h-px bg-slate-200"></div>
         </div>
 
-        {/* Form */}
-        <form className="space-y-5">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600 text-center">
+            {error}
+          </div>
+        )}
+        
+        {success && (
+          <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-700 text-center">
+            Account created successfully! Redirecting to login...
+          </div>
+        )}
 
+        {/* Form */}
+        <form className="space-y-5" onSubmit={handleRegister}>
           {/* Full Name */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-900 block" htmlFor="fullname">
@@ -75,7 +150,10 @@ export default function RegisterPage() {
               type="text"
               id="fullname"
               placeholder="Alex Rivera"
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
               className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-slate-50/50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              required
             />
           </div>
 
@@ -88,7 +166,10 @@ export default function RegisterPage() {
               type="email"
               id="email"
               placeholder="name@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-slate-50/50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              required
             />
           </div>
 
@@ -105,6 +186,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-slate-50/50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
+                required
               />
               <button
                 type="button"
@@ -149,6 +231,7 @@ export default function RegisterPage() {
                       : "border-red-300"
                     : "border-slate-200"
                 }`}
+                required
               />
               <button
                 type="button"
@@ -169,6 +252,7 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="terms"
+                required
                 className="peer h-4 w-4 appearance-none rounded border border-slate-300 checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition-colors cursor-pointer shrink-0"
               />
               <svg className="absolute w-3 h-3 left-0.5 top-0.5 pointer-events-none opacity-0 peer-checked:opacity-100 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
@@ -186,10 +270,15 @@ export default function RegisterPage() {
           {/* Buttons */}
           <div className="flex flex-col gap-3 pt-2">
             <button
-              type="button"
-              className="w-full h-12 rounded-lg bg-[#003380] hover:bg-blue-900 text-white font-medium text-sm transition-colors shadow-md shadow-blue-900/10"
+              type="submit"
+              disabled={loading || success}
+              className="w-full h-12 rounded-lg bg-[#003380] hover:bg-blue-900 disabled:bg-blue-400 text-white font-medium text-sm transition-colors shadow-md shadow-blue-900/10 flex items-center justify-center gap-2"
             >
-              Create Account
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</>
+              ) : (
+                "Create Account"
+              )}
             </button>
 
             <p className="text-center text-sm text-slate-500">
@@ -199,7 +288,6 @@ export default function RegisterPage() {
               </Link>
             </p>
           </div>
-
         </form>
       </div>
     </div>

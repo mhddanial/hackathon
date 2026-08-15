@@ -2,10 +2,62 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const supabase = createClient();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (signInError) throw signInError;
+      
+      // Successfully logged in, AuthProvider will catch this via onAuthStateChange
+      router.push("/dashboard");
+      
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setError(err.message || "An error occurred with Google Sign-In.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F4F7FA] relative flex flex-col items-center justify-center p-4">
@@ -37,6 +89,7 @@ export default function LoginPage() {
         {/* Google Sign In */}
         <button
           type="button"
+          onClick={handleGoogleLogin}
           className="w-full h-12 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm border border-slate-200 transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md mb-5"
         >
           {/* Google Icon */}
@@ -52,12 +105,18 @@ export default function LoginPage() {
         {/* Divider */}
         <div className="flex items-center gap-3 mb-5">
           <div className="flex-1 h-px bg-slate-200"></div>
-          <span className="text-xs text-slate-400 font-medium">or sign in with email</span>
+          <span className="text-xs text-slate-400 font-medium">sign in with email</span>
           <div className="flex-1 h-px bg-slate-200"></div>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600 text-center">
+            {error}
+          </div>
+        )}
+
         {/* Form */}
-        <form className="space-y-5">
+        <form className="space-y-5" onSubmit={handleLogin}>
           
           {/* Email */}
           <div className="space-y-2">
@@ -66,7 +125,10 @@ export default function LoginPage() {
               type="email" 
               id="email"
               placeholder="name@company.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-slate-50/50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+              required
             />
           </div>
 
@@ -83,7 +145,10 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"} 
                 id="password"
                 placeholder="••••••••" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full h-12 px-4 rounded-lg border border-slate-200 bg-slate-50/50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all pr-12"
+                required
               />
               <button 
                 type="button" 
@@ -112,14 +177,17 @@ export default function LoginPage() {
 
           {/* Buttons */}
           <div className="flex flex-col gap-3 pt-2">
-            <Link href="/dashboard" className="w-full">
-              <button 
-                type="button" 
-                className="w-full h-12 rounded-lg bg-[#003380] hover:bg-blue-900 text-white font-medium text-sm transition-colors shadow-md shadow-blue-900/10"
-              >
-                Sign In
-              </button>
-            </Link>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full h-12 rounded-lg bg-[#003380] hover:bg-blue-900 disabled:bg-blue-400 text-white font-medium text-sm transition-colors shadow-md shadow-blue-900/10 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</>
+              ) : (
+                "Sign In"
+              )}
+            </button>
             
             <Link href="/register" className="w-full">
               <button 

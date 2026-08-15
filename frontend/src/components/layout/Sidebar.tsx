@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Map, Ship, Compass, MessageSquare, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Map, Ship, Compass, MessageSquare, X, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { createClient } from "@/utils/supabase/client";
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -26,8 +28,29 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const supabase = createClient();
   const pathname = usePathname();
+  const router = useRouter();
   const { setOpenMobile, isMobile } = useSidebar();
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  // Get initials from user's full name or email
+  const getInitials = () => {
+    if (user?.user_metadata?.full_name) {
+      const names = user.user_metadata.full_name.split(" ");
+      return names.length > 1 
+        ? `${names[0][0]}${names[1][0]}`.toUpperCase() 
+        : names[0].substring(0, 2).toUpperCase();
+    }
+    return user?.email ? user.email.substring(0, 2).toUpperCase() : "US";
+  };
+
+  const displayName = user?.user_metadata?.full_name || user?.email || "User";
 
   return (
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
@@ -71,14 +94,31 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border/50">
-        <div className="flex items-center gap-3 px-2">
-          <Avatar className="w-10 h-10 border border-sidebar-border bg-sidebar-accent">
-            <AvatarFallback className="bg-slate-300 font-bold text-foreground">AR</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <p className="text-sm font-bold text-sidebar-foreground">Alex Rivera</p>
-            <p className="text-[11px] text-sidebar-foreground/60 font-semibold tracking-wider uppercase">Logistics Lead</p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3 px-2">
+            <Avatar className="w-10 h-10 border border-sidebar-border bg-sidebar-accent">
+              <AvatarFallback className="bg-slate-300 font-bold text-foreground">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col overflow-hidden">
+              <p className="text-sm font-bold text-sidebar-foreground truncate" title={displayName}>
+                {displayName}
+              </p>
+              <p className="text-[11px] text-sidebar-foreground/60 font-semibold tracking-wider uppercase truncate">
+                Logistics User
+              </p>
+            </div>
           </div>
+          
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
