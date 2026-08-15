@@ -6,9 +6,24 @@ import { Card } from "@/components/ui/card";
 import { Plus, MapPin, Search, Clock, Leaf, Target, Layers, Loader2 } from "lucide-react";
 import MapView from "@/components/MapView";
 
+const BATAM_LOCATIONS = [
+  { name: "Batu Ampar Port", coords: "1.1633, 104.0044" },
+  { name: "Sekupang Ferry Terminal", coords: "1.1291, 104.0494" },
+  { name: "Batam Center Terminal", coords: "1.1278, 104.0536" },
+  { name: "Batamindo Industrial Park", coords: "1.0667, 104.0333" },
+  { name: "Kabil Industrial Estate", coords: "1.0833, 104.1333" },
+  { name: "Hang Nadim Airport", coords: "1.1167, 104.1167" },
+];
+
 export default function RouteRecommendationPage() {
   const [origin, setOrigin] = useState("1.1291, 104.0494");
   const [destination, setDestination] = useState("1.1633, 104.0044");
+  
+  // Default to current time, but let user change it
+  const defaultTime = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
+  const [time, setTime] = useState(defaultTime);
+  const [dayType, setDayType] = useState("weekday");
+  
   const [loading, setLoading] = useState(false);
   const [routeData, setRouteData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +42,6 @@ export default function RouteRecommendationPage() {
       }
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const now = new Date();
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       // Backend RouteRequest schema: origin/destination as {lat, lng} objects, time as "HH:MM"
       const res = await fetch(`${API_URL}/route`, {
@@ -37,8 +50,8 @@ export default function RouteRecommendationPage() {
         body: JSON.stringify({
           origin: { lat: originLat, lng: originLng },
           destination: { lat: destLat, lng: destLng },
-          time: timeStr,
-          day_type: "weekday",
+          time: time,
+          day_type: dayType,
         })
       });
 
@@ -94,15 +107,18 @@ export default function RouteRecommendationPage() {
                 <div className="absolute -left-[35px] top-[22px] w-8 h-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#2563EB]">
                   <MapPin className="w-4 h-4" />
                 </div>
-                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">ORIGIN (LAT, LNG)</label>
-                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white">
-                  <input 
-                    type="text" 
+                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">ORIGIN</label>
+                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
+                  <select 
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value)}
-                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full"
-                  />
-                  <Target className="w-4 h-4 text-[#94A3B8]" />
+                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full appearance-none cursor-pointer"
+                  >
+                    {BATAM_LOCATIONS.map((loc) => (
+                      <option key={`origin-${loc.name}`} value={loc.coords}>{loc.name}</option>
+                    ))}
+                  </select>
+                  <Target className="w-4 h-4 text-[#94A3B8] pointer-events-none" />
                 </div>
               </div>
               
@@ -111,31 +127,46 @@ export default function RouteRecommendationPage() {
                 <div className="absolute -left-[35px] top-[22px] w-8 h-8 rounded-lg bg-[#F1F5F9] flex items-center justify-center text-[#64748B]">
                   <MapPin className="w-4 h-4" />
                 </div>
-                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DESTINATION (LAT, LNG)</label>
-                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white">
-                  <input 
-                    type="text" 
+                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DESTINATION</label>
+                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
+                  <select 
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full"
-                  />
-                  <Search className="w-4 h-4 text-[#94A3B8]" />
+                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full appearance-none cursor-pointer"
+                  >
+                    {BATAM_LOCATIONS.map((loc) => (
+                      <option key={`dest-${loc.name}`} value={loc.coords}>{loc.name}</option>
+                    ))}
+                  </select>
+                  <Search className="w-4 h-4 text-[#94A3B8] pointer-events-none" />
                 </div>
               </div>
             </div>
 
-            {/* Selectors — info only */}
+            {/* Selectors — Functional */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">CARGO TYPE</label>
-                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-[#F8F9FB]">
-                  <span className="text-sm font-medium text-[#94A3B8]">General Cargo</span>
+                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DEPARTURE TIME</label>
+                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
+                  <input 
+                    type="time" 
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full cursor-pointer"
+                  />
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">PRIORITY</label>
-                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-[#F8F9FB]">
-                  <span className="text-sm font-medium text-[#94A3B8]">Balanced</span>
+                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DAY TYPE</label>
+                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
+                  <select 
+                    value={dayType}
+                    onChange={(e) => setDayType(e.target.value)}
+                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full appearance-none cursor-pointer"
+                  >
+                    <option value="weekday">Weekday</option>
+                    <option value="weekend">Weekend</option>
+                  </select>
                 </div>
               </div>
             </div>
