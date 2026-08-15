@@ -3,6 +3,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, MapPin, Search, Clock, Leaf, Target, Layers, Loader2 } from "lucide-react";
 import MapView from "@/components/MapView";
 
@@ -108,17 +116,20 @@ export default function RouteRecommendationPage() {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">ORIGIN</label>
-                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
-                  <select 
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
-                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full appearance-none cursor-pointer"
-                  >
-                    {BATAM_LOCATIONS.map((loc) => (
-                      <option key={`origin-${loc.name}`} value={loc.coords}>{loc.name}</option>
-                    ))}
-                  </select>
-                  <Target className="w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors relative">
+                  <Select value={origin} onValueChange={setOrigin}>
+                    <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
+                      <SelectValue placeholder="Select Origin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BATAM_LOCATIONS.map((loc) => (
+                        <SelectItem key={`origin-${loc.name}`} value={loc.coords}>
+                          {loc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Target className="w-4 h-4 text-[#94A3B8] pointer-events-none absolute right-4" />
                 </div>
               </div>
               
@@ -128,17 +139,20 @@ export default function RouteRecommendationPage() {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DESTINATION</label>
-                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
-                  <select 
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full appearance-none cursor-pointer"
-                  >
-                    {BATAM_LOCATIONS.map((loc) => (
-                      <option key={`dest-${loc.name}`} value={loc.coords}>{loc.name}</option>
-                    ))}
-                  </select>
-                  <Search className="w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors relative">
+                  <Select value={destination} onValueChange={setDestination}>
+                    <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
+                      <SelectValue placeholder="Select Destination" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BATAM_LOCATIONS.map((loc) => (
+                        <SelectItem key={`dest-${loc.name}`} value={loc.coords}>
+                          {loc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Search className="w-4 h-4 text-[#94A3B8] pointer-events-none absolute right-4" />
                 </div>
               </div>
             </div>
@@ -147,26 +161,27 @@ export default function RouteRecommendationPage() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DEPARTURE TIME</label>
-                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
-                  <input 
+                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors">
+                  <Input 
                     type="time" 
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full cursor-pointer"
+                    className="border-0 shadow-none focus-visible:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto"
                   />
                 </div>
               </div>
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DAY TYPE</label>
-                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white focus-within:border-[#2563EB] transition-colors">
-                  <select 
-                    value={dayType}
-                    onChange={(e) => setDayType(e.target.value)}
-                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full appearance-none cursor-pointer"
-                  >
-                    <option value="weekday">Weekday</option>
-                    <option value="weekend">Weekend</option>
-                  </select>
+                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors">
+                  <Select value={dayType} onValueChange={setDayType}>
+                    <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
+                      <SelectValue placeholder="Day Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekday">Weekday</SelectItem>
+                      <SelectItem value="weekend">Weekend</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
