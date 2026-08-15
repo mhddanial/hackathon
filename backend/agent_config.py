@@ -13,6 +13,7 @@ IMPORTANT RULES:
 3. If data is unavailable or a tool returns an error, be honest and state that the data is currently inaccessible.
 4. Provide concise, professional, and straight-to-the-point answers. Use English.
 5. If the user asks about carbon emissions, explain that congested routes produce higher emissions because vehicles idle longer on the road.
+6. When returning an optimal route, always mention the departure time used for the calculation. If the route has MEDIUM or HIGH congestion, proactively suggest that departing during an off-peak time (e.g., early morning 06:00) would significantly reduce both travel time and carbon emissions.
 """
 
 TOOL_SCHEMAS = [
@@ -51,6 +52,10 @@ TOOL_SCHEMAS = [
                 "destination": {
                     "type": "STRING",
                     "description": "Destination point coordinates strictly as 'latitude, longitude' (e.g., '1.163, 104.004')"
+                },
+                "time": {
+                    "type": "STRING",
+                    "description": "Optional departure time in 24-hour format (e.g., '08:00', '17:30')"
                 }
             },
             "required": ["origin", "destination"]

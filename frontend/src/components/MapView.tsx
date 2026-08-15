@@ -63,31 +63,6 @@ export default function MapView({
         </div>
       </div>
 
-      {/* Bottom Action Bar */}
-      <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur shadow-lg rounded-[32px] p-4 flex items-center justify-between border border-border z-10">
-        
-        {/* Progress Tracker */}
-        <div className="flex-1 px-4">
-           <div className="h-1.5 w-full bg-border rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-primary w-1/2 rounded-full"></div>
-           </div>
-           <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-              <span className="text-muted-foreground">Preparing</span>
-              <span className="text-primary">In Transit</span>
-              <span className="text-muted-foreground">Arriving <span className="text-primary">Soon</span></span>
-           </div>
-        </div>
-
-        <div className="flex items-center gap-3 ml-8 pointer-events-auto">
-          <Button variant="outline" className="px-8 font-bold border-foreground text-foreground hover:bg-foreground hover:text-background">
-            SHARE ROUTE
-          </Button>
-          <Button className="px-8 font-bold">
-            CONFIRM SELECTION
-            <CheckCircle2 className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

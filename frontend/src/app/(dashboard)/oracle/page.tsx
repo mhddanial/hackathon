@@ -8,7 +8,7 @@ import { ChevronLeft, Trash2, Paperclip, Send, BarChart2, Database, Bot, Sparkle
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 type Message = {
-  role: "user" | "agent";
+  role: "user" | "agent" | "status" | "error";
   content: string;
 };
 
@@ -43,11 +43,52 @@ export default function OracleChatPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg }),
       });
-      const data = await res.json();
-      setMessages((prev) => [...prev, { role: "agent", content: data.reply || "Sorry, I couldn't process that." }]);
+
+      if (!res.body) throw new Error("No response body");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunkText = decoder.decode(value, { stream: true });
+        const lines = chunkText.split("\n\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.substring(6));
+
+              if (data.type === "status") {
+                setMessages((prev) => [...prev, { role: "status", content: data.content }]);
+              } else if (data.type === "chunk") {
+                setMessages((prev) => {
+                  const newMsgs = [...prev];
+                  const lastMsg = newMsgs[newMsgs.length - 1];
+                  
+                  if (lastMsg && lastMsg.role === "agent") {
+                    lastMsg.content += data.content;
+                  } else {
+                    newMsgs.push({ role: "agent", content: data.content });
+                  }
+                  return newMsgs;
+                });
+              } else if (data.type === "error") {
+                setMessages((prev) => [...prev, { role: "error", content: data.content }]);
+              } else if (data.type === "done") {
+                // finished
+              }
+            } catch (e) {
+              console.error("Error parsing stream JSON", e);
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error("Chat error", error);
-      setMessages((prev) => [...prev, { role: "agent", content: "Error connecting to Oracle API." }]);
+      setMessages((prev) => [...prev, { role: "error", content: "Error connecting to Oracle API." }]);
     } finally {
       setLoading(false);
     }
@@ -80,9 +121,9 @@ export default function OracleChatPage() {
         {/* Chat Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-[#F8F9FB]/50">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex max-w-[80%] ${msg.role === "user" ? "self-end justify-end" : ""}`}>
+            <div key={i} className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               {msg.role === "agent" ? (
-                <div className="flex gap-3">
+                <div className="flex gap-3 max-w-[80%]">
                   <div className="w-8 h-8 rounded-full bg-[#2563EB] flex items-center justify-center shrink-0">
                     <Bot className="w-4 h-4 text-white" />
                   </div>
@@ -90,9 +131,21 @@ export default function OracleChatPage() {
                     {msg.content}
                   </div>
                 </div>
-              ) : (
-                <div className="bg-[#2563EB] text-white rounded-2xl rounded-tr-sm p-4 text-[14px] shadow-md whitespace-pre-wrap">
+              ) : msg.role === "user" ? (
+                <div className="bg-[#2563EB] text-white rounded-2xl rounded-tr-sm p-4 text-[14px] shadow-md whitespace-pre-wrap max-w-[80%]">
                   {msg.content}
+                </div>
+              ) : msg.role === "status" ? (
+                <div className="flex gap-3 max-w-[80%] items-center ml-11">
+                  <span className="text-xs text-[#5E6470] italic bg-[#F1F5F9] px-3 py-1.5 rounded-full border border-[#E2E8F0]">
+                    {msg.content}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex gap-3 max-w-[80%] items-center ml-11">
+                  <span className="text-xs text-[#DC2626] bg-[#FEF2F2] px-3 py-1.5 rounded-full border border-[#FECACA]">
+                    {msg.content}
+                  </span>
                 </div>
               )}
             </div>
@@ -119,17 +172,17 @@ export default function OracleChatPage() {
           
           {/* Suggestion Chips */}
           <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-            <button onClick={() => handleSend("What is the congestion at Yos Sudarso right now?")} className="flex items-center gap-2 bg-[#F1F5F9] text-[#475569] text-xs font-medium px-4 py-2.5 rounded-full hover:bg-[#E2E8F0] transition-colors whitespace-nowrap border border-[#E2E8F0]">
+            <button onClick={() => setInput("What is the current congestion level at Yos Sudarso during weekday mornings?")} className="flex items-center gap-2 bg-[#F1F5F9] text-[#475569] text-xs font-medium px-4 py-2.5 rounded-full hover:bg-[#E2E8F0] transition-colors whitespace-nowrap border border-[#E2E8F0]">
               <BarChart2 className="w-3.5 h-3.5 text-[#2563EB]" />
-              Congestion at Yos Sudarso?
+              Check Congestion
             </button>
-            <button onClick={() => handleSend("Any ferry schedules from Batam Center to Singapore today?")} className="flex items-center gap-2 bg-[#F1F5F9] text-[#475569] text-xs font-medium px-4 py-2.5 rounded-full hover:bg-[#E2E8F0] transition-colors whitespace-nowrap border border-[#E2E8F0]">
+            <button onClick={() => setInput("Are there any Cargo Vessels departing from Batu Ampar today?")} className="flex items-center gap-2 bg-[#F1F5F9] text-[#475569] text-xs font-medium px-4 py-2.5 rounded-full hover:bg-[#E2E8F0] transition-colors whitespace-nowrap border border-[#E2E8F0]">
               <Database className="w-3.5 h-3.5 text-[#2563EB]" />
-              Ferry to Singapore
+              Find Cargo Vessels
             </button>
-            <button onClick={() => handleSend("What is the optimal route from 1.129, 104.049 to 1.163, 104.004?")} className="flex items-center gap-2 bg-[#F1F5F9] text-[#475569] text-xs font-medium px-4 py-2.5 rounded-full hover:bg-[#E2E8F0] transition-colors whitespace-nowrap border border-[#E2E8F0]">
+            <button onClick={() => setInput("Find the optimal route from Sekupang Terminal to Batam Center departing at 17:30. Is there a better time to leave to reduce emissions?")} className="flex items-center gap-2 bg-[#F1F5F9] text-[#475569] text-xs font-medium px-4 py-2.5 rounded-full hover:bg-[#E2E8F0] transition-colors whitespace-nowrap border border-[#E2E8F0]">
               <MessageSquare className="w-3.5 h-3.5 text-[#2563EB]" />
-              Optimal route
+              Optimal Route
             </button>
           </div>
 

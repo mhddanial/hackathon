@@ -51,15 +51,18 @@ export default function MapComponent({
   destName?: string
 }) {
   const [mounted, setMounted] = useState(false);
+  const [mapId, setMapId] = useState("");
 
   useEffect(() => {
+    setMapId(`map-${Math.random().toString(36).substring(2, 9)}`);
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || !mapId) return null;
 
   return (
     <MapContainer
+      key={mapId}
       center={[1.1462, 104.0269]}
       zoom={13}
       style={{ height: "100%", width: "100%" }}

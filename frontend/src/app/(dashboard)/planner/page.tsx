@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,17 @@ import {
 } from "@/components/ui/select";
 import { Plus, MapPin, Search, Clock, Leaf, Target, Layers, Loader2 } from "lucide-react";
 import MapView from "@/components/MapView";
+
+interface Schedule {
+  id: string;
+  terminal_id: string;
+  terminal_name: string;
+  destination: string;
+  departure_time: string;
+  cutoff_time: string;
+  vessel_type: string;
+  cargo_capacity_tons: number;
+}
 
 const BATAM_LOCATIONS = [
   { name: "Batu Ampar Port", coords: "1.1633, 104.0044" },
@@ -32,7 +43,41 @@ export default function RouteRecommendationPage() {
   const [time, setTime] = useState(defaultTime);
   const [dayType, setDayType] = useState("weekday");
   
+  const [vesselEtd, setVesselEtd] = useState("18:00");
+  const [cargoType, setCargoType] = useState("CONTAINER");
+  
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [selectedScheduleId, setSelectedScheduleId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${API_URL}/schedules`);
+        const data = await res.json();
+        setSchedules(data.schedules || []);
+      } catch (error) {
+        console.error("Failed to fetch schedules", error);
+      }
+    };
+    fetchSchedules();
+  }, []);
+
+  const handleScheduleChange = (scheduleId: string) => {
+    setSelectedScheduleId(scheduleId);
+    const schedule = schedules.find(s => s.id === scheduleId);
+    if (schedule) {
+      setVesselEtd(schedule.departure_time.substring(0, 5));
+      if (schedule.vessel_type.toLowerCase().includes("cargo") || schedule.vessel_type.toLowerCase().includes("intermodal")) {
+        setCargoType("CONTAINER");
+      } else {
+        setCargoType("FAST_FREIGHT");
+      }
+    }
+  };
+
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [routeData, setRouteData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +105,8 @@ export default function RouteRecommendationPage() {
           destination: { lat: destLat, lng: destLng },
           time: time,
           day_type: dayType,
+          vessel_etd: vesselEtd,
+          cargo_type: cargoType,
         })
       });
 
@@ -117,7 +164,7 @@ export default function RouteRecommendationPage() {
                 </div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">ORIGIN</label>
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors relative">
-                  <Select value={origin} onValueChange={setOrigin}>
+                  <Select value={origin} onValueChange={(val) => val && setOrigin(val)}>
                     <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
                       <SelectValue placeholder="Select Origin">
                         {origin ? (
@@ -146,7 +193,7 @@ export default function RouteRecommendationPage() {
                 </div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DESTINATION</label>
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors relative">
-                  <Select value={destination} onValueChange={setDestination}>
+                  <Select value={destination} onValueChange={(val) => val && setDestination(val)}>
                     <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
                       <SelectValue placeholder="Select Destination">
                         {destination ? (
@@ -170,7 +217,7 @@ export default function RouteRecommendationPage() {
             </div>
 
             {/* Selectors — Functional */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DEPARTURE TIME</label>
                 <div className="flex items-center border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors">
@@ -185,7 +232,7 @@ export default function RouteRecommendationPage() {
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DAY TYPE</label>
                 <div className="flex items-center border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors">
-                  <Select value={dayType} onValueChange={setDayType}>
+                  <Select value={dayType} onValueChange={(val) => val && setDayType(val)}>
                     <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
                       <SelectValue placeholder="Day Type" />
                     </SelectTrigger>
@@ -196,6 +243,42 @@ export default function RouteRecommendationPage() {
                   </Select>
                 </div>
               </div>
+            </div>
+
+            {/* Vessel Constraints */}
+            <div className="mb-6">
+              <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">VESSEL SCHEDULE (LIVE)</label>
+              <div className="flex items-center border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors relative">
+                <Select value={selectedScheduleId} onValueChange={(val) => val && handleScheduleChange(val)}>
+                  <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
+                    <SelectValue placeholder="Select a scheduled departure">
+                      {selectedScheduleId ? (
+                        (() => {
+                          const s = schedules.find(x => x.id === selectedScheduleId);
+                          return s ? (
+                            <>
+                              <span className="font-bold">{s.departure_time.substring(0, 5)}</span> | {s.terminal_name} ➔ {s.destination} <span className="text-[#94A3B8]">({s.vessel_type})</span>
+                            </>
+                          ) : "Select a scheduled departure";
+                        })()
+                      ) : "Select a scheduled departure"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schedules.map((schedule) => (
+                      <SelectItem key={schedule.id} value={schedule.id}>
+                        <span className="font-bold">{schedule.departure_time.substring(0, 5)}</span> | {schedule.terminal_name} ➔ {schedule.destination} <span className="text-[#94A3B8]">({schedule.vessel_type})</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedScheduleId && (
+                <div className="mt-2 flex gap-4 text-[11px] font-medium text-[#5E6470] bg-[#F1F5F9] p-2.5 rounded-md border border-[#E2E8F0]">
+                  <div><span className="text-[#94A3B8]">Extracted ETD:</span> <span className="font-bold text-[#1A1D27]">{vesselEtd}</span></div>
+                  <div><span className="text-[#94A3B8]">Derived Type:</span> <span className="font-bold text-[#1A1D27]">{cargoType === "CONTAINER" ? "Container (2H Cutoff)" : "Fast Freight (1H Cutoff)"}</span></div>
+                </div>
+              )}
             </div>
 
             {error && (
@@ -281,7 +364,7 @@ export default function RouteRecommendationPage() {
           {/* Bottom Summary Bar */}
           <Card className="rounded-[16px] p-6 shadow-sm border-[#E2E8F0] bg-white flex justify-between items-center">
             
-            <div className="flex gap-12">
+            <div className="flex gap-6 lg:gap-10">
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EST. DURATION</span>
                 <span className="text-2xl font-bold text-[#1A1D27]">
@@ -301,12 +384,22 @@ export default function RouteRecommendationPage() {
               <div className="w-px h-10 bg-[#E2E8F0]"></div>
               
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EMISSION RATING</span>
+                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EMISSIONS</span>
                   <div className="flex items-center gap-2">
                     <span className={`text-2xl font-bold ${routeData?.congestion_level === 'LOW' ? 'text-[#10B981]' : routeData?.congestion_level === 'MEDIUM' ? 'text-amber-500' : 'text-red-500'}`}>
                       {routeData ? routeData.congestion_level : "--"}
                     </span>
                   </div>
+              </div>
+
+              <div className="w-px h-10 bg-[#E2E8F0]"></div>
+              
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">OPTIMAL DEPARTURE</span>
+                <span className="text-2xl font-bold text-[#2563EB] leading-none">
+                  {routeData?.optimal_departure ? `${routeData.optimal_departure}` : "--:--"}
+                </span>
+                <span className="text-[9px] text-[#5E6470] font-semibold mt-1 uppercase tracking-wider">Gate-in: {routeData?.latest_gate_in || "--:--"}</span>
               </div>
             </div>
 

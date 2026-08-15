@@ -5,7 +5,9 @@ import google.generativeai as genai
 # Load environment variables from .env file
 load_dotenv()
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+import json
 from agent_config import SYSTEM_PROMPT, TOOL_SCHEMAS
 
 router = APIRouter()
@@ -18,9 +20,8 @@ else:
     print("WARNING: GEMINI_API_KEY not found in environment variables!")
 
 # Initialize the model
-# Using gemini-2.5-flash (or 1.5-flash if 2.5 is not available on their SDK version yet)
 model = genai.GenerativeModel(
-    model_name='gemini-2.5-flash',
+    model_name='gemini-3.5-flash-lite',
     system_instruction=SYSTEM_PROMPT,
     tools=TOOL_SCHEMAS
 )
@@ -60,7 +61,7 @@ def execute_tool(function_name: str, args: dict):
             dest_lat, dest_lng = map(float, [x.strip() for x in dest_str.split(',')])
             
             now = datetime.now()
-            time_str = f"{now.hour:02d}:{now.minute:02d}"
+            time_str = args.get("time", f"{now.hour:02d}:{now.minute:02d}")
             
             req = RouteRequest(
                 origin=Point(lat=origin_lat, lng=origin_lng),
@@ -75,6 +76,12 @@ def execute_tool(function_name: str, args: dict):
             # CRITICAL: strip out route_geometry GeoJSON so we don't blow up Gemini's context window!
             if "route_geometry" in result:
                 del result["route_geometry"]
+                
+            # Add metadata so the AI knows what time was used and can suggest off-peak times
+            result["_meta"] = {
+                "time_calculated_for": time_str,
+                "ai_instruction": "Mention the time used. If the estimated duration seems high, suggest leaving early morning (e.g., 06:00) to avoid peak multiplier, lower duration, and reduce CO2 emissions."
+            }
                 
             return result
         except ValueError:
@@ -97,7 +104,8 @@ def execute_tool(function_name: str, args: dict):
                 formatted_results.append({
                     "terminal": s['terminal_name'],
                     "destination": s['destination'],
-                    "departures": s['departure_times'],
+                    "departure_time": s['departure_time'],
+                    "cutoff_time": s.get('cutoff_time'),
                     "vessel_type": s.get('vessel_type'),
                     "cargo_capacity": s.get('cargo_capacity_tons')
                 })
@@ -113,49 +121,74 @@ def execute_tool(function_name: str, args: dict):
 # ---------------------------------------------------------
 @router.post("/chat")
 def chat_with_agent(request: ChatRequest):
-    try:
-        if not api_key:
-            return {"reply": "Sistem AI belum dikonfigurasi (API Key hilang). Silakan gunakan pencarian manual."}
+    if not api_key:
+        return {"reply": "Sistem AI belum dikonfigurasi (API Key hilang). Silakan gunakan pencarian manual."}
 
-        # Start a chat session (this is better than generate_content for function calling loops)
-        chat = model.start_chat()
-        
-        # Send user message
-        response = chat.send_message(request.message)
-        
-        # Check if Gemini decided to call a function
-        # In the Python SDK, function_call is found inside response.parts
-        func_call = None
-        if response.parts:
-            for part in response.parts:
-                if part.function_call:
-                    func_call = part.function_call
-                    break
+    async def generate_response():
+        try:
+            # Start a chat session
+            chat = model.start_chat()
+            
+            # Send user message
+            response = chat.send_message(request.message)
+            
+            # Check if Gemini decided to call a function
+            func_call = None
+            if response.parts:
+                for part in response.parts:
+                    if part.function_call:
+                        func_call = part.function_call
+                        break
 
-        if func_call:
-            func_name = func_call.name
-            func_args = {k: v for k, v in func_call.args.items()}
-            
-            # Execute the internal Python function (mock data for now)
-            tool_result = execute_tool(func_name, func_args)
-            
-            # Send the tool result back to Gemini so it can generate the final natural language answer
-            final_response = chat.send_message(
-                genai.protos.Part(
-                    function_response=genai.protos.FunctionResponse(
-                        name=func_name,
-                        response={"result": tool_result}
-                    )
+            if func_call:
+                func_name = func_call.name
+                func_args = {k: v for k, v in func_call.args.items()}
+                
+                # Yield intermediate status based on the tool
+                status_msg = "Processing request..."
+                if func_name == "get_congestion_level":
+                    status_msg = f"⚙️ Checking live congestion for {func_args.get('segment_id')}..."
+                elif func_name == "get_optimal_route":
+                    status_msg = "⚙️ Calculating optimal route and emissions..."
+                elif func_name == "get_ferry_schedule":
+                    status_msg = f"⚙️ Fetching live ferry schedules for {func_args.get('terminal')}..."
+                    
+                yield f"data: {json.dumps({'type': 'status', 'content': status_msg})}\n\n"
+                
+                # Execute the internal Python function
+                tool_result = execute_tool(func_name, func_args)
+                
+                yield f"data: {json.dumps({'type': 'status', 'content': '✅ Data retrieved. Generating final response...'})}\n\n"
+                
+                # Send the tool result back to Gemini and get STREAMING response
+                final_response = chat.send_message(
+                    genai.protos.Part(
+                        function_response=genai.protos.FunctionResponse(
+                            name=func_name,
+                            response={"result": tool_result}
+                        )
+                    ),
+                    stream=True
                 )
-            )
-            return {"reply": final_response.text}
-            
-        # If no function was called, just return Gemini's direct text response
-        return {"reply": response.text}
+                
+                for chunk in final_response:
+                    try:
+                        if chunk.text:
+                            yield f"data: {json.dumps({'type': 'chunk', 'content': chunk.text})}\n\n"
+                    except ValueError:
+                        # Ignore chunks that don't have text (e.g. function calls)
+                        pass
+                
+            else:
+                # If no function was called, we could just return the text.
+                # However, since we didn't use stream=True on the first call, 
+                # we'll just yield it as a single chunk.
+                yield f"data: {json.dumps({'type': 'chunk', 'content': response.text})}\n\n"
+                
+        except Exception as e:
+            print(f"Gemini API Error: {e}")
+            yield f"data: {json.dumps({'type': 'error', 'content': 'Maaf, sistem asisten AI sedang sibuk atau mengalami gangguan jaringan.'})}\n\n"
+        
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
-    except Exception as e:
-        # Fallback rule-based if Gemini API fails, times out, or quota exceeded
-        print(f"Gemini API Error: {e}")
-        return {
-            "reply": "Maaf, sistem asisten AI sedang sibuk atau mengalami gangguan jaringan. Silakan gunakan form pencarian rute di layar utama."
-        }
+    return StreamingResponse(generate_response(), media_type="text/event-stream")

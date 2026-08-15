@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import requests
 import math
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+from datetime import datetime, timedelta
 
 from database import get_supabase_client
 from routers.congestion import rf_model, feature_columns, level_to_multiplier, is_peak_hour
@@ -18,6 +19,8 @@ class RouteRequest(BaseModel):
     destination: Point
     time: str  # Format "HH:MM"
     day_type: str # "weekday" or "weekend"
+    vessel_etd: Optional[str] = None # Format "HH:MM"
+    cargo_type: Optional[str] = None # "CONTAINER" or "FAST_FREIGHT"
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371.0 # Earth radius in km
@@ -149,6 +152,25 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
     # Simple emission formula: roughly 0.2 kg CO2 per km for a light truck, increased by congestion
     emission_kg = distance_km * 0.2 * multiplier
 
+    # 6. Backward Calculation for Optimal Departure
+    latest_gate_in = None
+    optimal_departure = None
+    
+    if req.vessel_etd and req.cargo_type:
+        try:
+            # Parse ETD
+            etd_obj = datetime.strptime(req.vessel_etd, "%H:%M")
+            # Margin rules
+            margin_mins = 120 if req.cargo_type.upper() == "CONTAINER" else 60
+            
+            gate_in_obj = etd_obj - timedelta(minutes=margin_mins)
+            dep_obj = gate_in_obj - timedelta(minutes=final_time_min)
+            
+            latest_gate_in = gate_in_obj.strftime("%H:%M")
+            optimal_departure = dep_obj.strftime("%H:%M")
+        except Exception as e:
+            print(f"Error in backward calculation: {e}")
+
     return {
         "origin": req.origin.model_dump(),
         "destination": req.destination.model_dump(),
@@ -160,5 +182,7 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
         "congestion_multiplier": multiplier,
         "emission_kg": round(emission_kg, 2),
         "matched_segment_id": closest_seg,
+        "latest_gate_in": latest_gate_in,
+        "optimal_departure": optimal_departure,
         "route_geometry": route_geometry
     }
