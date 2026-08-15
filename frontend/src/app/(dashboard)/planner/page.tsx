@@ -124,7 +124,7 @@ export default function RouteRecommendationPage() {
                     <SelectContent>
                       {BATAM_LOCATIONS.map((loc) => (
                         <SelectItem key={`origin-${loc.name}`} value={loc.coords}>
-                          {loc.name}
+                          {loc.name} <span className="text-[#94A3B8] font-normal ml-1">({loc.coords})</span>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -147,7 +147,7 @@ export default function RouteRecommendationPage() {
                     <SelectContent>
                       {BATAM_LOCATIONS.map((loc) => (
                         <SelectItem key={`dest-${loc.name}`} value={loc.coords}>
-                          {loc.name}
+                          {loc.name} <span className="text-[#94A3B8] font-normal ml-1">({loc.coords})</span>
                         </SelectItem>
                       ))}
                     </SelectContent>
