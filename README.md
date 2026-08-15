@@ -307,37 +307,48 @@ Historical route query store for analytics.
 
 ## 📊 Data Engineering & Scientific Basis
 
-SmartFlow is built on top of empirical traffic data and standardized emission models to ensure real-world applicability in the Batam-Singapore logistics corridor.
+SmartFlow is built on top of empirical traffic data, real-world spatial geometries, and standardized emission models to ensure applicability in the Batam-Singapore logistics corridor.
 
-### 1. Road Segments & Corridors
-We mapped 6 primary logistics segments in Batam based on GIS data and Perwako Batam No. 60/2021:
-- **SEG001 (Jl. Yos Sudarso)**: 15.2 km (Industrial Arterial) - Primary route to Batu Ampar Port.
-- **SEG002 (Jl. Jendral Sudirman)**: 14.5 km (Urban Arterial)
-- **SEG003 (Jl. Ahmad Yani)**: 6.8 km (Industrial Arterial)
-- **SEG004 (Jl. Brigjen Katamso)**: 11.2 km (Industrial Arterial)
-- **SEG005 (Jl. Trans Barelang)**: 8.5 km (Access Road)
-- **SEG006 (Jl. Hang Jebat)**: 16.8 km (Urban Arterial)
+### 1. Key Logistics Corridors (Spatial Data)
+We mapped 6 primary logistics segments based on GIS coordinates and **Perwako Batam No. 60/2021**:
 
-### 2. Congestion Multiplier Model
-We apply dynamic time-window multipliers calibrated from empirical traffic research (Universitas Brawijaya, 2023). 
-- **Peak Hours (Weekday 06:00-09:00 & 15:00-19:00)**: Multiplier up to **1.85x - 2.1x** (HIGH congestion) due to heavy transport and factory shift changes.
-- **Off-Peak & Weekends**: Multiplier **1.0x - 1.25x** (LOW congestion) due to minimal factory operations.
+| Segment ID | Corridor Name | Type | Origin | Destination | Length (km) | Base Speed |
+|---|---|---|---|---|---|---|
+| **SEG001** | Jl. Yos Sudarso | Industrial Arterial | Mukakuning | Pel. Batu Ampar | 15.2 | 35 km/h |
+| **SEG002** | Jl. Jendral Sudirman | Urban Arterial | Batam Center | Kawasan Sekupang | 14.5 | 45 km/h |
+| **SEG003** | Jl. Ahmad Yani | Industrial Arterial | Batamindo | Batam Center | 6.8 | 40 km/h |
+| **SEG004** | Jl. Brigjen Katamso | Industrial Arterial | Tanjung Uncang | Pel. Sekupang | 11.2 | 30 km/h |
+| **SEG005** | Jl. Trans Barelang | Access Road | Tembesi | Jembatan 1 Barelang | 8.5 | 50 km/h |
+| **SEG006** | Jl. Hang Jebat | Urban Arterial | Bandara Hang Nadim | Pel. Batu Ampar | 16.8 | 40 km/h |
 
-*Formula for Real Travel Time:*
-`T_actual = (Distance_km / Free_Flow_Speed_kmh) * 60_mins * Congestion_Multiplier`
+### 2. Traffic Congestion Multiplier Matrix
+We apply dynamic time-window multipliers calibrated from empirical traffic research. Below is the base matrix for our primary corridor (**SEG001: Yos Sudarso**). *Note: The database contains full matrices for all 6 segments.*
 
-### 3. Carbon Emission Calculus
-Our carbon emission engine utilizes the **2006 IPCC Guidelines** and **US DOE** standards for heavy-duty diesel vehicles.
-- **Base Emission Factor**: 2.68 kg CO₂ per liter of diesel fuel.
-- **Fuel Consumption**: 0.25 L/km (Moving) + 2.25 L/hour (Idling in congestion).
+| Day Type | Time Window | Multiplier | Level | Traffic Condition Description |
+|---|---|---|---|---|
+| Weekday | 06:00 - 09:00 | **1.85x** | 🔴 HIGH | Peak pagi: Penumpukan truk kontainer & pekerja pabrik |
+| Weekday | 09:00 - 15:00 | **1.20x** | 🟡 MED | Jam operasional logistik normal |
+| Weekday | 15:00 - 19:00 | **2.10x** | 🔴 HIGH | Peak sore & menjelang *cut-off* kapal kargo Batu Ampar |
+| Weekday | 19:00 - 06:00 | **1.00x** | 🟢 LOW | Arus lalu lintas lancar (off-peak) |
+| Weekend | 00:00 - 24:00 | **1.10x** | 🟢 LOW | Akhir pekan: Aktivitas pabrik minimal |
 
-*Formula for Carbon Emission:*
-`Carbon_Emission (kg CO₂) = [(Distance * 0.25) + (Idle_Hours * 2.25)] * 2.68`
+**Real Travel Time Calculation:**
+`T_actual = (Distance / Base_Speed) * 60_mins * Congestion_Multiplier`
 
-### 4. Ferry Scheduling & Terminal Cut-offs
-Our dataset aggregates official schedules from BatamFast, Sindo Ferry, and Majestic Fast Ferry, synchronized with Pelindo Batu Ampar's gate-in cut-off SOP.
-- **Terminals**: Batu Ampar (Cargo), Batam Center (Fast Ferry), Sekupang (Fast Ferry).
-- **Enforcement**: strict cut-off times (e.g. 15 mins before departure) are accounted for in the routing logic.
+### 3. Empirical References & Emission Standards
+To ensure our calculations are scientifically sound, we base our Carbon Calculus and schedules on the following references:
+
+| Data Category | Source / Institution | Key Finding / Parameter Used |
+|---|---|---|
+| **Traffic Data** | Jurnal PURE Univ. Brawijaya (2023) | Angkutan barang mengambil 78.37% dari total volume arus jalan arteri Batam di hari kerja. |
+| **Port Ops** | BP Batam | Pelabuhan Batu Ampar melayani 685 ship calls (+10% YoY). |
+| **Ferry Schedules** | BatamFast, Sindo Ferry, Pelindo SOP | Penyesuaian waktu *Gate-in / Cut-off* operasional (15-30 menit sblm berangkat). |
+| **Emission Factor** | 2006 IPCC Guidelines | Pembakaran Diesel: **2.68 kg CO₂ per liter**. |
+| **Fuel Rate** | US DOE / Argonne National Lab | Konsumsi truk: **0.25 L/km** (Moving) + **2.25 L/jam** (Idling saat macet). |
+
+**Carbon Emission Calculus:**
+`Total_Fuel (L) = (Distance_km * 0.25) + (Idle_Time_Hours * 2.25)`
+`Carbon_Emission (kg CO₂) = Total_Fuel * 2.68`
 
 ---
 
