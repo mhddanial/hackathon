@@ -6,7 +6,7 @@ import { History, Send, Paperclip } from "lucide-react";
 
 export default function OracleChatPage() {
   return (
-    <div className="flex flex-col h-full bg-[#FAFAFA] relative overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-8rem)] bg-[#FAFAFA] relative overflow-hidden rounded-3xl">
       
       {/* Blurred Map Background */}
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1200&auto=format&fit=crop')] bg-cover bg-center opacity-10 filter blur-[8px]"></div>

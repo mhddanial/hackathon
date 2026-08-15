@@ -100,7 +100,7 @@ export default function LandingPage() {
                   <div className="absolute inset-2 border-[6px] border-blue-100 rounded-full border-b-transparent"></div>
                   <Activity className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="text-4xl font-bold tracking-tighter text-blue-600">CROSSFLOW</h3>
+                <h3 className="text-4xl font-bold tracking-tighter text-blue-600">SMARTFLOW</h3>
               </div>
             </Card>
 

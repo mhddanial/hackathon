@@ -8,7 +8,7 @@ import { History, Route, MapPin, Search, ChevronDown, Clock, Leaf, Factory, Ship
 
 export default function RoutePlannerPage() {
   return (
-    <div className="flex flex-col h-full bg-[#FAFAFA] p-6 md:p-8 overflow-y-auto">
+    <div className="flex flex-col bg-[#FAFAFA] rounded-3xl p-6 md:p-8 overflow-hidden min-h-[calc(100vh-8rem)]">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-8">

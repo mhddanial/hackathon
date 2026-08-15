@@ -8,7 +8,7 @@ import { MapPin, ChevronRight, Calendar, Ship, AlertCircle, ChevronDown, CheckCi
 
 export default function FerrySchedulesPage() {
   return (
-    <div className="flex flex-col h-full overflow-y-auto relative bg-[#f8fafc]">
+    <div className="flex flex-col relative bg-[#f8fafc] rounded-3xl overflow-hidden min-h-[calc(100vh-8rem)]">
       {/* Premium Background Mesh/Gradient */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-400/20 blur-[120px]" />

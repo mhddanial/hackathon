@@ -13,9 +13,9 @@ export default function DashboardLayout({
       <TooltipProvider>
         <SidebarProvider>
           <AppSidebar />
-          <SidebarInset className="bg-surface-soft flex-1 flex flex-col">
+          <SidebarInset className="bg-surface-soft flex-1 flex flex-col min-w-0">
             <Topbar />
-            <main className="flex-1 overflow-auto pt-20 p-8 max-w-[1600px] w-full mx-auto">
+            <main className="flex-1 p-4 md:p-8 max-w-[1600px] w-full mx-auto">
               {children}
             </main>
           </SidebarInset>
