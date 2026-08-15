@@ -98,9 +98,7 @@ export default function RegisterPage() {
         
         {/* Header */}
         <div className="flex flex-col items-center mb-8 text-center">
-          <div className="w-10 h-10 rounded-md border border-slate-200 flex items-center justify-center bg-blue-50/50 mb-6">
-            <span className="text-blue-600 font-serif font-bold text-xl leading-none">C</span>
-          </div>
+          <img src="/logo-icon.png" alt="SmartFlow Logo" className="w-14 h-14 object-contain mb-4" />
           <h1 className="text-2xl font-serif text-slate-900 mb-2">Create your account</h1>
           <p className="text-sm text-slate-500">Start optimizing your logistics with SmartFlow.</p>
         </div>

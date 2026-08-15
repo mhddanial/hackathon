@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Map, Ship, Compass, MessageSquare, X, LogOut } from "lucide-react";
+import { LayoutDashboard, Map, Ship, Compass, MessageSquare, X, LogOut, Layers, Settings, CheckSquare } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { createClient } from "@/utils/supabase/client";
 
+// Used original icons and links for the sidebar items
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Route Planner", url: "/planner", icon: Map },
@@ -53,13 +54,16 @@ export function AppSidebar() {
   const displayName = user?.user_metadata?.full_name || user?.email || "User";
 
   return (
-    <Sidebar className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="h-20 flex flex-row items-center justify-between px-6 border-b border-sidebar-border/50">
-        <Link href="/" className="text-sidebar-primary font-bold text-xl tracking-tight md:w-full md:text-left hover:opacity-80 transition-opacity">
-          SmartFlow
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-[#EFF6FF] group">
+      <SidebarHeader className="h-20 flex flex-row items-center px-6 border-b border-sidebar-border/50 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+        <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
+          <img src="/logo-icon.png" alt="Logo" className="h-10 w-10 object-contain" />
+          <span className="text-xl font-bold text-[#155EEF] group-data-[collapsible=icon]:hidden">
+            SmartFlow
+          </span>
         </Link>
         {isMobile && (
-          <Button variant="ghost" size="icon" className="md:hidden text-sidebar-foreground hover:bg-sidebar-accent" onClick={() => setOpenMobile(false)}>
+          <Button variant="ghost" size="icon" className="md:hidden ml-auto text-sidebar-foreground hover:bg-sidebar-accent" onClick={() => setOpenMobile(false)}>
             <X className="w-5 h-5" />
           </Button>
         )}
@@ -68,7 +72,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent className="pt-4">
-            <SidebarMenu className="gap-2 px-2">
+            <SidebarMenu className="gap-4 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center">
               {items.map((item) => {
                 const isActive = pathname === item.url;
                 
@@ -77,13 +81,14 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       render={<Link href={item.url} />}
                       isActive={isActive}
-                      className="h-11 px-4 font-semibold transition-colors"
+                      tooltip={item.title}
+                      className="h-11 px-4 font-semibold transition-colors text-slate-500 hover:text-slate-900 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg"
                       onClick={() => {
                         if (isMobile) setOpenMobile(false);
                       }}
                     >
                       <item.icon className="w-5 h-5" />
-                      <span>{item.title}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -93,34 +98,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border/50">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3 px-2">
-            <Avatar className="w-10 h-10 border border-sidebar-border bg-sidebar-accent">
-              <AvatarFallback className="bg-slate-300 font-bold text-foreground">
-                {getInitials()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col overflow-hidden">
-              <p className="text-sm font-bold text-sidebar-foreground truncate" title={displayName}>
-                {displayName}
-              </p>
-              <p className="text-[11px] text-sidebar-foreground/60 font-semibold tracking-wider uppercase truncate">
-                Logistics User
-              </p>
-            </div>
-          </div>
-          
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }

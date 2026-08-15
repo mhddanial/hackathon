@@ -12,11 +12,9 @@ export default function LandingPage() {
       
       {/* Navigation Header */}
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 lg:px-12 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md border border-slate-200 flex items-center justify-center bg-blue-50/50">
-            <span className="text-blue-600 font-serif font-bold text-lg leading-none">C</span>
-          </div>
-          <span className="font-bold text-slate-800 text-lg tracking-tight">SmartFlow</span>
+        <div className="flex items-center gap-3">
+          <img src="/logo-icon.png" alt="Logo" className="h-10 w-10 object-contain" />
+          <span className="font-bold text-[#155EEF] text-xl tracking-tight">SmartFlow</span>
         </div>
         
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
@@ -27,12 +25,9 @@ export default function LandingPage() {
         </nav>
         
         <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 hidden sm:block">
-            Sign In
-          </Link>
           <Link href="/login">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold px-6 shadow-md shadow-blue-600/20">
-              GET STARTED
+              Sign In
             </Button>
           </Link>
         </div>

@@ -1,273 +1,233 @@
 "use client";
 
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, RefreshCw, Anchor, Leaf, AlertTriangle, Ship, Map, ArrowRight } from "lucide-react";
+import { ChevronLeft, SlidersHorizontal, Download, Ship, Leaf, Anchor, Map } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col bg-[#FAFAFA] rounded-3xl p-6 md:p-8 overflow-hidden min-h-[calc(100vh-8rem)]">
+    <div className="flex flex-col bg-[#F8F9FB] rounded-tl-3xl p-8 overflow-y-auto min-h-screen">
       
+
+
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-8">
+      <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-serif text-foreground mb-2">Logistics Overview</h1>
-          <p className="text-muted-foreground text-sm">Real-time network performance and sustainability impact</p>
+          <h1 className="text-[28px] font-semibold text-[#1A1D27] mb-1">Logistic Overview</h1>
+          <p className="text-sm text-[#5E6470]">Real-time network performance and sustainability impact</p>
         </div>
-        <div className="flex gap-4">
-          <Button variant="outline" className="rounded-md px-4 py-2 font-medium text-foreground bg-muted/30 border-none hover:bg-muted/50">
-            <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
-            Today
-          </Button>
-          <Button className="rounded-md px-6 font-medium bg-primary text-primary-foreground hover:bg-primary/90">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh Data
-          </Button>
-        </div>
+        <Button variant="outline" className="rounded-lg px-4 h-10 border-[#E2E8F0] text-[#5E6470] bg-white shadow-sm">
+          <SlidersHorizontal className="w-4 h-4 mr-2" />
+          Filter
+        </Button>
       </div>
 
       {/* Top 3 Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         
         {/* Primary Corridors */}
-        <Card className="rounded-[24px] p-6 shadow-sm border border-border bg-white flex flex-col justify-between">
+        <Card className="rounded-[16px] p-6 shadow-sm border-[#E2E8F0] bg-white flex flex-col">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Map className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-medium text-foreground">Primary Corridors</h3>
+            <Map className="w-5 h-5 text-[#2563EB]" />
+            <h3 className="text-sm font-medium text-[#1A1D27]">Primary Corridors</h3>
           </div>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mt-auto">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">Yos Sudarso</span>
-              <Badge variant="secondary" className="bg-critical/10 text-critical hover:bg-critical/10 border-none font-bold text-[10px] uppercase tracking-wider px-3 py-1">High Congestion</Badge>
+              <span className="text-base font-medium text-[#1A1D27]">Yos Sudarso</span>
+              <span className="text-[11px] font-medium text-[#EF4444] bg-[#FEF2F2] border border-[#FECACA] px-3 py-1 rounded-md">Status</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">Sudirman</span>
-              <Badge variant="secondary" className="bg-success/10 text-success hover:bg-success/10 border-none font-bold text-[10px] uppercase tracking-wider px-3 py-1">Smooth Flow</Badge>
+              <span className="text-base font-medium text-[#1A1D27]">Sudirman</span>
+              <span className="text-[11px] font-medium text-[#10B981] bg-[#ECFDF5] border border-[#A7F3D0] px-3 py-1 rounded-md">Status</span>
             </div>
           </div>
         </Card>
 
         {/* Next Ferry Departures */}
-        <Card className="rounded-[24px] p-6 shadow-sm border border-border bg-white flex flex-col justify-between">
+        <Card className="rounded-[16px] p-6 shadow-sm border-[#E2E8F0] bg-white flex flex-col">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <Ship className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-medium text-foreground">Next Ferry Departures</h3>
+            <Ship className="w-5 h-5 text-[#2563EB]" />
+            <h3 className="text-sm font-medium text-[#1A1D27]">Next Ferry Departures</h3>
           </div>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mt-auto">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">Batam Center → SGP</span>
-              <span className="text-sm font-medium text-foreground">14:30</span>
+              <span className="text-base font-medium text-[#1A1D27]">Batam Center → SGP</span>
+              <span className="text-base font-semibold text-[#1A1D27]">14:30</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">Batu Ampar → JKT</span>
-              <span className="text-sm font-medium text-foreground">15:15</span>
+              <span className="text-base font-medium text-[#1A1D27]">Batu Ampar → JKT</span>
+              <span className="text-base font-semibold text-[#1A1D27]">15:15</span>
             </div>
           </div>
         </Card>
 
         {/* Total Emission Saved */}
-        <Card className="rounded-[24px] p-6 shadow-sm border border-border bg-white flex flex-col justify-between">
+        <Card className="rounded-[16px] p-6 shadow-sm border-[#E2E8F0] bg-white flex flex-col">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-success/10 text-success flex items-center justify-center">
-              <Leaf className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-medium text-foreground">Total Emission Saved</h3>
+            <Leaf className="w-5 h-5 text-[#10B981]" />
+            <h3 className="text-sm font-medium text-[#1A1D27]">Total Emission Saved</h3>
           </div>
-          <div>
-            <div className="flex items-end gap-2 mb-2">
-              <span className="text-5xl font-light text-success">42.8</span>
-              <span className="text-lg font-bold text-success mb-1">tCO₂e</span>
+          <div className="mt-auto">
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-[40px] font-semibold text-[#10B981] leading-none">42.8</span>
+              <span className="text-lg font-bold text-[#10B981]">tCO₂e</span>
             </div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">+12% VS LAST MONTH</p>
+            <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">+12% VS LAST MONTH</p>
           </div>
         </Card>
 
       </div>
 
-      {/* Middle Section: Heatmap (Left, 2/3) + Metrics (Right, 1/3) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Middle Section: 2 Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         
-        {/* Left: Corridor Heatmap */}
-        <Card className="lg:col-span-2 rounded-[32px] p-6 md:p-8 flex flex-col shadow-sm border border-border bg-white relative overflow-hidden">
-          <div className="flex flex-col md:flex-row md:justify-between items-start gap-4 mb-6">
-            <div>
-              <h2 className="text-2xl font-serif text-foreground">Corridor Heatmap</h2>
-              <p className="text-sm text-muted-foreground mt-1">Live traffic density: Yos Sudarso & Sudirman</p>
+        {/* Batu Ampar Port Card */}
+        <Card className="rounded-[16px] p-6 md:p-8 shadow-sm border-[#E2E8F0] bg-white flex flex-col justify-between">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
+              <Anchor className="w-6 h-6" />
             </div>
-            <div className="flex flex-wrap gap-2 md:gap-3">
-              <Badge variant="outline" className="rounded-full px-4 py-1.5 font-medium border-border bg-muted/20 text-foreground text-xs">
-                <span className="w-2 h-2 rounded-full bg-success mr-2"></span> Flowing
-              </Badge>
-              <Badge variant="outline" className="rounded-full px-4 py-1.5 font-medium border-border bg-muted/20 text-foreground text-xs">
-                <span className="w-2 h-2 rounded-full bg-warning mr-2"></span> Heavy
-              </Badge>
-              <Badge variant="outline" className="rounded-full px-4 py-1.5 font-medium border-border bg-muted/20 text-foreground text-xs">
-                <span className="w-2 h-2 rounded-full bg-critical mr-2"></span> Jammed
-              </Badge>
+            <div>
+              <h3 className="text-lg font-semibold text-[#1A1D27]">Batu Ampar Port</h3>
+              <p className="text-sm text-[#5E6470] mt-0.5">Current Terminal Status</p>
             </div>
           </div>
           
-          {/* Map Container */}
-          <div className="flex-1 rounded-[24px] overflow-hidden relative min-h-[400px]">
-             {/* Map Background */}
-             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1200&auto=format&fit=crop')] bg-cover bg-center opacity-70"></div>
-             
-             {/* Overlay to simulate map style from mockup */}
-             <div className="absolute inset-0 bg-blue-50/40 mix-blend-multiply"></div>
-             
-             {/* Heatmap blur spots to simulate the mockup's visual */}
-             <div className="absolute top-[35%] left-[25%] w-[35%] h-[15%] bg-warning/50 blur-[30px] rounded-full"></div>
-             <div className="absolute top-[25%] left-[55%] w-[25%] h-[15%] bg-critical/60 blur-[30px] rounded-full rotate-[-20deg]"></div>
-             
-             {/* Accident Tooltip Overlay */}
-             <div className="absolute top-[50%] left-[30%] bg-white rounded-[16px] p-5 shadow-lg border border-border max-w-[240px] z-10 flex flex-col items-center text-center">
-                <p className="text-[10px] font-bold text-critical uppercase tracking-wider mb-2">Accident Reported</p>
-                <p className="text-sm text-foreground">Sudirman intersection, expect +25m delay.</p>
-                
-                {/* Tooltip triangle */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[12px] border-b-white filter drop-shadow-md"></div>
-             </div>
+          <div className="mb-10">
+            <div className="flex items-baseline gap-1 mb-6">
+              <span className="text-[56px] font-medium text-[#1A1D27] leading-none">82%</span>
+              <span className="text-sm font-semibold text-[#EF4444]">~+5%</span>
+            </div>
+            <p className="text-sm text-[#5E6470] max-w-sm">
+              Capacity reached. Expect berthing delays of up to 4 hours for non-priority vessels.
+            </p>
+          </div>
+          
+          <div>
+            <div className="flex justify-between text-xs font-bold mb-3">
+              <span className="text-[#1A1D27]">Berth Availability</span>
+              <span className="text-[#1A1D27]">2 / 12 Open</span>
+            </div>
+            <div className="h-3 w-full bg-[#F1F5F9] rounded-full overflow-hidden">
+              <div className="h-full bg-[#EF4444] w-[82%] rounded-full"></div>
+            </div>
           </div>
         </Card>
 
-        {/* Right: Metrics */}
-        <div className="flex flex-col gap-6">
-          
-          {/* Batu Ampar Port Card */}
-          <Card className="rounded-[32px] p-8 shadow-sm border border-border bg-white flex flex-col justify-between flex-1">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                <Anchor className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-xl font-serif text-foreground">Batu Ampar Port</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Current Terminal Status</p>
-              </div>
+        {/* Carbon Savings Card */}
+        <Card className="rounded-[16px] p-6 md:p-8 shadow-sm border-[#E2E8F0] bg-white flex flex-col justify-between">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-full bg-[#ECFDF5] text-[#10B981] flex items-center justify-center">
+              <Leaf className="w-6 h-6" />
             </div>
-            
-            <div className="my-6">
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-6xl font-light text-foreground">82%</span>
-                <span className="text-sm font-medium text-critical">~+5%</span>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed pr-4">
-                Capacity reached. Expect berthing delays of up to 4 hours for non-priority vessels.
-              </p>
-            </div>
-            
             <div>
-              <div className="flex justify-between text-xs font-bold mb-3">
-                <span className="text-foreground">Berth Availability</span>
-                <span className="text-foreground">2 / 12 Open</span>
-              </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-critical w-[82%] rounded-full"></div>
-              </div>
+              <h3 className="text-lg font-semibold text-[#1A1D27]">Carbon Savings</h3>
+              <p className="text-sm text-[#5E6470] mt-0.5">Daily routing optimization</p>
             </div>
-          </Card>
-
-          {/* Carbon Savings Card */}
-          <Card className="rounded-[32px] p-8 shadow-sm border border-border bg-white flex flex-col justify-between flex-1">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-success/10 text-success flex items-center justify-center">
-                <Leaf className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-xl font-serif text-foreground">Carbon Savings</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Daily routing optimization</p>
-              </div>
-            </div>
-            
-            <div className="my-4">
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-5xl font-light text-success">1.4</span>
-                <span className="text-lg font-bold text-success mb-1">tCO₂e</span>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Prevented today by bypassing Yos Sudarso congestion.
-              </p>
-            </div>
-            
-            {/* Custom Bar Chart matching mockup */}
-            <div className="flex items-end justify-between h-20 mt-2 gap-3 px-1">
-              <div className="flex flex-col items-center flex-1 gap-2">
-                <div className="w-full bg-muted/40 rounded-t-sm h-[30%]"></div>
-                <span className="text-[9px] font-bold text-foreground">Mon</span>
-              </div>
-              <div className="flex flex-col items-center flex-1 gap-2">
-                <div className="w-full bg-muted/40 rounded-t-sm h-[40%]"></div>
-                <span className="text-[9px] font-bold text-foreground">Tue</span>
-              </div>
-              <div className="flex flex-col items-center flex-1 gap-2">
-                <div className="w-full bg-muted/40 rounded-t-sm h-[25%]"></div>
-                <span className="text-[9px] font-bold text-foreground">Wed</span>
-              </div>
-              <div className="flex flex-col items-center flex-1 gap-2">
-                <div className="w-full bg-muted/40 rounded-t-sm h-[60%]"></div>
-                <span className="text-[9px] font-bold text-foreground">Thu</span>
-              </div>
-              <div className="flex flex-col items-center flex-1 gap-2 relative">
-                <span className="absolute -top-5 text-[9px] font-bold text-success">1.4</span>
-                <div className="w-full bg-success rounded-t-sm h-[90%]"></div>
-                <span className="text-[9px] font-bold text-success">Today</span>
-              </div>
-            </div>
-          </Card>
+          </div>
           
-        </div>
+          <div className="mb-6">
+            <div className="flex items-baseline gap-1 mb-2">
+              <span className="text-[56px] font-medium text-[#10B981] leading-none">1.4</span>
+              <span className="text-lg font-bold text-[#10B981]">tCO₂e</span>
+            </div>
+            <p className="text-sm text-[#5E6470]">
+              Prevented today by bypassing Yos Sudarso congestion.
+            </p>
+          </div>
+          
+          {/* Custom Bar Chart matching mockup */}
+          <div className="flex items-end justify-between h-32 mt-4 gap-4 px-2">
+            <div className="flex flex-col items-center flex-1 gap-3">
+              <div className="w-full bg-[#F1F5F9] rounded-t-md h-[30%]"></div>
+              <span className="text-xs font-semibold text-[#1A1D27]">Mon</span>
+            </div>
+            <div className="flex flex-col items-center flex-1 gap-3">
+              <div className="w-full bg-[#F1F5F9] rounded-t-md h-[40%]"></div>
+              <span className="text-xs font-semibold text-[#1A1D27]">Tue</span>
+            </div>
+            <div className="flex flex-col items-center flex-1 gap-3">
+              <div className="w-full bg-[#F1F5F9] rounded-t-md h-[25%]"></div>
+              <span className="text-xs font-semibold text-[#1A1D27]">Wed</span>
+            </div>
+            <div className="flex flex-col items-center flex-1 gap-3">
+              <div className="w-full bg-[#F1F5F9] rounded-t-md h-[60%]"></div>
+              <span className="text-xs font-semibold text-[#1A1D27]">Thu</span>
+            </div>
+            <div className="flex flex-col items-center flex-1 gap-3 relative">
+              <span className="absolute -top-7 text-sm font-bold text-[#10B981]">1.4</span>
+              <div className="w-full bg-[#10B981] rounded-t-md h-[90%]"></div>
+              <span className="text-xs font-semibold text-[#10B981]">Today</span>
+            </div>
+          </div>
+        </Card>
+        
       </div>
 
       {/* Bottom Section: Recent Activity History */}
-      <div>
+      <div className="mb-8">
         <div className="flex justify-between items-end mb-6">
           <div>
-            <h2 className="text-2xl font-serif text-foreground mb-1">Recent Activity History</h2>
-            <p className="text-sm text-muted-foreground">Logistics optimization and routing logs</p>
+            <h2 className="text-2xl font-semibold text-[#1A1D27] mb-1">Recent Activity History</h2>
+            <p className="text-sm text-[#5E6470]">Logistics optimization and routing logs</p>
           </div>
-          <Button variant="link" className="text-[10px] font-bold text-primary uppercase tracking-widest p-0">
-            EXPORT CSV
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" className="rounded-lg px-4 h-10 border-[#E2E8F0] text-[#5E6470] bg-white shadow-sm">
+              <SlidersHorizontal className="w-4 h-4 mr-2" />
+              Filter
+            </Button>
+            <Button variant="outline" className="rounded-lg px-4 h-10 border-[#E2E8F0] text-[#5E6470] bg-white shadow-sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </div>
         </div>
         
-        <Card className="rounded-[24px] overflow-hidden shadow-sm border border-border bg-white w-full overflow-x-auto">
-          <div className="min-w-[800px]">
-            {/* Table Header */}
-            <div className="grid grid-cols-4 gap-4 p-6 bg-muted/10 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              <div>Timestamp</div>
-              <div>Origin/Destination</div>
-              <div>Recommended Departure</div>
-              <div>Emission Saved</div>
-            </div>
-
-            {/* Row 1 */}
-            <div className="grid grid-cols-4 gap-4 p-6 border-b border-border items-center">
-              <div className="text-sm text-foreground">14:22:05</div>
-              <div className="text-sm text-muted-foreground">BTM → SGP (BTM-SGP-092)</div>
-              <div className="text-sm text-foreground">15:00 (Delayed)</div>
-              <div className="text-sm text-success">0.4 tCO₂e</div>
-            </div>
-
-            {/* Row 2 */}
-            <div className="grid grid-cols-4 gap-4 p-6 border-b border-border items-center">
-              <div className="text-sm text-foreground">13:45:12</div>
-              <div className="text-sm text-muted-foreground">JKT → BTM (JKT-BTM-441)</div>
-              <div className="text-sm text-foreground">14:15 (On Time)</div>
-              <div className="text-sm text-success">1.2 tCO₂e</div>
-            </div>
-
-            {/* Row 3 */}
-            <div className="grid grid-cols-4 gap-4 p-6 border-b border-border items-center">
-              <div className="text-sm text-foreground">12:30:00</div>
-              <div className="text-sm text-muted-foreground">SGP → BTM (SGP-BTM-118)</div>
-              <div className="text-sm text-foreground">13:00 (On Time)</div>
-              <div className="text-sm text-success">0.8 tCO₂e</div>
-            </div>
+        <Card className="rounded-[16px] overflow-hidden shadow-sm border-[#E2E8F0] bg-white">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-[#EFF6FF] text-[#1A1D27]">
+                <tr>
+                  <th className="px-6 py-4 font-semibold text-xs border-b border-[#E2E8F0]">Time Stamp</th>
+                  <th className="px-6 py-4 font-semibold text-xs border-b border-[#E2E8F0]">Origin/Destination</th>
+                  <th className="px-6 py-4 font-semibold text-xs border-b border-[#E2E8F0]">Recomended Departure</th>
+                  <th className="px-6 py-4 font-semibold text-xs border-b border-[#E2E8F0]">Emission Saved</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E2E8F0]">
+                <tr className="hover:bg-muted/30">
+                  <td className="px-6 py-4 text-[#5E6470]">CL2026080100018</td>
+                  <td className="px-6 py-4 text-[#5E6470]">920000000110</td>
+                  <td className="px-6 py-4 text-[#5E6470]">Digital Weighing Scale</td>
+                  <td className="px-6 py-4 text-[#5E6470]">SP28</td>
+                </tr>
+                <tr className="hover:bg-muted/30">
+                  <td className="px-6 py-4 text-[#5E6470]">CL2026080900020</td>
+                  <td className="px-6 py-4 text-[#5E6470]">920000000103</td>
+                  <td className="px-6 py-4 text-[#5E6470]">Vernier Caliper</td>
+                  <td className="px-6 py-4 text-[#5E6470]">SP28</td>
+                </tr>
+                <tr className="hover:bg-muted/30">
+                  <td className="px-6 py-4 text-[#5E6470]">CL2026081100006</td>
+                  <td className="px-6 py-4 text-[#5E6470]">920000001129</td>
+                  <td className="px-6 py-4 text-[#5E6470]">Pressure Gauge</td>
+                  <td className="px-6 py-4 text-[#5E6470]">SP22</td>
+                </tr>
+                <tr className="hover:bg-muted/30">
+                  <td className="px-6 py-4 text-[#5E6470]">CL2026080500213</td>
+                  <td className="px-6 py-4 text-[#5E6470]">920000000234</td>
+                  <td className="px-6 py-4 text-[#5E6470]">Torque Wrench</td>
+                  <td className="px-6 py-4 text-[#5E6470]">IS13</td>
+                </tr>
+                <tr className="hover:bg-muted/30">
+                  <td className="px-6 py-4 text-[#5E6470]">CL2026090100016</td>
+                  <td className="px-6 py-4 text-[#5E6470]">920000000008</td>
+                  <td className="px-6 py-4 text-[#5E6470]">Digital Thermometer</td>
+                  <td className="px-6 py-4 text-[#5E6470]">SP22</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </Card>
       </div>
