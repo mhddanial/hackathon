@@ -309,6 +309,8 @@ Historical route query store for analytics.
 
 SmartFlow is built on top of empirical traffic data, real-world spatial geometries, and standardized emission models to ensure applicability in the Batam-Singapore logistics corridor.
 
+🔗 **[View Full Dataset & Parameters (Google Sheets)](https://docs.google.com/spreadsheets/d/1cX2JZrMVJFjLW_aWNMc5dFH68c26ofRTm-1kSyVlqoc/edit?gid=615876228#gid=615876228)**
+
 ### 1. Key Logistics Corridors (Spatial Data)
 We mapped 6 primary logistics segments based on GIS coordinates and **Perwako Batam No. 60/2021**:
 
