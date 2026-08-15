@@ -119,7 +119,13 @@ export default function RouteRecommendationPage() {
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors relative">
                   <Select value={origin} onValueChange={setOrigin}>
                     <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
-                      <SelectValue placeholder="Select Origin" />
+                      <SelectValue placeholder="Select Origin">
+                        {origin ? (
+                          <>
+                            {BATAM_LOCATIONS.find(loc => loc.coords === origin)?.name} <span className="text-[#94A3B8] font-normal ml-1">({origin})</span>
+                          </>
+                        ) : "Select Origin"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {BATAM_LOCATIONS.map((loc) => (
@@ -142,7 +148,13 @@ export default function RouteRecommendationPage() {
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-2 py-1 bg-white focus-within:border-[#2563EB] transition-colors relative">
                   <Select value={destination} onValueChange={setDestination}>
                     <SelectTrigger className="border-0 shadow-none focus:ring-0 text-sm font-medium text-[#1A1D27] w-full bg-transparent p-2 h-auto focus:ring-offset-0">
-                      <SelectValue placeholder="Select Destination" />
+                      <SelectValue placeholder="Select Destination">
+                        {destination ? (
+                          <>
+                            {BATAM_LOCATIONS.find(loc => loc.coords === destination)?.name} <span className="text-[#94A3B8] font-normal ml-1">({destination})</span>
+                          </>
+                        ) : "Select Destination"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {BATAM_LOCATIONS.map((loc) => (
