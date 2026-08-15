@@ -259,8 +259,8 @@ export default function RouteRecommendationPage() {
           <div className="flex-1 rounded-[16px] overflow-hidden relative shadow-sm border-[#E2E8F0] min-h-[400px] bg-white">
             <MapView 
               routeCoordinates={routeCoordinates}
-              originStr={origin}
-              destStr={destination}
+              originStr={BATAM_LOCATIONS.find(loc => loc.coords === origin)?.name || origin}
+              destStr={BATAM_LOCATIONS.find(loc => loc.coords === destination)?.name || destination}
               originCoords={origin.split(',').length === 2 ? [parseFloat(origin.split(',')[0]), parseFloat(origin.split(',')[1])] : undefined}
               destCoords={destination.split(',').length === 2 ? [parseFloat(destination.split(',')[0]), parseFloat(destination.split(',')[1])] : undefined}
             />

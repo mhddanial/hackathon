@@ -40,11 +40,15 @@ function BoundsUpdater({ coordinates }: { coordinates: [number, number][] | null
 export default function MapComponent({ 
   routeCoordinates = null,
   origin = BATAM_CENTER,
-  destination = BATU_AMPAR
+  destination = BATU_AMPAR,
+  originName = "Origin",
+  destName = "Destination"
 }: { 
   routeCoordinates?: [number, number][] | null,
   origin?: [number, number],
-  destination?: [number, number]
+  destination?: [number, number],
+  originName?: string,
+  destName?: string
 }) {
   const [mounted, setMounted] = useState(false);
 
@@ -68,13 +72,13 @@ export default function MapComponent({
 
       <Marker position={origin} icon={originIcon}>
         <Tooltip direction="right" offset={[15, 0]} opacity={1} permanent>
-          Origin
+          {originName}
         </Tooltip>
       </Marker>
       
       <Marker position={destination} icon={destIcon}>
         <Tooltip direction="right" offset={[15, 0]} opacity={1} permanent>
-          Destination
+          {destName}
         </Tooltip>
       </Marker>
 

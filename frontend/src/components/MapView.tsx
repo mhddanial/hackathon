@@ -35,6 +35,8 @@ export default function MapView({
           routeCoordinates={routeCoordinates} 
           origin={originCoords}
           destination={destCoords}
+          originName={originStr}
+          destName={destStr}
         />
       </div>
       
