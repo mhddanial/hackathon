@@ -14,8 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
-# Expose port
-EXPOSE 8000
+# Expose port (Removed to allow Railway auto-detection of $PORT)
 
 # Start command (using Railway's PORT environment variable)
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
