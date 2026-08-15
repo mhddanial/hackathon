@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, LogOut, ChevronDown } from "lucide-react";
+import { Search, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -29,7 +29,7 @@ export default function Topbar() {
     return user?.email ? user.email.substring(0, 2).toUpperCase() : "US";
   };
 
-  const displayName = user?.user_metadata?.full_name || user?.email || "Joko Siyanto";
+  const displayName = user?.user_metadata?.full_name || user?.email || "User";
 
   return (
     <header className="h-20 bg-background/80 backdrop-blur-md border-b border-sidebar-border flex items-center justify-between px-8 sticky top-0 z-50">
@@ -55,7 +55,7 @@ export default function Topbar() {
         {/* User Profile & Sign Out */}
         <div className="flex items-center gap-3">
           <span className="text-[#1A1D27] text-sm font-medium hidden md:block">
-            {displayName} - Driver
+            {displayName}
           </span>
           <Avatar className="w-10 h-10 border border-sidebar-border bg-sidebar-accent">
             {user?.user_metadata?.avatar_url ? (

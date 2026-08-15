@@ -3,26 +3,26 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, MapPin, Search, ChevronDown, Clock, Leaf, Target, Layers, Loader2 } from "lucide-react";
+import { Plus, MapPin, Search, Clock, Leaf, Target, Layers, Loader2 } from "lucide-react";
 import MapView from "@/components/MapView";
 
 export default function RouteRecommendationPage() {
   const [origin, setOrigin] = useState("1.1291, 104.0494");
   const [destination, setDestination] = useState("1.1633, 104.0044");
-  const [cargoType, setCargoType] = useState("electronics");
-  const [priority, setPriority] = useState("balanced");
-  
   const [loading, setLoading] = useState(false);
   const [routeData, setRouteData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async () => {
     setLoading(true);
+    setError(null);
+    setRouteData(null);
     try {
       const [originLat, originLng] = origin.split(",").map(s => parseFloat(s.trim()));
       const [destLat, destLng] = destination.split(",").map(s => parseFloat(s.trim()));
 
       if (isNaN(originLat) || isNaN(originLng) || isNaN(destLat) || isNaN(destLng)) {
-        console.error("Invalid coordinates");
+        setError("Invalid coordinates. Please enter as 'lat, lng'.");
         return;
       }
 
@@ -46,9 +46,12 @@ export default function RouteRecommendationPage() {
         const data = await res.json();
         setRouteData(data);
       } else {
-        console.error("Route API error:", await res.text());
+        const msg = await res.text();
+        setError(`Route API error: ${msg}`);
+        console.error("Route API error:", msg);
       }
     } catch (e) {
+      setError("Could not connect to the routing API. Is the backend running?");
       console.error("Failed to fetch route:", e);
     } finally {
       setLoading(false);
@@ -121,23 +124,27 @@ export default function RouteRecommendationPage() {
               </div>
             </div>
 
-            {/* Selectors */}
+            {/* Selectors — info only */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">CARGO TYPE</label>
-                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white">
-                  <span className="text-sm font-medium text-[#1A1D27] capitalize">{cargoType}</span>
-                  <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
+                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-[#F8F9FB]">
+                  <span className="text-sm font-medium text-[#94A3B8]">General Cargo</span>
                 </div>
               </div>
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">PRIORITY</label>
-                <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white">
-                  <span className="text-sm font-medium text-[#1A1D27] capitalize">{priority}</span>
-                  <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
+                <div className="flex items-center border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-[#F8F9FB]">
+                  <span className="text-sm font-medium text-[#94A3B8]">Balanced</span>
                 </div>
               </div>
             </div>
+
+            {error && (
+              <div className="mb-4 p-3 rounded-lg bg-[#FEF2F2] border border-[#FECACA] text-xs text-[#DC2626] font-medium">
+                {error}
+              </div>
+            )}
             
             <Button onClick={handleSearch} disabled={loading} className="w-full rounded-lg h-12 bg-[#2563EB] text-white hover:bg-[#1D4ED8] font-bold">
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "FIND ROUTE"}

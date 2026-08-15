@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, SlidersHorizontal, MapPin, ChevronRight, Calendar, Ship, CheckCircle2, AlertTriangle, Clock, ChevronDown, RefreshCw } from "lucide-react";
+import { SlidersHorizontal, MapPin, ChevronRight, Calendar, Ship, CheckCircle2, RefreshCw } from "lucide-react";
 
 interface Schedule {
   id: string;
@@ -36,6 +36,9 @@ export default function FerrySchedulesPage() {
   useEffect(() => {
     fetchSchedules();
   }, []);
+
+  // Derive trip count from real data
+  const totalDailyTrips = schedules.reduce((acc, s) => acc + (s.departure_times?.length || 0), 0);
 
   return (
     <div className="flex flex-col bg-[#F8F9FB] rounded-tl-3xl p-8 overflow-y-auto min-h-screen">
@@ -95,11 +98,13 @@ export default function FerrySchedulesPage() {
             </div>
             <div className="flex bg-white">
               <div className="flex-1 p-4 text-center">
-                <span className="text-[20px] font-bold text-[#2563EB] block mb-1">24</span>
+                <span className="text-[20px] font-bold text-[#2563EB] block mb-1">
+                  {loading ? "--" : totalDailyTrips}
+                </span>
                 <span className="text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest">DAILY TRIPS</span>
               </div>
-              <div className="flex-1 p-4 text-center">
-                <span className="text-[20px] font-bold text-[#2563EB] block mb-1">85%</span>
+              <div className="flex-1 p-4 text-center border-l border-[#E2E8F0]">
+                <span className="text-[20px] font-bold text-[#2563EB] block mb-1">--</span>
                 <span className="text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest">ON-TIME</span>
               </div>
             </div>
@@ -175,7 +180,14 @@ export default function FerrySchedulesPage() {
                     ))
                   ))
                 ) : (
-                  <div className="p-8 text-center text-[#94A3B8]">No schedules available.</div>
+                  <div className="p-12 flex flex-col items-center justify-center gap-3 text-center">
+                    <Ship className="w-10 h-10 text-[#CBD5E1]" />
+                    <p className="text-sm font-semibold text-[#64748B]">No schedules available</p>
+                    <p className="text-xs text-[#94A3B8]">The backend returned no ferry schedules. Try refreshing.</p>
+                    <Button onClick={fetchSchedules} variant="outline" size="sm" className="mt-2 rounded-lg">
+                      <RefreshCw className="w-3 h-3 mr-2" /> Retry
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

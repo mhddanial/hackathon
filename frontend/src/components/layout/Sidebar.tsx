@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Map, Ship, Compass, MessageSquare, X, LogOut, Layers, Settings, CheckSquare } from "lucide-react";
+import { LayoutDashboard, Map, Ship, MessageSquare, X, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
