@@ -55,9 +55,9 @@
 - [x] Implement `GET /congestion` endpoint — **DONE, sekarang live di `/congestion`**
 - [x] Agent tools `get_congestion_level` → real ML | `get_ferry_schedule` → real Supabase query
 - [x] Tes integrasi penuh frontend ↔ backend: Auth (Email/Password & Google OAuth) + SSR Middleware Route Protection (Selesai)
-- [ ] Implement `POST /route` — Routing OSRM digabung dengan model ML kemacetan (Fallback Haversine)
+- [x] Implement `POST /route` — Routing OSRM digabung dengan model ML kemacetan (Fallback Haversine)
 - [ ] Test end-to-end minimal 3 skenario origin-destination bersama Builder B
-- [ ] Cek edge case: input kosong, OSRM timeout, pastikan endpoint tidak 500
+- [x] Cek edge case: input kosong, OSRM timeout, pastikan endpoint tidak 500 (Sudah tertangani via Haversine Fallback)
 
 ## 🕒 JAM 13–14 — Polish & Persiapan Materi
 - [ ] Deployment backend production (Railway/Render) pastikan environment variables masuk semua
