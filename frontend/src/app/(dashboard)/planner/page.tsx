@@ -1,16 +1,57 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronLeft, Plus, MapPin, Search, ChevronDown, Clock, Leaf, Target, Layers } from "lucide-react";
-import Link from "next/link";
+import { Plus, MapPin, Search, ChevronDown, Clock, Leaf, Target, Layers, Loader2 } from "lucide-react";
+import MapView from "@/components/MapView";
 
 export default function RouteRecommendationPage() {
+  const [origin, setOrigin] = useState("1.1291, 104.0494");
+  const [destination, setDestination] = useState("1.1633, 104.0044");
+  const [cargoType, setCargoType] = useState("electronics");
+  const [priority, setPriority] = useState("balanced");
+  
+  const [loading, setLoading] = useState(false);
+  const [routeData, setRouteData] = useState<any>(null);
+
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const [originLat, originLng] = origin.split(",").map(s => parseFloat(s.trim()));
+      const [destLat, destLng] = destination.split(",").map(s => parseFloat(s.trim()));
+      
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      
+      const res = await fetch(`${API_URL}/route`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          origin: [originLat, originLng],
+          destination: [destLat, destLng],
+          departure_hour: new Date().getHours(),
+          day_type: "weekday",
+          cargo_type: cargoType
+        })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setRouteData(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch route:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Convert GeoJSON to Polyline coordinates format ([lat, lng][])
+  const routeCoordinates = routeData?.geometry?.coordinates?.map((coord: number[]) => [coord[1], coord[0]]) || null;
+
   return (
     <div className="flex flex-col bg-[#F8F9FB] rounded-tl-3xl p-8 overflow-y-auto min-h-screen">
       
-
-
       {/* Header */}
       <div className="flex justify-between items-end mb-8">
         <div>
@@ -41,9 +82,14 @@ export default function RouteRecommendationPage() {
                 <div className="absolute -left-[35px] top-[22px] w-8 h-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#2563EB]">
                   <MapPin className="w-4 h-4" />
                 </div>
-                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">FIRST LOCATION</label>
+                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">ORIGIN (LAT, LNG)</label>
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white">
-                  <span className="text-sm font-medium text-[#1A1D27]">Suzhou Industrial Park, CN</span>
+                  <input 
+                    type="text" 
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full"
+                  />
                   <Target className="w-4 h-4 text-[#94A3B8]" />
                 </div>
               </div>
@@ -53,31 +99,40 @@ export default function RouteRecommendationPage() {
                 <div className="absolute -left-[35px] top-[22px] w-8 h-8 rounded-lg bg-[#F1F5F9] flex items-center justify-center text-[#64748B]">
                   <MapPin className="w-4 h-4" />
                 </div>
-                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DESTINATION</label>
+                <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">DESTINATION (LAT, LNG)</label>
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-4 py-2.5 bg-white">
-                  <span className="text-sm font-medium text-[#1A1D27]">Port of Long Beach, US</span>
+                  <input 
+                    type="text" 
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    className="text-sm font-medium text-[#1A1D27] bg-transparent outline-none w-full"
+                  />
                   <Search className="w-4 h-4 text-[#94A3B8]" />
                 </div>
               </div>
             </div>
 
             {/* Selectors */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">CARGO TYPE</label>
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white">
-                  <span className="text-sm font-medium text-[#1A1D27]">Electronics (TEU)</span>
+                  <span className="text-sm font-medium text-[#1A1D27] capitalize">{cargoType}</span>
                   <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
                 </div>
               </div>
               <div>
                 <label className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest mb-1.5 block">PRIORITY</label>
                 <div className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-3 py-2.5 bg-white">
-                  <span className="text-sm font-medium text-[#1A1D27]">Balanced</span>
+                  <span className="text-sm font-medium text-[#1A1D27] capitalize">{priority}</span>
                   <ChevronDown className="w-4 h-4 text-[#94A3B8]" />
                 </div>
               </div>
             </div>
+            
+            <Button onClick={handleSearch} disabled={loading} className="w-full rounded-lg h-12 bg-[#2563EB] text-white hover:bg-[#1D4ED8] font-bold">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "FIND ROUTE"}
+            </Button>
           </Card>
 
           {/* Mini Cards Row */}
@@ -89,16 +144,20 @@ export default function RouteRecommendationPage() {
                 <div className="w-10 h-10 rounded-full bg-[#F1F5F9] flex items-center justify-center text-[#1A1D27] mb-4">
                   <Clock className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#1A1D27] leading-tight mb-2">Departure<br/>Window</h3>
-                <p className="text-xs text-[#5E6470]">Optimal window based on port congestion.</p>
+                <h3 className="text-lg font-semibold text-[#1A1D27] leading-tight mb-2">Distance<br/>Overview</h3>
+                <p className="text-xs text-[#5E6470]">Physical distance vs duration.</p>
               </div>
               <div className="mt-6">
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-[32px] font-bold text-[#1A1D27] leading-none">14:00</span>
-                  <span className="text-sm font-bold text-[#10B981]">Today</span>
+                  <span className="text-[32px] font-bold text-[#1A1D27] leading-none">
+                    {routeData ? `${routeData.distance_km.toFixed(1)}` : "--"}
+                  </span>
+                  <span className="text-sm font-bold text-[#10B981]">KM</span>
                 </div>
                 <div className="flex items-center border-l-2 border-[#10B981] pl-2 mt-2">
-                  <span className="text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest">SAVES 4HRS IDLE TIME</span>
+                  <span className="text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest">
+                    {routeData ? `~${routeData.estimated_duration_min.toFixed(0)} MINS` : "AWAITING ROUTE"}
+                  </span>
                 </div>
               </div>
             </Card>
@@ -110,25 +169,21 @@ export default function RouteRecommendationPage() {
                   <Leaf className="w-5 h-5" />
                 </div>
                 <div className="bg-[#10B981] text-white font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
-                  LEAFY_GREEN OPTIMAL
+                  {routeData?.emission_score || "UNKNOWN"}
                 </div>
               </div>
               
               <div>
-                <h3 className="text-[20px] font-semibold text-white mb-1">Impact</h3>
-                <p className="text-xs text-[#93C5FD]">CO2e reduction vs<br/>standard route.</p>
+                <h3 className="text-[20px] font-semibold text-white mb-1">Congestion</h3>
+                <p className="text-xs text-[#93C5FD]">Traffic multiplier applied to this route.</p>
               </div>
               
               <div className="mt-6 flex justify-between items-end">
                 <div>
-                  <span className="text-[36px] font-bold text-white leading-none block mb-1">-18%</span>
-                  <span className="text-[9px] font-bold text-white uppercase tracking-widest">3.2 TONS<br/>SAVED</span>
-                </div>
-                <div className="w-10 h-6">
-                   <svg viewBox="0 0 100 50" className="w-full h-full preserve-aspect-ratio-none overflow-visible">
-                     <path d="M0,40 L30,45 L60,20 L80,30 L100,10" className="stroke-white" strokeWidth="4" fill="transparent" strokeLinecap="round" strokeLinejoin="round" />
-                     <circle cx="100" cy="10" r="4" className="fill-white" />
-                   </svg>
+                  <span className="text-[36px] font-bold text-white leading-none block mb-1">
+                    {routeData ? `x${routeData.congestion_multiplier}` : "-"}
+                  </span>
+                  <span className="text-[9px] font-bold text-white uppercase tracking-widest">MULTIPLIER</span>
                 </div>
               </div>
             </Card>
@@ -140,50 +195,13 @@ export default function RouteRecommendationPage() {
           
           {/* Main Map Area */}
           <div className="flex-1 rounded-[16px] overflow-hidden relative shadow-sm border-[#E2E8F0] min-h-[400px] bg-white">
-            
-            {/* Map Image matching mockup */}
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1200&auto=format&fit=crop')] bg-cover bg-center opacity-30 grayscale hidden"></div>
-            {/* Real mockup map replacement */}
-            <div className="absolute inset-0 bg-[#E5E7EB] bg-[url('https://upload.wikimedia.org/wikipedia/commons/4/4b/San_Francisco_streets_map.png')] bg-cover bg-center mix-blend-multiply opacity-60"></div>
-
-            {/* Map Top Controls Overlay */}
-            <div className="absolute top-4 left-4 flex gap-2 z-10">
-              <div className="flex bg-white rounded-full shadow-sm border border-[#E2E8F0] p-1">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white font-semibold text-xs text-[#1A1D27] shadow-sm border border-[#E2E8F0]">
-                  <span className="w-2 h-2 rounded-full bg-[#2563EB]"></span> Recommended
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs text-[#5E6470]">
-                  <span className="w-2 h-2 rounded-full bg-[#94A3B8]"></span> Standard
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs text-[#5E6470] border-l border-[#E2E8F0] rounded-l-none">
-                  <Layers className="w-3.5 h-3.5" /> Traffic Layer
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3 bg-white rounded-full shadow-sm border border-[#E2E8F0] px-4 py-1.5">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">CONGESTION:</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
-                  <span className="text-[10px] font-bold text-[#5E6470] uppercase tracking-wider">LOW</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#EF4444]"></span>
-                  <span className="text-[10px] font-bold text-[#5E6470] uppercase tracking-wider">HIGH</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Tooltip on Map */}
-            <div className="absolute top-[35%] left-[50%] flex flex-col items-center z-10">
-              <div className="bg-[#1A1D27] text-white text-[10px] font-semibold px-3 py-2 rounded-md shadow-md relative">
-                760 Market Street, San Francisco, CA 94107
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1A1D27] transform rotate-45"></div>
-              </div>
-              <div className="mt-2 text-[#2563EB] drop-shadow-md">
-                <MapPin className="w-8 h-8 fill-[#2563EB] text-white" />
-              </div>
-            </div>
-
+            <MapView 
+              routeCoordinates={routeCoordinates}
+              originStr={origin}
+              destStr={destination}
+              originCoords={origin.split(',').length === 2 ? [parseFloat(origin.split(',')[0]), parseFloat(origin.split(',')[1])] : undefined}
+              destCoords={destination.split(',').length === 2 ? [parseFloat(destination.split(',')[0]), parseFloat(destination.split(',')[1])] : undefined}
+            />
           </div>
 
           {/* Bottom Summary Bar */}
@@ -191,27 +209,29 @@ export default function RouteRecommendationPage() {
             
             <div className="flex gap-12">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">TOTAL EST. TIME</span>
-                <span className="text-2xl font-bold text-[#1A1D27]">14d 6h</span>
+                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EST. DURATION</span>
+                <span className="text-2xl font-bold text-[#1A1D27]">
+                  {routeData ? `${routeData.estimated_duration_min.toFixed(0)} min` : "--"}
+                </span>
               </div>
               
               <div className="w-px h-10 bg-[#E2E8F0]"></div>
               
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">TOTAL COST</span>
-                <span className="text-2xl font-bold text-[#1A1D27]">$12,450</span>
+                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">DISTANCE</span>
+                <span className="text-2xl font-bold text-[#1A1D27]">
+                  {routeData ? `${routeData.distance_km.toFixed(1)} km` : "--"}
+                </span>
               </div>
               
               <div className="w-px h-10 bg-[#E2E8F0]"></div>
               
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">RELIABILITY SCORE</span>
+                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EMISSION RATING</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-[#10B981]">98%</span>
-                  {/* Small trend up icon */}
-                  <svg width="20" height="12" viewBox="0 0 20 12" className="stroke-[#10B981] overflow-visible">
-                    <path d="M0,10 L6,4 L10,8 L18,0 M14,0 L18,0 L18,4" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <span className={`text-2xl font-bold ${routeData?.emission_score === 'Low' ? 'text-[#10B981]' : routeData?.emission_score === 'Medium' ? 'text-amber-500' : 'text-red-500'}`}>
+                    {routeData ? routeData.emission_score : "--"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -219,7 +239,6 @@ export default function RouteRecommendationPage() {
             <Button className="rounded-lg px-8 h-12 font-semibold text-sm bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm">
               CONFIRM ROUTE
             </Button>
-
           </Card>
 
         </div>

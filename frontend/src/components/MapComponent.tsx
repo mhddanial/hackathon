@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -21,9 +21,31 @@ const originIcon = createCustomIcon("bg-primary");
 const destIcon = createCustomIcon("bg-primary-deep");
 
 const BATAM_CENTER: [number, number] = [1.1291, 104.0494];
-const BATU_AMPAR: [number, number] = [1.1633, 104.0044]; // Approximate coordinate
+const BATU_AMPAR: [number, number] = [1.1633, 104.0044];
 
-export default function MapComponent() {
+// Component to handle dynamic map bounds
+function BoundsUpdater({ coordinates }: { coordinates: [number, number][] | null }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (coordinates && coordinates.length > 0) {
+      const bounds = L.latLngBounds(coordinates);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [coordinates, map]);
+
+  return null;
+}
+
+export default function MapComponent({ 
+  routeCoordinates = null,
+  origin = BATAM_CENTER,
+  destination = BATU_AMPAR
+}: { 
+  routeCoordinates?: [number, number][] | null,
+  origin?: [number, number],
+  destination?: [number, number]
+}) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -34,40 +56,49 @@ export default function MapComponent() {
 
   return (
     <MapContainer
-      center={[1.1462, 104.0269]} // Center between origin and destination
+      center={[1.1462, 104.0269]}
       zoom={13}
       style={{ height: "100%", width: "100%" }}
       zoomControl={false}
       attributionControl={false}
     >
-      {/* Light, clean tile layer matching DESIGN.md's stark white canvas */}
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
 
-      <Marker position={BATAM_CENTER} icon={originIcon}>
+      <Marker position={origin} icon={originIcon}>
         <Tooltip direction="right" offset={[15, 0]} opacity={1} permanent>
-          Batam Warehouse
+          Origin
         </Tooltip>
       </Marker>
       
-      <Marker position={BATU_AMPAR} icon={destIcon}>
+      <Marker position={destination} icon={destIcon}>
         <Tooltip direction="right" offset={[15, 0]} opacity={1} permanent>
-          Batu Ampar Terminal
+          Destination
         </Tooltip>
       </Marker>
 
-      {/* Primary Route */}
-      <Polyline
-        positions={[BATAM_CENTER, [1.1400, 104.0300], [1.1550, 104.0150], BATU_AMPAR]}
-        pathOptions={{ color: "#0064e0", weight: 4, opacity: 0.8 }}
-      />
-      
-      {/* Alternative Route (e.g. heavier traffic) */}
-      <Polyline
-        positions={[BATAM_CENTER, [1.1350, 104.0200], [1.1480, 104.0080], BATU_AMPAR]}
-        pathOptions={{ color: "#f7b928", weight: 4, opacity: 0.5, dashArray: "10, 10" }}
-      />
+      {routeCoordinates && routeCoordinates.length > 0 ? (
+        <>
+          <Polyline
+            positions={routeCoordinates}
+            pathOptions={{ color: "#0064e0", weight: 5, opacity: 0.9 }}
+          />
+          <BoundsUpdater coordinates={routeCoordinates} />
+        </>
+      ) : (
+        <>
+          {/* Default Mock Routes if no data is provided */}
+          <Polyline
+            positions={[BATAM_CENTER, [1.1400, 104.0300], [1.1550, 104.0150], BATU_AMPAR]}
+            pathOptions={{ color: "#0064e0", weight: 4, opacity: 0.8 }}
+          />
+          <Polyline
+            positions={[BATAM_CENTER, [1.1350, 104.0200], [1.1480, 104.0080], BATU_AMPAR]}
+            pathOptions={{ color: "#f7b928", weight: 4, opacity: 0.5, dashArray: "10, 10" }}
+          />
+        </>
+      )}
     </MapContainer>
   );
 }

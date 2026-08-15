@@ -14,12 +14,28 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
   ),
 });
 
-export default function MapView() {
+export default function MapView({
+  routeCoordinates = null,
+  originStr = "Batam Central Hub",
+  destStr = "Batu Ampar Terminal",
+  originCoords,
+  destCoords
+}: {
+  routeCoordinates?: [number, number][] | null,
+  originStr?: string,
+  destStr?: string,
+  originCoords?: [number, number],
+  destCoords?: [number, number]
+}) {
   return (
     <div className="w-full h-full relative">
       {/* The Actual Leaflet Map */}
       <div className="absolute inset-0 z-0">
-        <MapComponent />
+        <MapComponent 
+          routeCoordinates={routeCoordinates} 
+          origin={originCoords}
+          destination={destCoords}
+        />
       </div>
       
       {/* Top Overlays */}
@@ -30,14 +46,14 @@ export default function MapView() {
           </div>
           <div>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Origin</p>
-            <p className="text-sm font-bold text-foreground">Batam Central Hub</p>
+            <p className="text-sm font-bold text-foreground">{originStr}</p>
           </div>
         </div>
         
         <div className="bg-white/95 backdrop-blur shadow-sm px-6 py-4 rounded-full flex items-center gap-4 pointer-events-auto border border-border">
           <div>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-right">Destination</p>
-            <p className="text-sm font-bold text-foreground text-right">Batu Ampar Terminal</p>
+            <p className="text-sm font-bold text-foreground text-right">{destStr}</p>
           </div>
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
             <Ship className="w-4 h-4" />
@@ -56,7 +72,7 @@ export default function MapView() {
            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
               <span className="text-muted-foreground">Preparing</span>
               <span className="text-primary">In Transit</span>
-              <span className="text-muted-foreground">Arriving <span className="text-primary">14:30</span></span>
+              <span className="text-muted-foreground">Arriving <span className="text-primary">Soon</span></span>
            </div>
         </div>
 
