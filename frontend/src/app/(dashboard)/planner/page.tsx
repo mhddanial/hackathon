@@ -336,7 +336,9 @@ export default function RouteRecommendationPage() {
               
               <div>
                 <h3 className="text-[20px] font-semibold text-white mb-1">Emissions Impact</h3>
-                <p className="text-xs text-[#93C5FD]">Calculated CO₂ based on distance and live traffic multiplier.</p>
+                <p className="text-[11px] text-[#93C5FD] leading-tight pr-4">
+                  Formula: {routeData ? `${routeData.distance_km.toFixed(1)}km` : "Distance"} × 0.2 kg/km × {routeData ? `x${routeData.congestion_multiplier}` : "Multiplier"}
+                </p>
               </div>
               
               <div className="mt-6 flex justify-between items-end">
@@ -345,12 +347,7 @@ export default function RouteRecommendationPage() {
                     {routeData ? `${routeData.emission_kg}` : "-"}
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-bold text-[#93C5FD] uppercase tracking-widest">KG CO₂</span>
-                    {routeData && (
-                      <span className="text-[9px] font-bold text-white uppercase tracking-widest opacity-60">
-                        • MULTIPLIER x{routeData.congestion_multiplier}
-                      </span>
-                    )}
+                    <span className="text-[9px] font-bold text-[#93C5FD] uppercase tracking-widest">KG CO₂ TOTAL</span>
                   </div>
                 </div>
               </div>
@@ -395,10 +392,10 @@ export default function RouteRecommendationPage() {
               <div className="w-px h-10 bg-[#E2E8F0]"></div>
               
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EMISSIONS</span>
+                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">CONGESTION</span>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-[#1A1D27]">
-                    {routeData ? `${routeData.emission_kg} kg` : "--"}
+                    {routeData ? `x${routeData.congestion_multiplier}` : "--"}
                   </span>
                   {routeData && (
                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
