@@ -60,3 +60,6 @@ yarn-error.log*
 !backend/rf_model.joblib
 *.pkl
 *.model
+
+.vercel
+.env*

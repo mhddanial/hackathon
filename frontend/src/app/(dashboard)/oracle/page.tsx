@@ -3,17 +3,22 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronLeft, Trash2, Paperclip, Send, BarChart2, Database, Bot, Sparkles, MessageSquare } from "lucide-react";
+import { Trash2, Paperclip, Send, BarChart2, Database, Bot, Sparkles, MessageSquare } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 type Message = {
+  id: string;
   role: "user" | "agent" | "status" | "error";
   content: string;
 };
 
+let messageSequence = 0;
+const createMessageId = () => `message-${Date.now()}-${messageSequence++}`;
+
 export default function OracleChatPage() {
   const initialMessage: Message = {
+    id: "oracle-greeting",
     role: "agent",
     content: "Good morning! I'm the Logistic Oracle. I can analyze congestion, check ferry schedules, or optimize routes. How can I assist you today?",
   };
@@ -22,6 +27,7 @@ export default function OracleChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -29,11 +35,23 @@ export default function OracleChatPage() {
     }
   }, [messages]);
 
+  useEffect(() => () => abortRef.current?.abort(), []);
+
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
     const userMsg = text.trim();
-    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const agentMessageId = createMessageId();
+    let receivedDone = false;
+
+    setMessages((prev) => [
+      ...prev,
+      { id: createMessageId(), role: "user", content: userMsg },
+      { id: agentMessageId, role: "agent", content: "" },
+    ]);
     setInput("");
     setLoading(true);
 
@@ -42,59 +60,78 @@ export default function OracleChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg }),
+        signal: controller.signal,
       });
 
+      if (!res.ok) throw new Error(`Oracle API returned ${res.status}`);
       if (!res.body) throw new Error("No response body");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
 
+      let buffer = "";
+      const processEvent = (event: string) => {
+        const dataText = event
+          .split("\n")
+          .filter((line) => line.startsWith("data: "))
+          .map((line) => line.substring(6))
+          .join("\n");
+        if (!dataText) return;
+
+        try {
+          const data = JSON.parse(dataText);
+          if (data.type === "status") {
+            setLoading(true);
+            setMessages((prev) => [...prev, { id: createMessageId(), role: "status", content: data.content }]);
+          } else if (data.type === "chunk") {
+            setLoading(false);
+            setMessages((prev) => prev.map((message) => (
+              message.id === agentMessageId
+                ? { ...message, content: message.content + data.content }
+                : message
+            )));
+          } else if (data.type === "error") {
+            setMessages((prev) => [...prev, { id: createMessageId(), role: "error", content: data.content }]);
+          } else if (data.type === "done") {
+            receivedDone = true;
+          }
+        } catch (eventError) {
+          console.error("Error parsing stream JSON", eventError);
+        }
+      };
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
 
-        const chunkText = decoder.decode(value, { stream: true });
-        const lines = chunkText.split("\n\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const data = JSON.parse(line.substring(6));
-
-              if (data.type === "status") {
-                setMessages((prev) => [...prev, { role: "status", content: data.content }]);
-              } else if (data.type === "chunk") {
-                setMessages((prev) => {
-                  const newMsgs = [...prev];
-                  const lastMsg = newMsgs[newMsgs.length - 1];
-                  
-                  if (lastMsg && lastMsg.role === "agent") {
-                    lastMsg.content += data.content;
-                  } else {
-                    newMsgs.push({ role: "agent", content: data.content });
-                  }
-                  return newMsgs;
-                });
-              } else if (data.type === "error") {
-                setMessages((prev) => [...prev, { role: "error", content: data.content }]);
-              } else if (data.type === "done") {
-                // finished
-              }
-            } catch (e) {
-              console.error("Error parsing stream JSON", e);
-            }
-          }
+        buffer += decoder.decode(value, { stream: true });
+        let delimiterIndex = buffer.indexOf("\n\n");
+        while (delimiterIndex !== -1) {
+          processEvent(buffer.slice(0, delimiterIndex));
+          buffer = buffer.slice(delimiterIndex + 2);
+          delimiterIndex = buffer.indexOf("\n\n");
         }
       }
+      buffer += decoder.decode();
+      if (buffer.trim()) processEvent(buffer);
+      if (!receivedDone) throw new Error("Oracle stream ended unexpectedly");
     } catch (error) {
-      console.error("Chat error", error);
-      setMessages((prev) => [...prev, { role: "error", content: "Error connecting to Oracle API." }]);
+      if ((error as DOMException).name !== "AbortError") {
+        console.error("Chat error", error);
+        setMessages((prev) => [...prev, { id: createMessageId(), role: "error", content: "Error connecting to Oracle API." }]);
+      }
     } finally {
-      setLoading(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        setLoading(false);
+      }
     }
   };
 
   const handleClear = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setLoading(false);
     setMessages([initialMessage]);
   };
 
@@ -120,10 +157,10 @@ export default function OracleChatPage() {
         
         {/* Chat Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-[#F8F9FB]/50">
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               {msg.role === "agent" ? (
-                <div className="flex gap-3 max-w-[80%]">
+                <div className={`flex gap-3 max-w-[80%] ${msg.content ? "" : "hidden"}`}>
                   <div className="w-8 h-8 rounded-full bg-[#2563EB] flex items-center justify-center shrink-0">
                     <Bot className="w-4 h-4 text-white" />
                   </div>

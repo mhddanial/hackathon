@@ -126,7 +126,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 - Loading state with spinner; polished empty state with Retry button
 
 ### 🤖 Logistic Oracle (AI Chat)
-- Powered by Google Gemini 2.5 Flash with function-calling
+- Powered by `google/gemini-3.5-flash` through Lightning AI's OpenAI-compatible API, with function-calling
 - 3 registered tools: `get_congestion_level`, `get_ferry_schedule`, `get_optimal_route`
 - Quick-action suggestion chips for common queries
 - Typing animation while AI is responding
@@ -171,7 +171,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 | Supabase Python SDK | 2.31.0 | PostgreSQL client |
 | scikit-learn | 1.9.0 | Random Forest ML model |
 | joblib | 1.5.3 | Model serialization |
-| google-generativeai | latest | Gemini 2.5 Flash + function-calling |
+| OpenAI Python SDK | latest | Lightning AI OpenAI-compatible API + function-calling |
 | Requests | latest | OSRM external API calls |
 | python-dotenv | latest | .env loading |
 
@@ -184,7 +184,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 | Frontend Deployment | Vercel | Auto-deploy from GitHub main |
 | Backend Deployment | Railway | Containerized FastAPI |
 | Routing Engine | OSRM Public API | Road routing GeoJSON |
-| AI Model | Google Gemini 2.5 Flash | NL logistics assistant |
+| AI Model | `google/gemini-3.5-flash` via Lightning AI | NL logistics assistant |
 
 ---
 
@@ -278,7 +278,7 @@ Send a natural language message to the AI logistics assistant.
 
 **Response:** `{ "reply": "Based on current data, Yos Sudarso (SEG001) is experiencing HIGH congestion..." }`
 
-**Gemini Tools:**
+**AI tools:**
 - `get_congestion_level(segment_id, day_type, hour)` → calls real ML API
 - `get_ferry_schedule(terminal)` → queries Supabase
 - `get_optimal_route(origin, destination)` → returns routing data
@@ -401,7 +401,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
 ```
 SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_ANON_KEY=<anon-key>
-GEMINI_API_KEY=<gemini-key>
+LIGHTNING_API_KEY=<lightning-api-key>
 ```
 
 ---
@@ -422,7 +422,7 @@ cd hackathon
 cd backend
 python -m venv .venv
 .venv\Scripts\activate
-pip install fastapi uvicorn supabase google-generativeai scikit-learn joblib python-dotenv requests
+pip install fastapi uvicorn supabase openai scikit-learn joblib python-dotenv requests
 cp .env.example .env    # Fill in your keys
 uvicorn main:app --reload
 # → http://127.0.0.1:8000  |  Swagger: /docs
@@ -445,7 +445,7 @@ npm run dev
 ```env
 SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_ANON_KEY=eyJ...
-GEMINI_API_KEY=AIza...
+LIGHTNING_API_KEY=<lightning-api-key>
 ```
 
 ### Frontend `.env.local`

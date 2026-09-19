@@ -1,5 +1,5 @@
 """
-Configuration and Prompt for the Gemini AI Agent
+Configuration and prompt for the OpenAI-compatible AI agent.
 """
 
 SYSTEM_PROMPT = """
@@ -18,61 +18,73 @@ IMPORTANT RULES:
 
 TOOL_SCHEMAS = [
     {
-        "name": "get_congestion_level",
-        "description": "Get the congestion level and time multiplier for a specific road segment at a specific hour.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "segment_id": {
-                    "type": "STRING",
-                    "description": "Road segment ID (e.g., 'yos-sudarso', 'sudirman')"
+        "type": "function",
+        "function": {
+            "name": "get_congestion_level",
+            "description": "Get the congestion level and time multiplier for a specific road segment at a specific hour.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "segment_id": {
+                        "type": "string",
+                        "description": "Road segment ID (e.g., 'yos-sudarso', 'sudirman')"
+                    },
+                    "hour": {
+                        "type": "integer",
+                        "description": "Departure hour in 24-hour format (0-23)"
+                    },
+                    "day_type": {
+                        "type": "string",
+                        "description": "Type of day: 'weekday' or 'weekend'"
+                    }
                 },
-                "hour": {
-                    "type": "INTEGER",
-                    "description": "Departure hour in 24-hour format (0-23)"
-                },
-                "day_type": {
-                    "type": "STRING",
-                    "description": "Type of day: 'weekday' or 'weekend'"
-                }
+                "required": ["segment_id", "hour", "day_type"],
+                "additionalProperties": False,
             },
-            "required": ["segment_id", "hour", "day_type"]
         }
     },
     {
-        "name": "get_optimal_route",
-        "description": "Get the best route from an origin to a destination along with the estimated duration and emission score.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "origin": {
-                    "type": "STRING",
-                    "description": "Origin point coordinates strictly as 'latitude, longitude' (e.g., '1.129, 104.049')"
+        "type": "function",
+        "function": {
+            "name": "get_optimal_route",
+            "description": "Get the best route from an origin to a destination along with the estimated duration and emission score.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "origin": {
+                        "type": "string",
+                        "description": "Origin point coordinates strictly as 'latitude, longitude' (e.g., '1.129, 104.049')"
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Destination point coordinates strictly as 'latitude, longitude' (e.g., '1.163, 104.004')"
+                    },
+                    "time": {
+                        "type": "string",
+                        "description": "Optional departure time in 24-hour format (e.g., '08:00', '17:30')"
+                    }
                 },
-                "destination": {
-                    "type": "STRING",
-                    "description": "Destination point coordinates strictly as 'latitude, longitude' (e.g., '1.163, 104.004')"
-                },
-                "time": {
-                    "type": "STRING",
-                    "description": "Optional departure time in 24-hour format (e.g., '08:00', '17:30')"
-                }
+                "required": ["origin", "destination"],
+                "additionalProperties": False,
             },
-            "required": ["origin", "destination"]
         }
     },
     {
-        "name": "get_ferry_schedule",
-        "description": "Get the ferry departure schedule from a specific port terminal.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "terminal": {
-                    "type": "STRING",
-                    "description": "Port terminal name (e.g., 'Batam Center', 'Sekupang', 'Batu Ampar')"
-                }
+        "type": "function",
+        "function": {
+            "name": "get_ferry_schedule",
+            "description": "Get the ferry departure schedule from a specific port terminal.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "terminal": {
+                        "type": "string",
+                        "description": "Port terminal name (e.g., 'Batam Center', 'Sekupang', 'Batu Ampar')"
+                    }
+                },
+                "required": ["terminal"],
+                "additionalProperties": False,
             },
-            "required": ["terminal"]
         }
     }
 ]
