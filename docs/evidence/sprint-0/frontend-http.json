@@ -1,0 +1,16 @@
+{
+  "/": {
+    "http_status": 200
+  },
+  "/login": {
+    "http_status": 200
+  },
+  "/oracle": {
+    "http_status": 307,
+    "redirect_path": "/login"
+  },
+  "/dashboard": {
+    "http_status": 307,
+    "redirect_path": "/login"
+  }
+}

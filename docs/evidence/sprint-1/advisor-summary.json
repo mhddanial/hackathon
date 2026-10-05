@@ -1,0 +1,27 @@
+{
+  "command": "supabase db advisors --linked --type all --output-format json",
+  "new_oracle_findings": [],
+  "existing_errors": [
+    {
+      "name": "rls_disabled_in_public",
+      "tables": [
+        "road_segments",
+        "congestion_multipliers",
+        "ferry_schedules",
+        "route_query_log"
+      ]
+    }
+  ],
+  "existing_warnings": [
+    {
+      "name": "auth_leaked_password_protection",
+      "count": 1
+    },
+    {
+      "name": "auth_rls_initplan",
+      "table": "profiles",
+      "count": 3
+    }
+  ],
+  "scope": "Pre-existing issues recorded; no unrelated policy or Auth setting changes"
+}

@@ -1,0 +1,10 @@
+{
+  "command": "python -m pytest backend/tests -q --junitxml docs/evidence/sprint-1/tests.xml",
+  "tests": 59,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "duration_seconds": 4.337,
+  "sql_environment": "isolated loopback PostgreSQL 18; minimal Auth claim stub",
+  "auth_environment": "real Supabase SDK; mocked HTTP transport"
+}

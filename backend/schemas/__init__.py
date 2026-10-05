@@ -1,0 +1,1 @@
+"""Shared validated API contracts."""

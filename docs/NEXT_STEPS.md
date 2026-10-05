@@ -69,7 +69,7 @@ PIC: **Builder A & B**
 
 1. Hustler selesaikan gap data (poin 1) — ini blocker untuk semua yang lain
 2. Builder A perbaiki notebook (poin 2) sambil menunggu data lengkap, bisa test dulu pakai data placeholder
-3. Tim putuskan soal Auth (poin 5) — kalau ditambah, alokasikan waktu eksplisit di TASK.md; kalau tidak, hapus dari draft PRD/TECH yang beredar supaya tidak ada dokumen yang saling kontradiksi
+3. Tim putuskan soal Auth (poin 5) — kalau ditambah, alokasikan waktu eksplisit di TASK.md; kalau tidak, hapus dari draft PRD/TECH yang beredar supaya tidak ada dokumen yang saling kontradiks
 4. Test OSRM public server (poin 4) dari laptop masing-masing builder
 5. Setelah semua di atas beres, baru mulai simulasi dry-run alur end-to-end (form → congestion → route → emisi) dengan data dummy, sebelum hari-H beneran dimulai
 

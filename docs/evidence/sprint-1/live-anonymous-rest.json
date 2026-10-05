@@ -1,0 +1,12 @@
+{
+  "conversations": {
+    "http_status": 401,
+    "anonymous_denied": true,
+    "database_error_code": "42501"
+  },
+  "chat_messages": {
+    "http_status": 401,
+    "anonymous_denied": true,
+    "database_error_code": "42501"
+  }
+}

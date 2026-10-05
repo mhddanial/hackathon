@@ -1,0 +1,228 @@
+{
+  "columns": [
+    {
+      "column_default": "uuid_generate_v4()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "origin",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "destination",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "requested_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 4,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "recommended_departure",
+      "data_type": "time without time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 5,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "result_json",
+      "data_type": "jsonb",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "route_query_log"
+    }
+  ],
+  "constraints": [
+    {
+      "constraint_name": "route_query_log_pkey",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "route_query_log"
+    }
+  ],
+  "grants": [
+    {
+      "grantee": "anon",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can insert own profile",
+      "qual": null,
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": "(auth.uid() = id)"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can update own profile",
+      "qual": "(auth.uid() = id)",
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can view own profile",
+      "qual": "(auth.uid() = id)",
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": null
+    }
+  ],
+  "tables": [
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": false,
+      "table_name": "profiles"
+    },
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "road_segments"
+    },
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "route_query_log"
+    }
+  ]
+}
