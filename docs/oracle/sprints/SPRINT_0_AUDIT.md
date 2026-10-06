@@ -1,5 +1,8 @@
 # Sprint 0 — Oracle audit and baseline
 
+Historical audit snapshot. See the [current context](../context/CURRENT_STATE.md)
+for findings resolved by later sprints.
+
 Date: 5 October 2026 (Asia/Jakarta). Branch: `danial`.
 Audited application commit: `b7d733021e62cfce671473c8c08284c99143b9c2`.
 
@@ -79,10 +82,10 @@ Actual PostgreSQL RLS flags, policy expressions, grants, ownership constraints, 
 
 - `backend/scripts/audit_oracle_baseline.py` — rerunnable read-only Python audit with sanitized JSON output and bounded HTTP timeouts.
 - `backend/database/audit_oracle_schema.sql` — read-only catalog/RLS/grant/index inspection for authorized SQL access.
-- `docs/evidence/sprint-0/baseline.json` — configuration presence, live dependency probes, backend wiring, and model load evidence.
-- `docs/evidence/sprint-0/frontend-http.json` — local production-server HTTP checks.
-- `docs/SPRINT_0_AUDIT.md` — results, limitations, and Sprint 1 entry requirements.
-- `docs/ORACLE_IMPLEMENTATION_SPRINTS.md` — original backlog updated with the Sprint 0 execution status.
+- `docs/oracle/evidence/sprint-0/baseline.json` — configuration presence, live dependency probes, backend wiring, and model load evidence.
+- `docs/oracle/evidence/sprint-0/frontend-http.json` — local production-server HTTP checks.
+- `docs/oracle/sprints/SPRINT_0_AUDIT.md` — results, limitations, and Sprint 1 entry requirements.
+- `docs/oracle/planning/ORACLE_IMPLEMENTATION_SPRINTS.md` — original backlog updated with the Sprint 0 execution status.
 
 ## Commands and reproduction
 
@@ -91,7 +94,7 @@ From the repository root:
 ```powershell
 git branch --show-current
 git status --short
-& .\backend\.venv\Scripts\python.exe .\backend\scripts\audit_oracle_baseline.py --output .\docs\evidence\sprint-0\baseline.json
+& .\backend\.venv\Scripts\python.exe .\backend\scripts\audit_oracle_baseline.py --output .\docs\oracle\evidence\sprint-0\baseline.json
 & .\backend\.venv\Scripts\python.exe -m pytest backend --collect-only -q
 ```
 

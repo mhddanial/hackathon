@@ -77,11 +77,11 @@
 
 | Deliverable | Status | Detail |
 |---|---|---|
-| Supabase schema v2 | ✅ Done | [`database/schema.sql`](../backend/database/schema.sql) — 4 tabel, FK, index |
-| Data cleaning & import script | ✅ Done | [`scripts/prepare_data.py`](../backend/scripts/prepare_data.py) — idempotent, validasi coverage |
+| Supabase schema v2 | ✅ Done | [`database/schema.sql`](../../backend/database/schema.sql) — 4 tabel, FK, index |
+| Data cleaning & import script | ✅ Done | [`scripts/prepare_data.py`](../../backend/scripts/prepare_data.py) — idempotent, validasi coverage |
 | Data import ke Supabase | ✅ Done | 6 segments · 25 multipliers · 20 ferry schedules |
 | English descriptions | ✅ Done | Semua 25 baris `congestion_multipliers.description` → English |
-| Methodology notes | ✅ Done | [`docs/methodology_notes.md`](./methodology_notes.md) |
+| Methodology notes | ✅ Done | [`docs/hackathon/methodology_notes.md`](./methodology_notes.md) |
 | Model training | ✅ Done | `rf_model.joblib` 310 KB, accuracy 95.1% |
 | Model evaluation | ✅ Done | Classification report, multiplier map, sanity check 3/4 pass |
 

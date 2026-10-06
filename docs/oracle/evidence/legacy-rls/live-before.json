@@ -1,0 +1,1033 @@
+{
+  "columns": [
+    {
+      "column_default": "uuid_generate_v4()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "segment_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "day_type",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "hour_window",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 4,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "hour_start",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "hour_end",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "ordinal_position": 6,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "multiplier",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "ordinal_position": 7,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "congestion_level",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 8,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": null,
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 10,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "column_default": "uuid_generate_v4()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "terminal_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "terminal",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "terminal_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 4,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "destination",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "vessel_type",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "departure_time",
+      "data_type": "time without time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 7,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "cutoff_time",
+      "data_type": "time without time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 8,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": null,
+      "column_name": "cargo_capacity_tons",
+      "data_type": "double precision",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 10,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "column_default": "uuid_generate_v4()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "segment_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "corridor_type",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "origin_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 5,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "destination_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "start_lat",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "ordinal_position": 7,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "start_lng",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "ordinal_position": 8,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "end_lat",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "ordinal_position": 9,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "end_lng",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "ordinal_position": 10,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "length_km",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "ordinal_position": 11,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": null,
+      "column_name": "typical_speed_kmh",
+      "data_type": "double precision",
+      "is_nullable": "NO",
+      "ordinal_position": 12,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 13,
+      "table_name": "road_segments"
+    },
+    {
+      "column_default": "uuid_generate_v4()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "origin",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "destination",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "requested_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 4,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "recommended_departure",
+      "data_type": "time without time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 5,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "result_json",
+      "data_type": "jsonb",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "route_query_log"
+    }
+  ],
+  "counts": {
+    "congestion_multipliers": 25,
+    "ferry_schedules": 20,
+    "road_segments": 6,
+    "route_query_log": 0
+  },
+  "grants": [
+    {
+      "grantee": "anon",
+      "privilege_type": "DELETE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "INSERT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "REFERENCES",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "SELECT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRIGGER",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRUNCATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "UPDATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "DELETE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "INSERT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "REFERENCES",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRIGGER",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRUNCATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "UPDATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "DELETE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "INSERT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "REFERENCES",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "SELECT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRIGGER",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRUNCATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "UPDATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "DELETE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "INSERT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "REFERENCES",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "SELECT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRIGGER",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRUNCATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "UPDATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "DELETE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "INSERT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "REFERENCES",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRIGGER",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRUNCATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "UPDATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "DELETE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "INSERT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "REFERENCES",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "SELECT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRIGGER",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRUNCATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "UPDATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "ferry_schedules"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "DELETE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "INSERT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "REFERENCES",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "SELECT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRIGGER",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRUNCATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "UPDATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "DELETE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "INSERT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "REFERENCES",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRIGGER",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRUNCATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "UPDATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "DELETE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "INSERT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "REFERENCES",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "SELECT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRIGGER",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRUNCATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "UPDATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "road_segments"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "anon",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "postgres",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "DELETE",
+      "policyname": "oracle_messages_delete",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "policyname": "oracle_messages_insert",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM conversations c\n  WHERE ((c.id = chat_messages.conversation_id) AND (c.user_id = ( SELECT auth.uid() AS uid)) AND (c.archived_at IS NULL)))))"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "oracle_messages_select",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "policyname": "oracle_messages_update",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM conversations c\n  WHERE ((c.id = chat_messages.conversation_id) AND (c.user_id = ( SELECT auth.uid() AS uid)) AND (c.archived_at IS NULL)))))"
+    },
+    {
+      "cmd": "DELETE",
+      "policyname": "oracle_conversations_delete",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "policyname": "oracle_conversations_insert",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "oracle_conversations_select",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "policyname": "oracle_conversations_update",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "INSERT",
+      "policyname": "Users can insert own profile",
+      "qual": null,
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": "(auth.uid() = id)"
+    },
+    {
+      "cmd": "UPDATE",
+      "policyname": "Users can update own profile",
+      "qual": "(auth.uid() = id)",
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "Users can view own profile",
+      "qual": "(auth.uid() = id)",
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": null
+    }
+  ],
+  "tables": [
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "chat_messages"
+    },
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "conversations"
+    },
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": false,
+      "table_name": "profiles"
+    },
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "road_segments"
+    },
+    {
+      "rls_enabled": false,
+      "rls_forced": false,
+      "table_name": "route_query_log"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "checks": [
+    {
+      "table": "road_segments",
+      "method": "GET",
+      "http_status": 200,
+      "database_error_code": null,
+      "passed": true
+    },
+    {
+      "table": "road_segments",
+      "method": "POST",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "road_segments",
+      "method": "PATCH",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "road_segments",
+      "method": "DELETE",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "congestion_multipliers",
+      "method": "GET",
+      "http_status": 200,
+      "database_error_code": null,
+      "passed": true
+    },
+    {
+      "table": "congestion_multipliers",
+      "method": "POST",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "congestion_multipliers",
+      "method": "PATCH",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "congestion_multipliers",
+      "method": "DELETE",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "ferry_schedules",
+      "method": "GET",
+      "http_status": 200,
+      "database_error_code": null,
+      "passed": true
+    },
+    {
+      "table": "ferry_schedules",
+      "method": "POST",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "ferry_schedules",
+      "method": "PATCH",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "ferry_schedules",
+      "method": "DELETE",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "route_query_log",
+      "method": "GET",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "route_query_log",
+      "method": "POST",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "route_query_log",
+      "method": "PATCH",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    },
+    {
+      "table": "route_query_log",
+      "method": "DELETE",
+      "http_status": 401,
+      "database_error_code": "42501",
+      "passed": true
+    }
+  ],
+  "passed": 16,
+  "scope": "Live anonymous REST reads/writes; no persistent rows or credentials retained"
+}

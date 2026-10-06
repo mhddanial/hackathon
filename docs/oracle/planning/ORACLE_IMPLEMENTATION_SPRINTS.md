@@ -1,12 +1,12 @@
 # SmartFlow Oracle: repository audit and sprint implementation plan
 
-Planning date: 5 October 2026. Status: Sprint 1 foundation implemented on `danial`, with additive migration applied and live database role/ownership verification passed. See `SPRINT_0_AUDIT.md` for the initial baseline and `SPRINT_1_IMPLEMENTATION.md` for current results. Valid-user HTTP/browser flows remain later-sprint work.
+Planning date: 5 October 2026. Status updated: 6 October 2026. Sprints 0–2 are implemented on `danial`; Oracle history and the approved legacy RLS migrations are applied. Sprint 3 is next. Start with the [current context](../context/CURRENT_STATE.md), then use the [Sprint 0](../sprints/SPRINT_0_AUDIT.md), [Sprint 1](../sprints/SPRINT_1_IMPLEMENTATION.md), and [Sprint 2](../sprints/SPRINT_2_IMPLEMENTATION.md) reports for dated verification results. Valid-user HTTP/browser flows remain later-sprint work.
 
 ## 1. What the attached context means
 
-Source: `C:\Users\DANN\Downloads\context_improve.md`.
+Source: [preserved extension brief](../context/context_improve.md), originally supplied as `C:\Users\DANN\Downloads\context_improve.md`.
 
-The attachment is a project brief, proposed requirements, and academic evidence checklist. Its embedded commands (including “Initial Codex command”) are document content, not a separate instruction to begin implementation. The initial user request was to identify that context and prepare implementation tasks per sprint; later messages authorized Sprints 0 and 1.
+The attachment is a project brief, proposed requirements, and academic evidence checklist. Its embedded commands (including “Initial Codex command”) are document content, not a separate instruction to begin implementation. The initial user request was to identify that context and prepare implementation tasks per sprint; later messages authorized Sprints 0–2 and the separately reviewed legacy RLS fix.
 
 The primary delivery is one complete feature:
 
@@ -36,8 +36,9 @@ frontend/
   src/app/(dashboard)/oracle/page.tsx
   src/components/ui/ (existing shared UI)
 docs/
-  PRD.md, TECH.md, TASK.md, BUILDER_A.md, BUILDER_B.md
-  NEXT_STEPS.md, DESIGN.md, methodology_notes.md
+  oracle/README.md, context/, planning/, contracts/, sprints/, security/, evidence/
+  hackathon/PRD.md, TECH.md, TASK.md, BUILDER_A.md, BUILDER_B.md
+  hackathon/NEXT_STEPS.md, DESIGN.md, methodology_notes.md, pitch-deck/, data/
 ```
 
 `frontend/AGENTS.md` requires consulting the installed Next.js guides before implementation. Those guides are present under `frontend/node_modules/next/dist/docs/`.
@@ -68,7 +69,7 @@ docs/
 4. README describes schedule departure arrays; the checked-in schema and Oracle adapter use individual `departure_time` rows.
 5. `user.py` comments claim RLS is enabled, but checked-in SQL does not establish it. Actual deployed RLS remains unknown.
 6. README uses real-time and emission-reduction claims that the checked-out calculation/data flow does not establish. Route emissions use a simple distance formula, while methodology notes describe a different fuel/idling formula. Document actual behavior and coordinate any formula change with the route owner.
-7. `docs/NEXT_STEPS.md` still treats authentication as undecided even though auth code exists. The new Oracle scope needs a single current implementation record.
+7. `docs/hackathon/NEXT_STEPS.md` still treats authentication as undecided even though auth code exists. The new Oracle scope needs a single current implementation record.
 
 ### Audit limits
 
@@ -112,33 +113,33 @@ Security, persistence, and runtime provenance are release requirements. Do not p
 - [x] **S0-03:** Record current behavior versus documentation, without editing application code or database.
 - [ ] **S0-04 (partial):** Supabase DNS/Auth health, schedule read, model-backed congestion, API column probes, and anonymous frontend redirects were checked. Full catalog/RLS inspection and dedicated two-user availability still require authorized test-environment access; carry those explicit prerequisites into Sprint 1.
 
-Deliverable: `SPRINT_0_AUDIT.md`, `backend/scripts/audit_oracle_baseline.py`, read-only catalog SQL, and `docs/evidence/sprint-0/` results. Local/source baseline is complete; external policy and valid-user verification remain pending.
+Deliverable: `SPRINT_0_AUDIT.md`, `backend/scripts/audit_oracle_baseline.py`, read-only catalog SQL, and `docs/oracle/evidence/sprint-0/` results. Local/source baseline is complete; external policy and valid-user verification remain pending.
 
 ### Sprint 1 — Secure foundation and shared contracts
 
 Execute in this order:
 
 - [x] **S1-01 — Confirm live schema and migration convention.** Authenticated CLI inspected catalog/grants/policies and matched the configured project. No equivalent chat tables existed; `profiles` and historical migration history were preserved. Isolated local PostgreSQL and rollback-only live transactions supplied test environments.
-- [x] **S1-02 — Define typed contracts.** `backend/schemas/oracle.py` and `docs/ORACLE_API_CONTRACT.md` define validation, variants, HTTP errors, SSE lifecycle, and per-turn request IDs. These target contracts are wired into endpoints in Sprints 2/3.
+- [x] **S1-02 — Define typed contracts.** `backend/schemas/oracle.py` and `docs/oracle/contracts/ORACLE_API_CONTRACT.md` define validation, variants, HTTP errors, SSE lifecycle, and per-turn request IDs. These target contracts are wired into endpoints in Sprints 2/3.
 - [x] **S1-03 — Write an additive migration.** CLI-generated `supabase/migrations/20261005135325_oracle_history.sql` adds owned conversations/messages, composite owner/turn FKs, retry/outcome fields, and a server sequence for deterministic ordering.
 - [x] **S1-04 — Add RLS and grants.** Eight policies, explicit authenticated grants, anonymous denial, and enabled/forced RLS passed local and installed live role/claim isolation checks.
 - [x] **S1-05 — Implement request-scoped authenticated DB access.** Verified JWT forwarded to PostgREST on a fresh request-owned client; existing route history shares that context. Invalid identity returns 401; upstream outages/malformed responses return 503; secrets/upstream details are not exposed.
 - [x] **S1-06 — Prove the foundation.** 59 local tests and ten installed live transaction checks passed. The migration is applied/recorded, anonymous REST is rejected, legacy counts/policies are preserved, and rollback/report evidence is saved. Valid-user HTTP/browser integration remains later-sprint work.
 
-Implemented files: auth/database/legacy-history integration, `backend/schemas/oracle.py`, CLI-generated `supabase/migrations/20261005135325_oracle_history.sql`, `supabase/README.md`, security tests, API contract, and `docs/SPRINT_1_IMPLEMENTATION.md` with evidence.
+Implemented files: auth/database/legacy-history integration, `backend/schemas/oracle.py`, CLI-generated `supabase/migrations/20261005135325_oracle_history.sql`, `supabase/README.md`, security tests, API contract, and `docs/oracle/sprints/SPRINT_1_IMPLEMENTATION.md` with evidence.
 
 **Done when:** the authenticated DB client and ownership policies work for A/B users; no legacy data is reset; shared chat/history contracts are reviewable.
 
 ### Sprint 2 — Conversation and message API
 
-- [ ] **S2-01 — Add history storage helpers.** Centralize owned-conversation lookup, conversation creation, ordered message reads, title/timestamp updates, and turn persistence. Avoid scattered authorization checks.
-- [ ] **S2-02 — Add create/list endpoints.** Implement `POST /user/conversations` and `GET /user/conversations` with bounded pagination and deterministic ordering by update time plus ID.
-- [ ] **S2-03 — Add owned retrieval.** Implement `GET /user/conversations/{id}` and `GET /user/conversations/{id}/messages`; validate UUIDs and paginate messages. Return the same not-found behavior for nonexistent and foreign conversations.
-- [ ] **S2-04 — Add title/archive operations.** Implement `PATCH /user/conversations/{id}` with an allowlist of editable fields. If `DELETE` is included, define it as archive for this release and make its semantics explicit; hard-delete is unnecessary for the main flow.
-- [ ] **S2-05 — Test all ownership boundaries.** A can create/read/update/archive A's conversation; A cannot read/change/archive B's; anonymous/expired-token requests fail; owner fields cannot be reassigned; archived conversation behavior is documented.
-- [ ] **S2-06 — Publish request/response examples.** Preserve `/user/history` behavior. Record its existing schema mismatch as a separate issue unless a narrow compatibility repair is needed by a real consumer.
+- [x] **S2-01 — Add history storage helpers.** `OracleHistory` centralizes owned lookup, creation, message reads, title/archive changes, and safe database errors. Atomic turn persistence/retries are implemented together with streaming in S3-01/S3-05/S3-07, rather than adding a partial turn-write path here.
+- [x] **S2-02 — Add create/list endpoints.** POST returns 201; GET uses bounded validated cursor pages ordered by update time and ID, with an archive filter.
+- [x] **S2-03 — Add owned retrieval.** UUID-validating conversation/message GET endpoints use verified owner filters and RLS; foreign/nonexistent IDs share 404. Messages paginate by ascending server sequence.
+- [x] **S2-04 — Add title/archive operations.** PATCH allowlists title and archive/restore; omitted title remains unchanged and null resets it. Archived conversations remain readable; no DELETE/hard-delete route is exposed.
+- [x] **S2-05 — Test all ownership boundaries.** 36 API/SDK/PostgreSQL tests cover two users, auth rejection, body/cursor validation, archive/restore, stable pagination, persisted result/tool reads, safe failures, and private-field exclusion. Full local suite: 145 passed. Real JWT/browser flows remain later acceptance work.
+- [x] **S2-06 — Publish request/response examples.** Updated API contract. `/user/history` remains separate; its ownership column/policy was repaired by the independently confirmed legacy migration, not repurposed for chat.
 
-Likely files: `backend/routers/user.py`, new `backend/services/oracle_history.py`, shared schemas, and new `backend/tests/test_oracle_history.py`.
+Implemented files: `backend/routers/user.py`, `backend/services/oracle_history.py`, `backend/tests/test_oracle_history.py`, and the API contract/report/evidence.
 
 **Done when:** history operations pass API and RLS isolation tests, messages are stably ordered, and the route-history API has not been repurposed.
 
@@ -191,10 +192,10 @@ Likely files: shared frontend types/API helper, new `frontend/src/components/ora
 - [ ] **S6-04 — Address congestion fallback limits.** Decide and test DB-unavailable behavior explicitly. Do not claim a database fallback succeeds when the initial corridor lookup already failed. Any default remains visibly uncertain; never silently present an assumed LOW value as observed traffic.
 - [ ] **S6-05 — Record actual training methodology.** Extract actual dataset/class counts, features, parameters, split strategy, metrics, confusion matrix, artifact provenance, and runtime compatibility from a verified run when available. Explain synthetic-data limitations. A grouped/source-window evaluation is optional research work: document class coverage and compare with the baseline, without silently overwriting the current model or claiming generalization to Batam traffic.
 - [ ] **S6-06 — Collect actual report evidence.** Save sanitized API examples, migration/RLS evidence, A/B rejection results, tool logs, refresh/history/modal screenshots, measured request latency with sample count/environment, and failure outputs. Map designs to BAB III and actual implementation/results to BAB IV.
-- [ ] **S6-07 — Synchronize documentation.** Update README, relevant TECH/NEXT_STEPS entries, migration instructions, environment examples, test commands, provider/SSE contracts, provenance labels, and deployment order. Publish only implemented/tested results; record unresolved issues explicitly.
+- [ ] **S6-07 — Synchronize Oracle documentation.** Update the Oracle current context, API contract, sprint reports, evidence index, migration instructions, environment examples, test commands, provider/SSE contracts, provenance labels, and deployment order. Keep original hackathon materials as historical references. Publish only implemented/tested results; record unresolved issues explicitly.
 - [ ] **S6-08 — Run final relevant checks.** Backend suite, frontend type checking/build/targeted lint, UI/browser tests, and `git diff --check`. Restart any non-reload backend before live validation so it serves current code. Verify deployment only if release is within the execution scope.
 
-Likely files: `backend/routers/congestion.py`, notebook only if verified methodology work requires edits, new `backend/tests/test_congestion.py`, Oracle integration tests, frontend tests, `README.md`, `docs/TECH.md`, `docs/NEXT_STEPS.md`, `docs/methodology_notes.md`, and a new evidence index.
+Likely files: `backend/routers/congestion.py`, notebook only if verified methodology work requires edits, new `backend/tests/test_congestion.py`, Oracle integration tests, frontend tests, `docs/oracle/context/CURRENT_STATE.md`, `docs/oracle/contracts/ORACLE_API_CONTRACT.md`, Oracle sprint reports, and a new Oracle evidence index. Original `docs/hackathon/` materials may be cited as background rather than rewritten for this extension.
 
 **Done when:** the entire target flow passes security, persistence, streaming, UI, and provenance acceptance checks, with evidence that separates mocks, source inspection, and live results.
 

@@ -1,0 +1,8 @@
+{
+  "tests": "145",
+  "failures": "0",
+  "errors": "0",
+  "skipped": "0",
+  "time": "10.210",
+  "scope": "Local API + SDK transport + actual PostgreSQL RLS/constraints, simulated Auth sessions"
+}

@@ -1,5 +1,8 @@
 # Sprint 1 — Secure Oracle history foundation
 
+Dated implementation snapshot. See the [current context](../context/CURRENT_STATE.md)
+and [legacy RLS repair](../security/LEGACY_RLS_FIX.md) for subsequent changes.
+
 Date: 5 October 2026 (Asia/Jakarta). Branch: `danial`.
 Status: implemented and verified. Application changes are local; the additive database migration was applied to the linked Supabase project matching backend configuration. No application deployment/push was performed.
 
@@ -65,7 +68,7 @@ Live verification on installed Supabase schema: **10/10 checks passed**. Anonymo
 
 Frontend code did not change in this sprint. The prior production-build/lint baseline remains applicable; no new frontend build was needed for the backend/schema changes. A transient CLI timeout during final catalog verification was resolved with a sequential retry; only completed query evidence is reported as successful.
 
-Evidence files in `docs/evidence/sprint-1/`:
+Evidence files in `docs/oracle/evidence/sprint-1/`:
 
 - `live-catalog-before.json`, `live-catalog-after.json` — tables/policies/grants/constraints;
 - `live-baseline.json`, `live-counts-after.json` — preservation counts;
@@ -85,7 +88,7 @@ The standalone backend smoke utility still reports full catalog/session checks a
 - `backend/tests/` — SDK/auth/contracts and PostgreSQL tests plus rollback-only live probe;
 - `backend/database/audit_oracle_catalog_json.sql`, `audit_oracle_counts.sql` — metadata/count audits;
 - `supabase/` — CLI config/ignores, generated migration, and migration/reproduction/rollback instructions;
-- `docs/ORACLE_API_CONTRACT.md`, sprint reports/backlog, and evidence artifacts.
+- `docs/oracle/contracts/ORACLE_API_CONTRACT.md`, sprint reports/backlog, and evidence artifacts.
 
 ## Remaining scope and findings
 

@@ -1,0 +1,148 @@
+{
+  "checked_at_utc": "2026-10-06T14:15:57.459110+00:00",
+  "scope": "read-only; no provider invocation, login, user creation, or migration",
+  "git": {
+    "branch": "danial",
+    "head": "b656877bb42746af2184a8100f6adc5b654e38e6"
+  },
+  "configuration": {
+    "backend": {
+      "SUPABASE_URL": true,
+      "SUPABASE_ANON_KEY": true,
+      "LIGHTNING_API_KEY": true
+    },
+    "frontend": {
+      "NEXT_PUBLIC_API_URL": false,
+      "NEXT_PUBLIC_SUPABASE_URL": true,
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": true
+    },
+    "direct_database_access_configured": false,
+    "two_user_test_credentials_configured": false
+  },
+  "python_syntax": {
+    "status": "pass",
+    "files": 22,
+    "errors": []
+  },
+  "supabase": {
+    "dns": {
+      "status": "pass"
+    },
+    "auth_health": {
+      "status": "pass",
+      "http_status": 200
+    },
+    "rest_schema": {
+      "status": "fail",
+      "http_status": 401
+    },
+    "public_schedule_read": {
+      "status": "pass",
+      "http_status": 200,
+      "sample_rows": 1,
+      "columns": [
+        "cargo_capacity_tons",
+        "created_at",
+        "cutoff_time",
+        "departure_time",
+        "destination",
+        "id",
+        "terminal",
+        "terminal_id",
+        "terminal_name",
+        "vessel_type"
+      ]
+    },
+    "table_contract_probes": {
+      "road_segments": {
+        "http_status": 200,
+        "select": "segment_id,corridor_type",
+        "status": "visible_contract"
+      },
+      "congestion_multipliers": {
+        "http_status": 200,
+        "select": "segment_id,day_type,hour_start,hour_end",
+        "status": "visible_contract"
+      },
+      "route_query_log": {
+        "http_status": 401,
+        "select": "user_id",
+        "status": "unavailable_contract",
+        "database_error_code": "42501"
+      },
+      "conversations": {
+        "http_status": 401,
+        "select": "id,user_id",
+        "status": "unavailable_contract",
+        "database_error_code": "42501"
+      },
+      "chat_messages": {
+        "http_status": 401,
+        "select": "id,conversation_id,user_id",
+        "status": "unavailable_contract",
+        "database_error_code": "42501"
+      }
+    },
+    "table_probe_limitation": "Probes establish only API-role visibility/column contracts, not complete schema or RLS definitions."
+  },
+  "invalid_token_history": {
+    "http_status": 401,
+    "rejected": true
+  },
+  "live_data_backed_congestion": {
+    "http_status": 200,
+    "body": {
+      "source": "ml_model",
+      "segment_id": "SEG001",
+      "day_type": "weekday",
+      "hour": 8,
+      "congestion_level": "LOW",
+      "multiplier": 1.07
+    }
+  },
+  "backend_in_process": {
+    "health": {
+      "http_status": 200,
+      "body": {
+        "status": "ok"
+      }
+    },
+    "history_without_token": {
+      "http_status": 401,
+      "rejected": true
+    },
+    "chat_requires_auth_in_openapi": false,
+    "history_requires_auth_in_openapi": true,
+    "chat_request_fields": [
+      "message"
+    ],
+    "limitation": "In-process requests prove current app wiring, not network service or authenticated ownership."
+  },
+  "model_artifact": {
+    "loaded": true,
+    "feature_columns": [
+      "hour",
+      "is_peak",
+      "day_type_weekday",
+      "day_type_weekend",
+      "corridor_type_access_road",
+      "corridor_type_industrial_arterial",
+      "corridor_type_urban_arterial"
+    ],
+    "estimator_count": 50,
+    "classes": [
+      "high",
+      "low",
+      "medium"
+    ],
+    "limitation": "Artifact loaded; training metrics and runtime data-backed predictions not verified."
+  },
+  "live_policy_inspection": {
+    "status": "pending",
+    "reason": "API schema alone does not expose PostgreSQL policy definitions; authorized catalog access is required."
+  },
+  "authenticated_two_user_checks": {
+    "status": "pending",
+    "reason": "No credentials are requested, printed, or created by this audit."
+  }
+}

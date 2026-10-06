@@ -1,0 +1,8 @@
+{
+  "migrations": [
+    {"version": "20260815133157", "name": "schema_v2_full_rebuild"},
+    {"version": "20261005135325", "name": "oracle_history"},
+    {"version": "20261006140252", "name": "legacy_table_rls"}
+  ],
+  "source": "Supabase list_migrations after successful application and registration"
+}

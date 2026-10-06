@@ -1,0 +1,5 @@
+{
+  "checks_passed": 46,
+  "persistent_test_data": "none; transaction rolled back",
+  "scope": "Installed policies with simulated database claims"
+}

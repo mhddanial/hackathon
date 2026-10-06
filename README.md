@@ -2,6 +2,11 @@
 
 > **Hackathon Project** · Built in 16 hours · Full-stack AI-powered logistics optimization for the Singapore–Batam maritime corridor
 
+Documentation: [Current Oracle implementation](docs/oracle/README.md) ·
+[Original hackathon materials](docs/hackathon/README.md) · [Documentation index](docs/README.md).
+The sections below retain the original project overview; use the Oracle context
+for the extension's current implementation and verification status.
+
 [![Backend](https://img.shields.io/badge/Backend-FastAPI%200.138-009688?logo=fastapi)](https://smartflow-api.up.railway.app)
 [![Frontend](https://img.shields.io/badge/Frontend-Next.js%2016.3-black?logo=next.js)](https://frontend-nine-blue-dx6g6mxt1e.vercel.app)
 [![ML Model](https://img.shields.io/badge/ML-Random%20Forest%2095.1%25%20Accuracy-blue?logo=scikit-learn)](https://scikit-learn.org)
@@ -501,8 +506,9 @@ hackathon/
 │   └── package.json
 │
 └── docs/
-    ├── BUILDER_A.md             # Backend developer task tracker
-    └── methodology_notes.md    # ML model methodology notes
+    ├── README.md               # Documentation entry point
+    ├── oracle/                 # Current context, contracts, sprints, security, evidence
+    └── hackathon/              # Original plans, trackers, pitch, methodology, workbook
 ```
 
 ---

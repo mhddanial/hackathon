@@ -16,7 +16,7 @@ Update: data mentah sekarang sudah lengkap (weekday + weekend, 6 segmen penuh, 2
 
 **Langkah pembersihan `congestion_multipliers`:**
 - [ ] Sisakan cuma kolom: `segment_id`, `day_type`, `hour_window` (opsional, untuk dibaca manusia), `hour_start`, `hour_end`, `multiplier`, `congestion_level`, `description` (opsional)
-- [ ] **Hapus kolom J sampai Y** (`section_id`, `topic`, `method_or_source`, `technical_explanation`, `journal_or_reference`, dan kolom contoh perhitungan `t_name`/`distance_km`/dst) — ini catatan metodologi yang tidak sejajar baris dengan data di kirinya, salin ke file terpisah (mis. `docs/methodology_notes.md`) kalau mau disimpan sebagai referensi, jangan ikut diimpor ke tabel
+- [ ] **Hapus kolom J sampai Y** (`section_id`, `topic`, `method_or_source`, `technical_explanation`, `journal_or_reference`, dan kolom contoh perhitungan `t_name`/`distance_km`/dst) — ini catatan metodologi yang tidak sejajar baris dengan data di kirinya, salin ke file terpisah (mis. `docs/hackathon/methodology_notes.md`) kalau mau disimpan sebagai referensi, jangan ikut diimpor ke tabel
 - [ ] **Hapus baris di bagian bawah sheet yang tidak punya `segment_id` terisi** — ini baris catatan/referensi yang nyasar ke tabel data
 - [ ] Pastikan `hour_start`/`hour_end` berupa angka bulat (integer), bukan string atau format jam (`"06:00"`) — notebook memakainya langsung sebagai `int()`
 - [ ] Pastikan `day_type` konsisten cuma dua nilai: `weekday` / `weekend` (huruf kecil semua, tanpa spasi tersembunyi)

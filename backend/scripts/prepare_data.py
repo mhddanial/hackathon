@@ -8,6 +8,10 @@ Usage (dari direktori backend/):
 
 Requirements:
     pip install openpyxl supabase python-dotenv
+
+Import credentials (server/admin machine only):
+    SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
+    Never put the service-role key in NEXT_PUBLIC_* or browser configuration.
 """
 
 import os
@@ -21,10 +25,14 @@ from supabase import create_client, Client
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../.env'))
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("ERROR: SUPABASE_URL atau SUPABASE_ANON_KEY tidak ditemukan di .env")
+    print("ERROR: Import requires SUPABASE_URL and a server-only SUPABASE_SERVICE_ROLE_KEY.")
+    sys.exit(1)
+
+if SUPABASE_KEY == os.environ.get("SUPABASE_ANON_KEY"):
+    print("ERROR: Import must use a privileged server credential, not SUPABASE_ANON_KEY.")
     sys.exit(1)
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -32,7 +40,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Path ke Excel
 EXCEL_PATH = os.path.join(
     os.path.dirname(__file__),
-    '../../docs/Batam SmartFlow Data Master (1).xlsx'
+    '../../docs/hackathon/data/Batam SmartFlow Data Master (1).xlsx'
 )
 
 if not os.path.exists(EXCEL_PATH):

@@ -1,8 +1,8 @@
-# Oracle history contract — Sprint 1
+# Oracle history contract — Sprints 1 and 2
 
-Date: 5 October 2026. Python definitions: `backend/schemas/oracle.py`.
+Updated: 6 October 2026. Python definitions: `backend/schemas/oracle.py`.
 
-This document defines the interfaces for Sprint 2 history endpoints and Sprint 3 persistent chat. Those endpoints/behaviors are not implemented by Sprint 1. The current chat endpoint still accepts `{ message }`; its caller and authentication requirements must be upgraded together during Sprint 3. Keep the existing `status`, `chunk`, `error`, and `done` event names.
+The Sprint 2 conversation endpoints below are implemented. Sprint 3 persistent chat remains planned. The current chat endpoint still accepts `{ message }`; its caller and authentication requirements must be upgraded together during Sprint 3. Keep the existing `status`, `chunk`, `error`, and `done` event names.
 
 ## Identity and errors
 
@@ -28,7 +28,7 @@ GET   /user/conversations/{conversation_id}/messages
 PATCH /user/conversations/{conversation_id}
 ```
 
-Create body: `{ "title": "Batu Ampar trip" }`; title is optional, nullable, trimmed, and limited to 160 characters. Update accepts only `title` and/or `archived`; an explicit `title: null` resets the title, and an omitted field leaves it unchanged. Empty updates are rejected. Archiving uses `archived: true`; a DELETE alias, if added, must document archive semantics.
+POST returns HTTP 201. Create body: `{ "title": "Batu Ampar trip" }`; title is optional, nullable, trimmed, and limited to 160 characters. Update accepts only `title` and/or `archived`; an explicit `title: null` resets the title, and an omitted field leaves it unchanged. Empty updates are rejected. Archive with `{ "archived": true }`; restore with `{ "archived": false }`. No DELETE alias or hard-delete API is exposed.
 
 Conversation response:
 
@@ -42,11 +42,28 @@ Conversation response:
 }
 ```
 
-Conversation lists return `{ "conversations": [], "next_cursor": null }`; message lists return `{ "messages": [], "next_cursor": null }`. Sprint 2 must implement bounded pages (default 30, maximum 100) and opaque validated cursors. Conversations sort by `(updated_at DESC, id DESC)`. Messages sort by the server-generated `sequence` ascending; gaps are allowed and identical timestamps do not cause ambiguous ordering.
+Conversation lists return `{ "conversations": [], "next_cursor": null }`; message lists return `{ "messages": [], "next_cursor": null }`. Implemented pages accept `limit` (default 30, minimum 1, maximum 100) and a validated opaque `cursor` (maximum 512 characters). Conversations sort by `(updated_at DESC, id DESC)`. Messages sort by the server-generated `sequence` ascending; gaps are allowed and identical timestamps do not cause ambiguous ordering. Lists request one extra row to detect a next page without counting every record.
+
+Conversation lists exclude archived items by default; `include_archived=true` includes active and archived items. Owned archived conversations and their messages remain directly readable. The existing database policies prevent appending/editing messages while archived. Title editing and restore remain available. Listing cursors are bound to the archive filter, and message cursors to their conversation. They contain only typed ordering fields and resource context, not user IDs or credentials. Cursors do not authorize access: every query still uses the verified user filter and RLS. Paging is not a frozen snapshot; refresh the list after edits that change update-time ordering.
+
+Example sequence (all calls require the Bearer header):
+
+```text
+POST /user/conversations                 body: {"title":"Batu Ampar trip"}
+GET  /user/conversations?limit=30
+GET  /user/conversations/{id}
+GET  /user/conversations/{id}/messages?limit=30
+PATCH /user/conversations/{id}           body: {"title":"Updated trip"}
+PATCH /user/conversations/{id}           body: {"archived":true}
+GET  /user/conversations?include_archived=true
+PATCH /user/conversations/{id}           body: {"archived":false}
+```
+
+Pass `next_cursor` back as a URL-encoded query parameter with the same filter/resource. It is null on the final page. Foreign/nonexistent IDs both return `{ "detail": "Conversation not found" }` with HTTP 404. Database/network/malformed stored-contract errors return safe 503 and `Retry-After: 5`, independently of Auth verification failures.
 
 Message responses contain server UUIDs, `conversation_id`, `turn_id`, `sequence`, `role`, `content`, tool fields, `tool_calls`, `structured_results`, `status`, and `created_at`. Do not expose user IDs, system instructions, or raw credentials. User text and structured results are still untrusted display data and must be safely rendered.
 
-`GET /user/history` retains its route-history contract. Its missing legacy ownership column is a known separate issue; chat storage does not use that table.
+`GET /user/history` retains its route-history contract. The separately approved legacy RLS fix added `route_query_log.user_id` and owner-read access; chat storage does not use that table. No route-history writer or AI-provider invocation is added by Sprint 2.
 
 ## Persistent chat (Sprint 3)
 
