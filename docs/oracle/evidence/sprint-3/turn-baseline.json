@@ -1,0 +1,16 @@
+{
+  "chat_messages": 0,
+  "conversations": 0,
+  "duplicate_tool_calls": 0,
+  "functions": [
+    {
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "function_name": "oracle_touch_conversation_updated_at",
+      "security_definer": false,
+      "settings": [
+        "search_path=\"\""
+      ]
+    }
+  ]
+}

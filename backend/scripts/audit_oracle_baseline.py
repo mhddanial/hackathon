@@ -47,7 +47,7 @@ def run_audit():
         "configuration": {
             "backend": {
                 key: bool(backend_env.get(key))
-                for key in ("SUPABASE_URL", "SUPABASE_ANON_KEY", "LIGHTNING_API_KEY")
+                for key in ("SUPABASE_URL", "SUPABASE_ANON_KEY", "GEMINI_API_KEY")
             },
             "frontend": {
                 key: bool(frontend_env.get(key) or os.environ.get(key))

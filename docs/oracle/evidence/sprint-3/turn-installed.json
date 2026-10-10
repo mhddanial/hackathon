@@ -1,0 +1,55 @@
+{
+  "functions": [
+    {
+      "settings": [
+        "search_path=\"\"",
+        "lock_timeout=5s"
+      ],
+      "anon_execute": false,
+      "function_name": "oracle_finish_turn",
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "settings": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "function_name": "oracle_guard_active_archive",
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "settings": [
+        "search_path=\"\"",
+        "lock_timeout=5s"
+      ],
+      "anon_execute": false,
+      "function_name": "oracle_record_tool",
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "settings": [
+        "search_path=\"\"",
+        "lock_timeout=5s"
+      ],
+      "anon_execute": false,
+      "function_name": "oracle_reserve_turn",
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "settings": [
+        "search_path=\"\""
+      ],
+      "anon_execute": false,
+      "function_name": "oracle_touch_conversation_updated_at",
+      "security_definer": false,
+      "authenticated_execute": false
+    }
+  ],
+  "chat_messages": 0,
+  "conversations": 0,
+  "duplicate_tool_calls": 0
+}

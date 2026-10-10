@@ -1,8 +1,8 @@
-# Oracle history contract — Sprints 1 and 2
+# Oracle history and persistent chat contract — Sprints 1–4
 
-Updated: 6 October 2026. Python definitions: `backend/schemas/oracle.py`.
+Updated: 10 October 2026. Python definitions: `backend/schemas/oracle.py`.
 
-The Sprint 2 conversation endpoints below are implemented. Sprint 3 persistent chat remains planned. The current chat endpoint still accepts `{ message }`; its caller and authentication requirements must be upgraded together during Sprint 3. Keep the existing `status`, `chunk`, `error`, and `done` event names.
+The conversation endpoints and authenticated persistent chat below are implemented. The Oracle caller now sends its session token and request ID together. SSE retains `status`, `chunk`, `error`, and `done`, with typed `metadata` and `result` events. Backend checks are recorded in the [Sprint 3 report](../sprints/SPRINT_3_IMPLEMENTATION.md), and history UI checks in the [Sprint 4 report](../sprints/SPRINT_4_IMPLEMENTATION.md). The [Gemini provider migration](../providers/GEMINI_PROVIDER_MIGRATION.md) uses the official native SDK; live direct-answer/tool/follow-up checks passed with an in-memory turn store. Real signed-in browser/HTTP persistence remains unverified.
 
 ## Identity and errors
 
@@ -14,7 +14,7 @@ Every new history/chat request requires `Authorization: Bearer <Supabase access 
 | 503 | Auth/network service unavailable or invalid upstream response; `Retry-After: 5`. |
 | 404 | Owned conversation not found, including foreign IDs; do not disclose another user's existence. |
 | 422 | Request validation failure (UUID, length, unsupported field/value). |
-| 409 | Request ID conflicts with a different conversation or a turn is already in progress. |
+| 409 | Request ID conflicts with saved content/conversation, a turn is already active, a conversation is archived, or archive races an active turn. |
 
 Authentication, request validation, ownership lookup, and initial persistence occur before the SSE response opens. Runtime stream errors use safe `error` content and a terminal failed/interrupted outcome rather than claiming success.
 
@@ -67,7 +67,7 @@ Message responses contain server UUIDs, `conversation_id`, `turn_id`, `sequence`
 
 ## Persistent chat (Sprint 3)
 
-Target request:
+Implemented `POST /agent/chat` request:
 
 ```json
 {
@@ -79,7 +79,9 @@ Target request:
 
 `conversation_id` may be omitted for a new chat. `message` is trimmed, nonempty text with a maximum of 8,000 characters. `client_request_id` is a UUID created once per submitted user turn and reused for retries. The new contract deliberately rejects arbitrary identity fields.
 
-Look up `(authenticated user, client_request_id)` before creating another conversation. The database enforces uniqueness across that user's conversations. A completed retry replays the saved outcome without rerunning tools; an in-progress retry conflicts safely; a failed/interrupted retry follows an explicit recovery path using the same turn identity. If the supplied conversation conflicts with the saved request, return 409. Implement this orchestration in Sprint 3; database uniqueness alone is not a complete retry implementation.
+Atomic reservation looks up `(authenticated user, client_request_id)` before creating another conversation. Completed, failed, and interrupted retries replay the saved terminal outcome with the same IDs and no provider/tool rerun. A fresh execution after a saved failure needs a **new** request ID. A live in-progress retry or another active turn in that conversation returns 409 with `Retry-After: 5`; there is no automatic provider retry. Different content or a supplied conflicting conversation also returns 409. For uncertainty caused by a lost connection, retry the original ID/content rather than creating a second turn.
+
+After three minutes, a later reservation can retire a stale in-progress turn as interrupted. Retrying its original ID replays that interrupted state; a new ID can begin a fresh turn. Late writes to a retired turn fail. This is lazy recovery, not a background worker. Archived conversations reject new turns; terminal replay remains readable. PATCH archive returns 409 while a recent turn is active, preventing archive from blocking its final save under RLS.
 
 Each turn starts with a user message whose `id = turn_id`, plus one assistant placeholder. Tool messages reference that owned user turn. Composite foreign keys enforce both conversation ownership and turn membership. Final assistant metadata holds allowed tool calls, validated arguments/outputs, and all successful structured results. Persisted roles are `user`, `assistant`, and `tool`; the server system prompt is not accepted from the client.
 
@@ -96,7 +98,33 @@ done      → conversation_id, turn_id, message_id, outcome, persisted
 
 `outcome` is `completed`, `failed`, or `interrupted`. A completed terminal event requires `persisted: true` and an assistant `message_id`. A partial streamed response is provisional until that success acknowledgment. A failed save must never produce a completed acknowledgment. Failed/interrupted outcomes may acknowledge saved failure state with `persisted: true` without suggesting that the answer completed.
 
-The minimal existing Oracle caller must send its token/request ID and handle terminal outcome when Sprint 3 changes the endpoint; do not wait until the Sprint 4 sidebar work to restore caller compatibility. Preserve buffered fragmented/batched SSE parsing.
+HTTP failures before reservation/context success return normal JSON errors. Once SSE opens, missing provider configuration, provider exceptions, truncation, empty final answers, malformed tools, or persistence failures produce safe `error` and failed `done` events. A save failure can have `persisted: false` and no message ID. Cancellation makes a bounded best-effort interrupted save; a disconnected client may receive no terminal event. Live success is emitted only after the terminal RPC acknowledgment. Normal results are emitted after that save; replay may return stored partial results alongside a failed/interrupted outcome.
+
+The caller keeps React messages provisional until the terminal event, validates IDs, buffers fragmented/batched UTF-8/CRLF frames, rejects invalid completion acknowledgments, guards concurrent sends, and clears scoped state on account change. New conversation starts a fresh local view without deleting saved history. History list/reopening and archive/restore are implemented in Sprint 4; displaying result cards/modal remains Sprint 5.
+
+## Implemented history interface (Sprint 4)
+
+The client lists 30 conversations per API page, with optional archived items and explicit load-more/reload controls. Selection is a single UUID in `?conversation=<uuid>`; invalid/duplicate values are removed and valid uppercase UUIDs are canonicalized. Browser back/forward and refresh reload the owned conversation and messages. The URL contains no token, owner ID, or message text and does not authorize access.
+
+Stored messages load 100 rows per API page in ascending sequence. Tool rows are retained in the received contract but not rendered as chat bubbles; assistant result metadata is restored without rerunning tools. More saved pages are explicit, and new follow-up sends wait until all pages are loaded. Completed, failed, interrupted, active, and uncertain local outcomes remain distinct. No title-edit or hard-delete UI is introduced.
+
+The API helper obtains the current session for each request, checks that it still belongs to the mounted account, and lets the backend verify the token. After HTTP 401 it refreshes once and repeats the same request; chat keeps its UUID/body unchanged during that auth retry. The backend rejects 401 before mutation/provider work. There is no automatic retry after network/5xx failure. History/update requests have a 30-second browser deadline; chat keeps its 120-second deadline.
+
+Selecting a different chat aborts pending reads/streams/updates, clears visible old messages, and ignores results from older view generations. Uncertain retry state is cached only in memory per conversation in the mounted signed-in page; the latest unassigned request can be checked separately if metadata was lost. A terminal replay clears the earlier active state and permits a follow-up. Logout/account change clears that cache. Full refresh does not persist/replay pending request bodies: it reloads server state and offers explicit reload for a recent active turn, with the existing three-minute stale recovery rule.
+
+Archive/restore uses the existing PATCH endpoint. Archived history remains readable and its composer is disabled until restored. Archive is disabled during local active/uncertain work, while the database guard handles concurrent active turns. Successful list/archive updates are refreshed from the API. Native buttons/labels and responsive history/message panes provide the existing shared UI styling.
+
+## Implemented limits and storage
+
+- Context: at most 120 recent completed rows, reconstructed as up to eight complete user/assistant/tool pairs within 24,000 serialized characters. Failed/incomplete pairs are skipped; a pair is never clipped in half.
+- Provider: official `google-genai` SDK/Gemini Developer API, backend `GEMINI_API_KEY` and optional `GEMINI_MODEL` (default `gemini-3.5-flash`), 20-second SDK timeout, one attempt with zero SDK retries, at most 2,048 output tokens per round, 90-second generation/lifecycle budget, and 32,000 accumulated answer characters. Native parts/signatures are limited to 256,000 UTF-8 bytes per turn. Current-turn native signatures are preserved; older completed tool history is untrusted reference text. See the [provider migration](../providers/GEMINI_PROVIDER_MIGRATION.md).
+- Tools: three executed rounds, 12 calls per turn, 8,000-byte JSON arguments, 16,000-byte outputs, 15-second per-tool deadline. Recorded schedule queries return at most 20 rows; map geometry is excluded from Oracle results.
+- Database calls: 10-second client timeout; mutation functions have a five-second lock timeout. Disconnect cleanup uses a 12-second cancellation shield; a DB outage can leave a turn for three-minute lazy recovery. Timed-out read-only tool threads may continue until their underlying network timeout.
+- Frontend: 120-second request deadline and 300,000-character SSE frame/pending-buffer limit; unknown saved outcomes offer a manual retry with the same request ID.
+
+The additive `oracle_reserve_turn`, `oracle_record_tool`, and `oracle_finish_turn` RPCs use the caller JWT with RLS, `SECURITY INVOKER`, an empty search path, and authenticated-only execution. Reservation atomically creates the user/assistant pair; each tool row is appended before continuing the model; terminal text/tool metadata/results and both message outcomes commit together. RPCs serialize reservations/writes, and a unique tool-call index prevents repeated tool rows. No service-role credential is used.
+
+Tool argument models in `backend/services/oracle_tools.py` generate provider schemas and validate execution: `SEG001`–`SEG006`, explicit weekday/weekend and hour 0–23, finite bounded coordinates, explicit `HH:MM`, supported terminal/destination, and paired vessel ETD/cargo type. Missing planning inputs belong in a clarification; Oracle does not invent coordinates or a host-clock departure time. The server prompt instructs scope/provenance behavior, but real model adherence remains an acceptance check.
 
 ## Structured results
 

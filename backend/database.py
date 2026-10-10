@@ -15,7 +15,7 @@ if not url or not key:
 def get_supabase_client(*, http_client: HttpClient | None = None) -> Client:
     """Create a fresh client; authenticated requests own and close their transport."""
     if http_client is None:
-        return create_client(url, key)
+        return create_client(url, key, options=ClientOptions(postgrest_client_timeout=10))
     return create_client(
         url, key,
         options=ClientOptions(

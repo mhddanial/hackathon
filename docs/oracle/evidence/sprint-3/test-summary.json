@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-10",
+  "tests": 195,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 19.642,
+  "database": "Isolated loopback PostgreSQL with minimal test-only Auth role/claim stub",
+  "provider": "Mocked streamed Lightning/OpenAI-compatible responses"
+}

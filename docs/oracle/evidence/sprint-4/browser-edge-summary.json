@@ -1,0 +1,8 @@
+{
+  "checks_passed": 2,
+  "checks": [
+    "uppercase bookmark UUID restores owned history",
+    "page punctuation renders as UTF-8"
+  ],
+  "scope": "Chromium/Next UI with local synthetic services"
+}

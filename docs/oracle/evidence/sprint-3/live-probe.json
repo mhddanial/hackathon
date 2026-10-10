@@ -1,0 +1,5 @@
+{
+  "checks_passed": 11,
+  "persistent_test_data": "none; rolled back",
+  "scope": "Installed RPCs and RLS with simulated claims"
+}

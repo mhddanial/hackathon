@@ -1,0 +1,24 @@
+{
+  "model": "gemini-3.5-flash",
+  "provider": "Official google-genai Developer API",
+  "scope": "Real Google API and public ferry data; in-memory turn store, no live user authentication or history writes",
+  "first_turn": {
+    "outcome": "completed",
+    "tool_names": [
+      "get_ferry_schedule"
+    ],
+    "result_types": [
+      "schedule"
+    ],
+    "answer_characters": 1287,
+    "elapsed_ms": 18235
+  },
+  "tool_round_trip_passed": true,
+  "follow_up": {
+    "outcome": "completed",
+    "tool_calls": 0,
+    "answer_characters": 161,
+    "elapsed_ms": 4700
+  },
+  "restored_context_passed": true
+}

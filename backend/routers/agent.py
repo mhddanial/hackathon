@@ -1,240 +1,209 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
+"""Authenticated, persistent Oracle streaming with bounded provider/tool work."""
 
-# Load environment variables from .env file
-load_dotenv()
-from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+import asyncio
+from contextlib import aclosing
 import json
-from agent_config import SYSTEM_PROMPT, TOOL_SCHEMAS
+from uuid import uuid4
 
+import anyio
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import StreamingResponse
+from google.genai import types
+
+from auth import AuthenticatedContext, get_authenticated_context
+from schemas.oracle import ChatRequest, MetadataEvent, TextEvent, ResultEvent, DoneEvent, ToolCall
+from services.oracle_tools import validate_arguments, execute_tool, status_message
+from services.oracle_turns import OracleTurns, ReservedTurn
+from services.oracle_provider import GeminiProvider
+
+load_dotenv()
 router = APIRouter()
+provider = GeminiProvider.from_environment()
 
-# Lightning AI exposes an OpenAI-compatible Chat Completions API.
-LIGHTNING_API_BASE_URL = "https://lightning.ai/api/v1/"
-LIGHTNING_MODEL = "google/gemini-3.5-flash"
-api_key = os.environ.get("LIGHTNING_API_KEY")
-client = OpenAI(base_url=LIGHTNING_API_BASE_URL, api_key=api_key) if api_key else None
+TURN_TIMEOUT = 90
+TOOL_TIMEOUT = 15
+MAX_TOOL_ROUNDS = 3
+MAX_TOOL_CALLS = 12
+MAX_ANSWER_CHARS = 32000
+MAX_PROVIDER_BYTES = 256000
 
-class ChatRequest(BaseModel):
-    message: str
 
-# ---------------------------------------------------------
-# Real Tool Functions 
-# ---------------------------------------------------------
-from routers.congestion import get_congestion
-from database import get_supabase_client
-from routers.route import calculate_route, RouteRequest, Point
-from datetime import datetime
-
-def execute_tool(function_name: str, args: dict):
-    """Execute a function requested by the AI model."""
-    if function_name == "get_congestion_level":
+class OracleStreamingResponse(StreamingResponse):
+    async def __call__(self, scope, receive, send):
         try:
-            # Reusing the logic from our actual endpoint
-            result = get_congestion(
-                segment_id=args.get("segment_id"),
-                day_type=args.get("day_type", "weekday").lower(),
-                hour=int(args.get("hour"))
-            )
-            return result
-        except Exception as e:
-            return {"error": f"Failed to get congestion level: {str(e)}"}
-            
-    elif function_name == "get_optimal_route":
+            await super().__call__(scope, receive, send)
+        finally:
+            # ASGI >=2.4 can fail during send, outside the generator itself.
+            # Close it before the request-owned DB transport is released.
+            if hasattr(self.body_iterator,"aclose"):
+                await self.body_iterator.aclose()
+
+
+def sse_event(event) -> str:
+    return f"data: {event.model_dump_json()}\n\n"
+
+
+def metadata(turn: ReservedTurn) -> MetadataEvent:
+    return MetadataEvent(conversation_id=turn.conversation_id, turn_id=turn.turn_id,
+        user_message_id=turn.user_message_id, assistant_message_id=turn.assistant_message_id)
+
+
+async def persist(store, turn, content, outcome, calls, results):
+    return await anyio.to_thread.run_sync(lambda: store.finish(turn, content=content,
+        outcome=outcome, calls=calls, results=results))
+
+
+async def stream_turn(turn: ReservedTurn, store: OracleTurns, model_context: list[dict], request: Request):
+    calls, results, text = [], [], []
+    finalized = False
+    outcome = "failed"
+    if turn.replay:
+        yield sse_event(metadata(turn))
+        if turn.content:
+            yield sse_event(TextEvent(type="chunk",content=turn.content))
+        if turn.results:
+            yield sse_event(ResultEvent(results=turn.results))
+        if turn.outcome != "completed":
+            yield sse_event(TextEvent(type="error",content="This saved turn did not complete. Send a new turn to try again."))
+        yield sse_event(DoneEvent(conversation_id=turn.conversation_id,turn_id=turn.turn_id,
+            message_id=turn.assistant_message_id,outcome=turn.outcome,persisted=True))
+        return
+
+    try:
+        yield sse_event(metadata(turn))
+        if provider is None:
+            raise RuntimeError("Provider not configured")
+        with anyio.fail_after(TURN_TIMEOUT):
+            async with provider.session(model_context, request.state.oracle_message) as session:
+                rounds, provider_bytes = 0, 0
+                seen_ids = set()
+                while True:
+                    if await request.is_disconnected():
+                        raise asyncio.CancelledError
+                    stream = await session.stream()
+                    round_text, parts, pending = [], [], []
+                    finish_reason = None
+                    async with aclosing(stream):
+                        async for chunk in stream:
+                            if await request.is_disconnected():
+                                raise asyncio.CancelledError
+                            if chunk.prompt_feedback and chunk.prompt_feedback.block_reason not in (None, types.BlockedReason.BLOCKED_REASON_UNSPECIFIED):
+                                raise ValueError("Provider blocked the prompt")
+                            if not chunk.candidates:
+                                continue
+                            if len(chunk.candidates) != 1:
+                                raise ValueError("Unexpected provider candidates")
+                            candidate = chunk.candidates[0]
+                            if candidate.finish_reason:
+                                finish_reason = candidate.finish_reason
+                            for part in candidate.content.parts if candidate.content and candidate.content.parts else []:
+                                provider_bytes += len(part.model_dump_json(exclude_none=True).encode())
+                                if provider_bytes > MAX_PROVIDER_BYTES:
+                                    raise ValueError("Provider output limit exceeded")
+                                parts.append(part)
+                                # Thinking text/signatures stay inside this native
+                                # session; only answer text is streamed/persisted.
+                                if part.text and not part.thought:
+                                    if sum(map(len,text))+len(part.text)>MAX_ANSWER_CHARS:
+                                        raise ValueError("Answer limit exceeded")
+                                    text.append(part.text)
+                                    round_text.append(part.text)
+                                    yield sse_event(TextEvent(type="chunk",content=part.text))
+                                if part.function_call:
+                                    call = part.function_call
+                                    if call.partial_args or call.will_continue:
+                                        raise ValueError("Incomplete streamed function arguments")
+                                    if len(pending)>=MAX_TOOL_CALLS:
+                                        raise ValueError("Tool limit exceeded")
+                                    pending.append(call)
+                    # A missing terminal reason is a lost/truncated response,
+                    # never a successful saved answer. STOP includes tool calls.
+                    if finish_reason != types.FinishReason.STOP:
+                        raise ValueError("Incomplete provider answer")
+                    if not pending:
+                        if not "".join(round_text).strip():
+                            raise ValueError("Provider returned no final answer")
+                        break
+                    if rounds>=MAX_TOOL_ROUNDS or len(calls)+len(pending)>MAX_TOOL_CALLS:
+                        raise ValueError("Tool limit exceeded")
+                    rounds += 1
+                    validated = []
+                    for call in pending:
+                        # Gemini may omit IDs; assign only the persisted local
+                        # ID, without rewriting the signed native function part.
+                        identifier = call.id or str(uuid4())
+                        if len(identifier)>200 or identifier in seen_ids or not call.name or len(call.name)>80:
+                            raise ValueError("Invalid or repeated tool call ID/name")
+                        args = validate_arguments(call.name,json.dumps(call.args,allow_nan=False))
+                        seen_ids.add(identifier)
+                        validated.append((call,identifier,args))
+                    session.remember_round(parts)
+                    replies = []
+                    for call,identifier,args in validated:
+                        if await request.is_disconnected():
+                            raise asyncio.CancelledError
+                        yield sse_event(TextEvent(type="status",content=status_message(call.name)))
+                        try:
+                            with anyio.fail_after(TOOL_TIMEOUT):
+                                output,result = await anyio.to_thread.run_sync(
+                                    lambda: execute_tool(call.name,args),abandon_on_cancel=True)
+                        except TimeoutError:
+                            output,result = {"error":"Tool request timed out","code":"tool_timeout"},None
+                        tool_call = ToolCall(id=identifier,name=call.name,arguments=args,output=output)
+                        await anyio.to_thread.run_sync(lambda: store.record_tool(turn,tool_call))
+                        calls.append(tool_call)
+                        if result is not None:
+                            results.append(result)
+                        replies.append(types.Part(function_response=types.FunctionResponse(
+                            id=call.id, name=call.name, response=output)))
+                    session.answer_tools(replies)
+                    yield sse_event(TextEvent(type="status",content="Generating an answer from the available tool data…"))
+            await persist(store,turn,"".join(text),"completed",calls,results)
+            finalized = True
+            outcome = "completed"
+        if results:
+            yield sse_event(ResultEvent(results=results))
+        yield sse_event(DoneEvent(conversation_id=turn.conversation_id,turn_id=turn.turn_id,
+            message_id=turn.assistant_message_id,outcome="completed",persisted=True))
+    except (asyncio.CancelledError, GeneratorExit):
+        outcome = "interrupted"
+        raise
+    except Exception:
+        yield sse_event(TextEvent(type="error",content="The Oracle turn could not complete. Any streamed text is provisional."))
+        saved = False
         try:
-            origin_str = args.get("origin", "")
-            dest_str = args.get("destination", "")
-            
-            # Parse "lat, lng"
-            origin_lat, origin_lng = map(float, [x.strip() for x in origin_str.split(',')])
-            dest_lat, dest_lng = map(float, [x.strip() for x in dest_str.split(',')])
-            
-            now = datetime.now()
-            time_str = args.get("time", f"{now.hour:02d}:{now.minute:02d}")
-            
-            req = RouteRequest(
-                origin=Point(lat=origin_lat, lng=origin_lng),
-                destination=Point(lat=dest_lat, lng=dest_lng),
-                time=time_str,
-                day_type="weekday"
-            )
-            
-            # Get real routing data
-            result = calculate_route(req)
-            
-            # CRITICAL: strip out route_geometry GeoJSON so we don't blow up Gemini's context window!
-            if "route_geometry" in result:
-                del result["route_geometry"]
-                
-            # Add metadata so the AI knows what time was used and can suggest off-peak times
-            result["_meta"] = {
-                "time_calculated_for": time_str,
-                "ai_instruction": "Mention the time used. If the estimated duration seems high, suggest leaving early morning (e.g., 06:00) to avoid peak multiplier, lower duration, and reduce CO2 emissions."
-            }
-                
-            return result
-        except ValueError:
-            return {"error": "Could not parse coordinates. Please provide origin and destination exactly as 'latitude, longitude'."}
-        except Exception as e:
-            return {"error": f"Failed to get optimal route: {str(e)}"}
-        
-    elif function_name == "get_ferry_schedule":
-        try:
-            supabase = get_supabase_client()
-            terminal_name = args.get("terminal")
-            # Query the database
-            response = supabase.table("ferry_schedules").select("*").ilike("terminal_name", f"%{terminal_name}%").execute()
-            if not response.data:
-                return {"error": f"No ferry schedules found for terminal '{terminal_name}'"}
-            
-            schedules = response.data
-            formatted_results = []
-            for s in schedules:
-                formatted_results.append({
-                    "terminal": s['terminal_name'],
-                    "destination": s['destination'],
-                    "departure_time": s['departure_time'],
-                    "cutoff_time": s.get('cutoff_time'),
-                    "vessel_type": s.get('vessel_type'),
-                    "cargo_capacity": s.get('cargo_capacity_tons')
-                })
-            return {"schedules": formatted_results}
-        except Exception as e:
-             return {"error": f"Failed to fetch ferry schedules: {str(e)}"}
-             
-    else:
-        return {"error": f"Unknown function: {function_name}"}
-
-
-def sse_event(event_type: str, content: str | None = None) -> str:
-    payload = {"type": event_type}
-    if content is not None:
-        payload["content"] = content
-    return f"data: {json.dumps(payload)}\n\n"
-
-
-def tool_status_message(function_name: str, args: dict) -> str:
-    if function_name == "get_congestion_level":
-        return f"⚙️ Checking live congestion for {args.get('segment_id')}..."
-    if function_name == "get_optimal_route":
-        return "⚙️ Calculating optimal route and emissions..."
-    if function_name == "get_ferry_schedule":
-        return f"⚙️ Fetching live ferry schedules for {args.get('terminal')}..."
-    return "Processing request..."
-
-# ---------------------------------------------------------
-# Agent Chat Endpoint
-# ---------------------------------------------------------
-@router.post("/chat")
-def chat_with_agent(request: ChatRequest):
-    if not client:
-        return {"reply": "Sistem AI belum dikonfigurasi (API Key hilang). Silakan gunakan pencarian manual."}
-
-    def generate_response():
-        try:
-            messages = [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": request.message},
-            ]
-            tool_rounds = 0
-
-            while True:
-                stream = client.chat.completions.create(
-                    model=LIGHTNING_MODEL,
-                    messages=messages,
-                    tools=TOOL_SCHEMAS,
-                    tool_choice="auto",
-                    stream=True,
-                )
-
-                text_parts = []
-                streamed_tool_calls = {}
-                for chunk in stream:
-                    if not chunk.choices:
-                        continue
-
-                    delta = chunk.choices[0].delta
-                    if delta.content:
-                        text_parts.append(delta.content)
-                        yield sse_event("chunk", delta.content)
-
-                    for tool_delta in delta.tool_calls or []:
-                        tool_call = streamed_tool_calls.setdefault(
-                            tool_delta.index,
-                            {"id": None, "name": "", "arguments": ""},
-                        )
-                        if tool_delta.id:
-                            tool_call["id"] = tool_delta.id
-                        if tool_delta.function:
-                            if tool_delta.function.name:
-                                tool_call["name"] += tool_delta.function.name
-                            if tool_delta.function.arguments:
-                                tool_call["arguments"] += tool_delta.function.arguments
-
-                if not streamed_tool_calls:
-                    break
-
-                if tool_rounds >= 3:
-                    yield sse_event("error", "The AI exceeded the tool-call limit.")
-                    return
-
-                tool_rounds += 1
-                completed_tool_calls = []
-                for tool_call in (streamed_tool_calls[index] for index in sorted(streamed_tool_calls)):
-                    if not tool_call["id"] or not tool_call["name"]:
-                        yield sse_event("error", "The AI returned an incomplete tool call.")
-                        return
-
+            await persist(store,turn,"".join(text),"failed",calls,results)
+            saved = True
+            finalized = True
+        except Exception:
+            pass
+        yield sse_event(DoneEvent(conversation_id=turn.conversation_id,turn_id=turn.turn_id,
+            message_id=turn.assistant_message_id if saved else None,outcome="failed",persisted=saved))
+    finally:
+        if not finalized:
+            # ASGI cancellation must not cancel the bounded best-effort outcome save.
+            with anyio.CancelScope(shield=True):
+                with anyio.move_on_after(12):
                     try:
-                        func_args = json.loads(tool_call["arguments"] or "{}")
-                    except json.JSONDecodeError:
-                        if not isinstance(func_args, dict):
-                            raise ValueError("Tool arguments must be an object.")
-                    except (json.JSONDecodeError, ValueError):
-                        yield sse_event("error", "The AI returned invalid tool arguments.")
-                        return
+                        await persist(store,turn,"".join(text),outcome,calls,results)
+                    except Exception:
+                        pass
 
-                    yield sse_event("status", tool_status_message(tool_call["name"], func_args))
-                    tool_result = execute_tool(tool_call["name"], func_args)
-                    completed_tool_calls.append({
-                        "id": tool_call["id"],
-                        "type": "function",
-                        "function": {
-                            "name": tool_call["name"],
-                            "arguments": tool_call["arguments"],
-                        },
-                    })
-                    messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call["id"],
-                        "content": json.dumps(tool_result),
-                    })
 
-                messages.insert(
-                    len(messages) - len(completed_tool_calls),
-                    {
-                        "role": "assistant",
-                        "content": "".join(text_parts) or None,
-                        "tool_calls": completed_tool_calls,
-                    },
-                )
-                yield sse_event("status", "✅ Data retrieved. Generating final response...")
-
-        except Exception as e:
-            print(f"Lightning AI API Error: {e}")
-            yield sse_event("error", "Maaf, sistem asisten AI sedang sibuk atau mengalami gangguan jaringan.")
-        
-        yield sse_event("done")
-
-    return StreamingResponse(
-        generate_response(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache, no-transform",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
+@router.post("/chat",response_class=StreamingResponse)
+async def chat_with_agent(payload: ChatRequest, request: Request,
+    context: AuthenticatedContext = Depends(get_authenticated_context,scope="request")):
+    store = OracleTurns(context.database,context.user.id)
+    turn = await anyio.to_thread.run_sync(lambda: store.reserve(payload))
+    try:
+        model_context = [] if turn.replay else await anyio.to_thread.run_sync(lambda: store.context(turn))
+    except HTTPException:
+        try:
+            await persist(store,turn,"","failed",[],[])
+        except Exception:
+            pass
+        raise
+    request.state.oracle_message = payload.message
+    return OracleStreamingResponse(stream_turn(turn,store,model_context,request),media_type="text/event-stream",
+        headers={"Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"})

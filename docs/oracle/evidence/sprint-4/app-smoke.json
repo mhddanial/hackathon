@@ -1,0 +1,9 @@
+{
+  "frontend_url": "http://127.0.0.1:3000/oracle",
+  "backend_health": 200,
+  "database_reference_read": "success",
+  "anonymous_oracle_status": 307,
+  "anonymous_redirect": "/login",
+  "configuration": "Normal local environment restored; isolated test frontend/Auth/API stopped",
+  "valid_user_provider_check": false
+}

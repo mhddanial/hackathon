@@ -1,0 +1,8 @@
+{
+  "model": "gemini-3.5-flash",
+  "provider": "Official google-genai Developer API",
+  "live_direct_answer": true,
+  "chunks": 2,
+  "answer_characters": 141,
+  "finish_reason": "STOP"
+}

@@ -75,7 +75,11 @@ class OracleHistory:
             if not isinstance(data, list) or any(not isinstance(row, dict) for row in data):
                 raise ValueError("Invalid database response")
             return data
-        except (APIError, httpx.HTTPError, ValueError):
+        except APIError as exc:
+            if exc.code == "PT409":
+                raise HTTPException(409, "Wait for the active turn before archiving") from None
+            raise _unavailable() from None
+        except (httpx.HTTPError, ValueError):
             raise _unavailable() from None
 
     @staticmethod

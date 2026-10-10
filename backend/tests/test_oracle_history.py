@@ -13,12 +13,14 @@ import httpx
 import psycopg
 from psycopg import sql
 from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 import auth
 import database
+from routers.agent import router as agent_router
 from routers.user import router
 from test_oracle_rls import test_database_url, USER_A, USER_B
 
@@ -56,11 +58,32 @@ def api(test_database_url, monkeypatch):
             if state["error"]:
                 return httpx.Response(500, json={"code": "XX000", "message": "private SQL diagnostic"})
 
+            if request.url.path.startswith("/rest/v1/rpc/"):
+                name=request.url.path.rsplit("/",1)[-1]
+                arguments={
+                    "oracle_reserve_turn":["p_request_id","p_content","p_conversation_id"],
+                    "oracle_record_tool":["p_turn_id","p_call_id","p_name","p_arguments","p_output"],
+                    "oracle_finish_turn":["p_turn_id","p_content","p_status","p_tool_calls","p_results"],
+                }[name]
+                body=json.loads(request.content)
+                values=[Jsonb(body[key]) if key in ("p_arguments","p_output","p_tool_calls","p_results") else body[key] for key in arguments]
+                try:
+                    with conn.transaction():
+                        conn.execute("SET LOCAL ROLE authenticated")
+                        conn.execute("SELECT set_config('request.jwt.claim.sub',%s,true)",(user,))
+                        row=conn.execute(sql.SQL('SELECT public.{}({}) AS data').format(sql.Identifier(name),
+                            sql.SQL(',').join(sql.Placeholder() for _ in arguments)),values).fetchone()
+                    return httpx.Response(200,json=json.loads(json.dumps(row['data'],default=str)))
+                except psycopg.DatabaseError as exc:
+                    code=exc.sqlstate or 'XX000'
+                    status=int(code[2:]) if code.startswith('PT') else 500
+                    return httpx.Response(status,json={"code":code,"message":"private RPC diagnostic","details":None,"hint":None})
+
             table = request.url.path.rsplit("/", 1)[-1]
             assert table in ("conversations", "chat_messages")
             conditions, values = [], []
             for key, value in params.items():
-                if key in ("user_id", "id", "conversation_id", "sequence", "archived_at"):
+                if key in ("user_id", "id", "conversation_id", "sequence", "archived_at", "status"):
                     operator, argument = value.split(".", 1)
                     if operator == "is" and argument == "null":
                         conditions.append(sql.SQL("{} IS NULL").format(sql.Identifier(key)))
@@ -111,13 +134,16 @@ def api(test_database_url, monkeypatch):
             return httpx.Response(200, json=json.loads(json.dumps(rows, default=str)))
 
         def transport(**kwargs):
-            return OriginalHttpClient(transport=httpx.MockTransport(handle), **kwargs)
+            client=OriginalHttpClient(transport=httpx.MockTransport(handle), **kwargs)
+            state.setdefault('transports',[]).append(client)
+            return client
 
         monkeypatch.setattr(database, "url", "https://example.supabase.co")
         monkeypatch.setattr(database, "key", "test-publishable-key")
         monkeypatch.setattr(auth.httpx, "Client", transport)
         app = FastAPI()
         app.include_router(router, prefix="/user")
+        app.include_router(agent_router, prefix="/agent")
         with TestClient(app) as client:
             yield client, conn, calls, state
         conn.rollback()

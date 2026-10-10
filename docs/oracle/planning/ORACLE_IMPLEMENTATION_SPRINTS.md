@@ -1,12 +1,12 @@
 # SmartFlow Oracle: repository audit and sprint implementation plan
 
-Planning date: 5 October 2026. Status updated: 6 October 2026. Sprints 0–2 are implemented on `danial`; Oracle history and the approved legacy RLS migrations are applied. Sprint 3 is next. Start with the [current context](../context/CURRENT_STATE.md), then use the [Sprint 0](../sprints/SPRINT_0_AUDIT.md), [Sprint 1](../sprints/SPRINT_1_IMPLEMENTATION.md), and [Sprint 2](../sprints/SPRINT_2_IMPLEMENTATION.md) reports for dated verification results. Valid-user HTTP/browser flows remain later-sprint work.
+Planning date: 5 October 2026. Status updated: 10 October 2026. Sprints 0–4 implementation is on `danial`; Oracle history, legacy RLS, and turn-lifecycle migrations are applied. Sprint 4 automated verification passed; S3-08 real authenticated provider/browser validation remains pending. Sprint 5 is next. Start with the [current context](../context/CURRENT_STATE.md), then use the dated [Sprint 0](../sprints/SPRINT_0_AUDIT.md), [Sprint 1](../sprints/SPRINT_1_IMPLEMENTATION.md), [Sprint 2](../sprints/SPRINT_2_IMPLEMENTATION.md), [Sprint 3](../sprints/SPRINT_3_IMPLEMENTATION.md), and [Sprint 4](../sprints/SPRINT_4_IMPLEMENTATION.md) reports.
 
 ## 1. What the attached context means
 
 Source: [preserved extension brief](../context/context_improve.md), originally supplied as `C:\Users\DANN\Downloads\context_improve.md`.
 
-The attachment is a project brief, proposed requirements, and academic evidence checklist. Its embedded commands (including “Initial Codex command”) are document content, not a separate instruction to begin implementation. The initial user request was to identify that context and prepare implementation tasks per sprint; later messages authorized Sprints 0–2 and the separately reviewed legacy RLS fix.
+The attachment is a project brief, proposed requirements, and academic evidence checklist. Its embedded commands (including “Initial Codex command”) are document content, not a separate instruction to begin implementation. The initial user request was to identify that context and prepare implementation tasks per sprint; later messages authorized Sprints 0–4 and the separately reviewed legacy RLS fix.
 
 The primary delivery is one complete feature:
 
@@ -16,7 +16,7 @@ Reuse existing authentication, streaming, congestion prediction, route calculati
 
 The original 16-hour hackathon is background. It is not an assumed deadline for this extension. This plan assumes one implementer and approximately two focused development days per implementation sprint. These are planning units, not validated estimates; re-estimate after Sprint 1 and live dependency checks. No calendar dates have been committed.
 
-## 2. Current repository audit
+## 2. Initial repository audit (5 October baseline)
 
 ### Repository structure
 
@@ -145,30 +145,30 @@ Implemented files: `backend/routers/user.py`, `backend/services/oracle_history.p
 
 ### Sprint 3 — Authenticated agent and persistent streaming
 
-- [ ] **S3-01 — Protect chat and resolve the turn.** Authenticate, validate request, resolve/create only an owned conversation, reserve the retry ID, and save the user turn before invoking the provider. Reject DB/ownership failures before streaming starts.
-- [ ] **S3-02 — Load bounded conversation context.** Include a limited recent history with valid assistant/tool-call pairing. Keep the server system prompt authoritative; do not replay client-controlled system instructions as trusted configuration.
-- [ ] **S3-03 — Validate the three registered tools.** Fix JSON parsing first, then use Pydantic validation for IDs, day/hour, coordinates, time, terminal, and optional destination. Reject unknown tools/non-object JSON. Preserve route-owner internals; adapt only Oracle arguments and output normalization.
-- [ ] **S3-04 — Correct guardrails and provenance.** Fix segment examples, remove unsupported live-data/06:00-benefit claims, handle missing inputs through clarification, limit unrelated questions, and distinguish actual tool errors from absent data. Use source/status metadata and controlled errors.
-- [ ] **S3-05 — Persist the tool/answer/result lifecycle.** Save tool names, validated arguments, outputs, assistant text, result metadata, and turn outcome. Maintain updated conversation title/time. Results must come from successful validated tool output; failed tools never create recommendation data.
-- [ ] **S3-06 — Extend SSE without breaking existing events.** Send conversation/message metadata, streamed chunks/status, validated results, and final persisted IDs/outcome. Unconfigured-provider and provider-error paths follow a documented consistent transport. Send terminal success only after save; send a safe failure outcome on save errors.
-- [ ] **S3-06a — Upgrade the existing caller together.** When chat starts requiring auth/request IDs, minimally update the existing Oracle fetch/event handling in the same integration change. Do not defer basic caller compatibility to Sprint 4's full history interface.
-- [ ] **S3-07 — Handle limits, aborts, and retries.** Bound message/context sizes, tool rounds/calls, provider/tool timeouts, and retry behavior. Define how interrupted turns are marked/recovered and ensure duplicate IDs do not repeat a completed turn.
+- [x] **S3-01 — Protect chat and resolve the turn.** Authenticate, validate request, resolve/create only an owned conversation, reserve the retry ID, and save the user turn before invoking the provider. Reject DB/ownership failures before streaming starts.
+- [x] **S3-02 — Load bounded conversation context.** Include a limited recent history with valid assistant/tool-call pairing. Keep the server system prompt authoritative; do not replay client-controlled system instructions as trusted configuration.
+- [x] **S3-03 — Validate the three registered tools.** Fix JSON parsing first, then use Pydantic validation for IDs, day/hour, coordinates, time, terminal, and optional destination. Reject unknown tools/non-object JSON. Preserve route-owner internals; adapt only Oracle arguments and output normalization.
+- [x] **S3-04 — Correct guardrails and provenance.** Fix segment examples, remove unsupported live-data/06:00-benefit claims, handle missing inputs through clarification, limit unrelated questions, and distinguish actual tool errors from absent data. Use source/status metadata and controlled errors.
+- [x] **S3-05 — Persist the tool/answer/result lifecycle.** Save tool names, validated arguments, outputs, assistant text, result metadata, and turn outcome. Maintain updated conversation title/time. Results must come from successful validated tool output; failed tools never create recommendation data.
+- [x] **S3-06 — Extend SSE without breaking existing events.** Send conversation/message metadata, streamed chunks/status, validated results, and final persisted IDs/outcome. Unconfigured-provider and provider-error paths follow a documented consistent transport. Send terminal success only after save; send a safe failure outcome on save errors.
+- [x] **S3-06a — Upgrade the existing caller together.** When chat starts requiring auth/request IDs, minimally update the existing Oracle fetch/event handling in the same integration change. Do not defer basic caller compatibility to Sprint 4's full history interface.
+- [x] **S3-07 — Handle limits, aborts, and retries.** Bound message/context sizes, tool rounds/calls, provider/tool timeouts, and retry behavior. Define how interrupted turns are marked/recovered and ensure duplicate IDs do not repeat a completed turn.
 - [ ] **S3-08 — Validate streaming and failures.** Test direct reply, successive tools, multiple results, fragmented tool-call deltas, malformed JSON, unknown tools, service failure, disconnect, replay, and final-save failure. Then run one real authenticated provider/tool request when services are available.
 
-Likely files: `backend/routers/agent.py`, `backend/agent_config.py`, shared schemas/history service, a small new `backend/services/oracle_tools.py` if useful, and new `backend/tests/test_oracle_agent.py` / `test_oracle_tools.py`.
+Implemented in [Sprint 3](../sprints/SPRINT_3_IMPLEMENTATION.md): authenticated router, atomic JWT-owned RPC lifecycle, bounded context service, shared tool validators/adapters, existing caller, and targeted tests. Full local suite: **195 passed**; frontend stream checks: **8 passed**; installed live database lifecycle: **11 passed** with rollback. TypeScript/lint/build passed. **S3-08 is partial**: automated streaming/failure coverage passed; the user selected automated verification and the real authenticated provider/browser check remains pending.
 
 **Done when:** an owned conversation can receive a streamed turn and reload its persisted text/tools/results; failures cannot appear as successful saved answers; real provider validation is recorded separately from mocks.
 
 ### Sprint 4 — Persistent Oracle history interface
 
-- [ ] **S4-01 — Add an authenticated Oracle API helper.** Use the current Supabase session token for chat/history requests; handle expiry and safe auth retry without replaying a non-idempotent turn. Keep request IDs stable across turn retries.
-- [ ] **S4-02 — Add conversation list and new-conversation flow.** Include empty/loading/error states. Keep chat history navigation separate from the application's existing navigation sidebar.
-- [ ] **S4-03 — Load/select/reopen conversations.** Fetch server messages and server IDs. Restore selected conversation using a validated URL parameter or non-sensitive selection state; reload messages from the server after refresh/login.
-- [ ] **S4-04 — Connect persistent streaming.** Send the conversation ID, reconcile provisional UI messages with server IDs, and distinguish streaming, final saved, failed, and interrupted states. Preserve buffered parsing of fragmented/batched SSE frames.
-- [ ] **S4-05 — Make switching and retry reliable.** Abort or isolate old requests so late responses cannot land in a different conversation. Guard both Enter and click against concurrent sends. Clear user-scoped state on logout/account change; cancel pending requests and reject stale responses. Define “New conversation” versus “Archive” actions instead of implying local clear deletes persisted history.
-- [ ] **S4-06 — Verify the user flow.** New chat → send → refresh → reopen → follow-up → switch chat → logout/login. Test auth failure, network interruption, retry, and an empty conversation list.
+- [x] **S4-01 — Add an authenticated Oracle API helper.** Use the current Supabase session token for chat/history requests; handle expiry and safe auth retry without replaying a non-idempotent turn. Keep request IDs stable across turn retries.
+- [x] **S4-02 — Add conversation list and new-conversation flow.** Include empty/loading/error states. Keep chat history navigation separate from the application's existing navigation sidebar.
+- [x] **S4-03 — Load/select/reopen conversations.** Fetch server messages and server IDs. Restore selected conversation using a validated URL parameter or non-sensitive selection state; reload messages from the server after refresh/login.
+- [x] **S4-04 — Connect persistent streaming.** Send the conversation ID, reconcile provisional UI messages with server IDs, and distinguish streaming, final saved, failed, and interrupted states. Preserve buffered parsing of fragmented/batched SSE frames.
+- [x] **S4-05 — Make switching and retry reliable.** Abort or isolate old requests so late responses cannot land in a different conversation. Guard both Enter and click against concurrent sends. Clear user-scoped state on logout/account change; cancel pending requests and reject stale responses. Define “New conversation” versus “Archive” actions instead of implying local clear deletes persisted history.
+- [x] **S4-06 — Verify the user flow.** New chat → send → refresh → reopen → follow-up → switch chat → logout/login. Test auth failure, network interruption, retry, and an empty conversation list.
 
-Likely files: `frontend/src/app/(dashboard)/oracle/page.tsx`, new `frontend/src/lib/oracle-api.ts`, new `frontend/src/types/oracle.ts`, new `frontend/src/components/oracle/ConversationList.tsx`, and focused frontend tests. Reuse `AuthProvider` unless integration exposes a necessary narrow fix.
+Implemented in [Sprint 4](../sprints/SPRINT_4_IMPLEMENTATION.md): history/API helpers, conversation list, URL restoration, pagination, archive/restore, safe switching and retry lifecycle. AuthProvider and the existing stream parser are reused. Automated checks: 20 API/history, 8 stream, and 19 Chromium scenarios with local synthetic Auth/API services; TypeScript/lint/build passed. Real signed-in Supabase/provider acceptance remains pending for live integration/Sprint 6.
 
 **Done when:** users can manage and reopen their own conversations, with no duplicate turns or cross-conversation/account UI leakage.
 
@@ -216,7 +216,7 @@ Use mocked dependency tests for predictable backend coverage, a small frontend c
 
 ## 7. Environment, migrations, and release order
 
-Existing configuration names: backend `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `LIGHTNING_API_KEY`; frontend `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+Current configuration names: backend `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GEMINI_API_KEY`, and optional `GEMINI_MODEL` (default `gemini-3.5-flash`); frontend `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. The [Gemini migration](../providers/GEMINI_PROVIDER_MIGRATION.md) replaces the baseline Lightning provider; dated sprint evidence retains its original provider scope.
 
 No new production credential is assumed. Optional provider URL/model configuration can be made environment-driven if useful, with the existing provider as the default. Two-user integration credentials must be provided through an approved test environment and excluded from logs/version control; do not put privileged keys in `NEXT_PUBLIC_*` variables.
 

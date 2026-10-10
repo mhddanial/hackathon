@@ -1,0 +1,7 @@
+{
+  "health": 200,
+  "chat_missing_token": 401,
+  "chat_invalid_token": 401,
+  "valid_user_http_checked": false,
+  "real_provider_called": false
+}

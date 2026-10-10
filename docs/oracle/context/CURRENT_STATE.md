@@ -1,6 +1,6 @@
 # Oracle current implementation context
 
-Updated: 6 October 2026 (Asia/Jakarta). Working branch: `danial`.
+Updated: 10 October 2026 (Asia/Jakarta). Working branch: `danial`.
 This file is the starting context for continued Oracle implementation. Dated
 reports and evidence retain the detailed history.
 
@@ -23,6 +23,9 @@ with its respective owners; Oracle consumes those contracts. The original
 | Sprint 1 | Conversation/message schema, owned RLS, typed contracts, verified request-scoped JWT client | [Report](../sprints/SPRINT_1_IMPLEMENTATION.md) |
 | Legacy RLS repair | Applied to Supabase; public reference reads, privileged writes, private route history | [Security record](../security/LEGACY_RLS_FIX.md) |
 | Sprint 2 | Five authenticated conversation operations, bounded pagination, title edits, archive/restore, ordered message reads | [Report](../sprints/SPRINT_2_IMPLEMENTATION.md) |
+| Sprint 3 | Authenticated streaming, atomic turn reservation, bounded context/tools, saved outcomes/results, stable retry IDs | [Report](../sprints/SPRINT_3_IMPLEMENTATION.md) |
+| Sprint 4 | Saved conversation list/reopening, URL selection, paginated messages, archive/restore, isolated streams/retries | [Report](../sprints/SPRINT_4_IMPLEMENTATION.md) |
+| Provider migration | Official `google-genai` SDK, native Gemini streaming/tools, compatible saved history | [Record](../providers/GEMINI_PROVIDER_MIGRATION.md) |
 
 Implemented conversation routes:
 
@@ -32,6 +35,7 @@ GET   /user/conversations
 GET   /user/conversations/{id}
 PATCH /user/conversations/{id}
 GET   /user/conversations/{id}/messages
+POST  /agent/chat
 ```
 
 Ownership comes from server-verified Supabase identity. Request bodies cannot
@@ -44,6 +48,7 @@ Applied migration files remain in `supabase/migrations/`:
 
 - `20261005135325_oracle_history.sql`
 - `20261006140252_legacy_table_rls.sql`
+- `20261010105115_oracle_turn_lifecycle.sql`
 
 All seven current public tables have RLS enabled; both Oracle tables and the four
 repaired legacy tables force it. `profiles` retains its existing policies. The
@@ -51,34 +56,77 @@ import script requires a separate server-only `SUPABASE_SERVICE_ROLE_KEY`; this
 credential is optional for normal application reads and must stay out of the
 frontend. No real import credential was provisioned during the fix.
 
+## Current AI provider
+
+Oracle now calls the Gemini Developer API directly with `google-genai==2.29.0`.
+Set backend-only `GEMINI_API_KEY`; optional `GEMINI_MODEL` defaults to
+`gemini-3.5-flash`. The existing local Gemini key is used. Lightning/OpenAI
+credentials are no longer read by Oracle, and no automatic provider fallback is
+used. Native model parts/signatures stay within the active turn. Completed tool
+history becomes untrusted reference text, so old saved turns do not need
+fabricated Gemini signatures or a database migration. SSE and public contracts
+are unchanged. See the [provider record](../providers/GEMINI_PROVIDER_MIGRATION.md).
+
 ## Verification and limits
 
-- Latest full local suite: **145 passed**, including API/SDK transport tests and
-  actual PostgreSQL RLS/constraints with simulated Auth sessions.
+- Provider migration checks: **195 existing backend tests** passed again with
+  native Gemini fixtures and actual disposable PostgreSQL lifecycle/RLS using
+  simulated claims. **19 additional native Google SDK wire/lifecycle tests**
+  passed; total **214**. Two expected serializer warnings come from intentionally
+  malformed test arguments. No live RLS/schema change was made.
+- Live Google API checks passed: streamed direct answer, native ferry tool
+  request/response with public Supabase reference data, and follow-up using saved
+  reference context without refetching. These checks used an in-memory turn
+  store; they do not prove signed-in HTTP/browser history persistence.
+- Sprint 3 installed RPC lifecycle: **11 live database checks passed**, with all
+  synthetic rows rolled back. Existing policies/grants were preserved. This is
+  database role/claim evidence, not a valid-user HTTP login.
+- Sprint 4 frontend: **20 API/history checks**, **8 stream checks**, and **19
+  Chromium browser checks** passed. Browser checks used real Next/Supabase SDK
+  code with local synthetic Auth/API services, including two simulated accounts.
+  TypeScript, targeted lint, and production build passed. Desktop/mobile
+  screenshots were inspected; no new dependencies or migration were added.
+- Normal local app is running on ports 3000/8000. Health and a public Supabase
+  reference read passed; anonymous Oracle access redirects to login. These are
+  separate from signed-in history/provider acceptance.
 - Live legacy repair: **46 policy checks** and **16 anonymous REST checks** passed;
   counts, existing policies, and privileged grants were preserved.
 - Application changes are local; no application deployment or Git push was made.
-- Real valid-user Supabase JWT/browser persistence and live provider execution
-  remain unverified. Database role/claim probes are separate evidence.
+- Real valid-user Supabase JWT/browser persistence remains unverified. Live
+  provider checks, synthetic browser tests, and database role/claim probes are
+  separate evidence.
 - Existing Auth password-protection and profile/performance advisor findings are
   recorded in the security report; global advisor cleanliness is not claimed.
 
-## Next: Sprint 3
+## Next: Sprint 5
 
-The existing `/agent/chat` remains public and uses the current-message-only
-stream. The Oracle UI still holds chat locally. The complete target feature is
-therefore unfinished.
+`/agent/chat` now requires a verified token and a stable `client_request_id`.
+It atomically reserves owned user/assistant messages before provider work, loads
+bounded complete prior turns, and saves tool rows and terminal state. Completed
+SSE acknowledgment follows a successful save; retries replay terminal outcomes
+without repeating provider/tool work. Active turns conflict with HTTP 409, and
+turns older than three minutes can be retired as interrupted on a later request.
+Archiving an active conversation also returns 409.
 
-Sprint 3 integrates authentication, owned turn persistence, bounded saved context,
-tool validation, retry IDs, saved results/outcomes, and SSE completion after save.
-Upgrade the existing frontend caller with token/request-ID support in the same
-change. Sprint 4 adds the history interface; Sprint 5 adds result cards/modal;
-Sprint 6 supplies end-to-end and ML/report evidence.
+The Oracle interface now lists saved conversations, reopens owned messages,
+and restores the selected UUID from `?conversation=<uuid>` after refresh.
+Lists/messages load bounded pages; follow-up sends wait until the latest saved
+message page is loaded. Archive preserves readable history and restore allows
+new turns. New conversation starts a blank view and creates server history on
+the next send. The authenticated helper can refresh a token once after HTTP 401;
+network/5xx failures require manual retry with the existing request UUID.
 
-Continue from the [Sprint 3 backlog](../planning/ORACLE_IMPLEMENTATION_SPRINTS.md).
-Preserve the SSE events `status`, `chunk`, `error`, and `done`; add typed metadata
-and results. Derive result UI data from validated tool output, and label ML/time/
-emission outputs as estimates according to their actual provenance.
+Switching aborts old work and guards late responses with a view generation.
+Pending retry IDs survive switching within the mounted signed-in page. Account
+change/logout clears them; a full page reload restores server history rather
+than automatically resending an uncertain turn. Structured result metadata is
+restored and shown as a record count; cards/modal remain Sprint 5.
+
+Continue from the [Sprint 5 backlog](../planning/ORACLE_IMPLEMENTATION_SPRINTS.md).
+S3-08 remains partial: real authenticated browser/HTTP persistence validation
+is pending despite the successful direct Gemini/provider/tool checks. Carry this check
+into live integration and Sprint 6 acceptance. The entire feature is not
+complete yet. ML/time/emission outputs retain estimate and provenance labels.
 
 ## Operational boundaries
 

@@ -20,6 +20,12 @@ downloads/
 eggs/
 .eggs/
 lib/
+# Include Oracle helpers without adding unrelated ignored files.
+!/frontend/src/lib/
+/frontend/src/lib/*
+!/frontend/src/lib/oracle-stream.ts
+!/frontend/src/lib/oracle-api.ts
+!/frontend/src/lib/oracle-history.ts
 lib64/
 parts/
 sdist/
@@ -63,3 +69,7 @@ yarn-error.log*
 
 .vercel
 .env*
+
+# Local browser-verification artifacts (synthetic sessions/screenshots).
+/.playwright-cli/
+/output/playwright/

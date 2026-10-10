@@ -1,0 +1,20 @@
+{
+  "checked_at_utc": "2026-10-10T13:51:25.394650+00:00",
+  "connection": "successful",
+  "sdk": "google-genai",
+  "requested_model": "gemini-3.5-flash",
+  "prompt": "Hello. Introduce yourself as the Batam-Singapore logistics assistant in one short sentence.",
+  "scope": "Real Gemini API using the current Oracle provider; no mocks, Supabase login, or history writes",
+  "returned_model_version": "gemini-3.6-flash",
+  "response": "Hello, I am your Batam-Singapore logistics assistant, here to help you with route estimates, congestion forecasts, and ferry schedules.",
+  "finish_reason": "STOP",
+  "time_to_first_text_ms": 14288,
+  "total_time_ms": 14302,
+  "stream_frames": 3,
+  "function_calls": 0,
+  "usage": {
+    "prompt_tokens": 886,
+    "answer_tokens": 27,
+    "total_tokens": 982
+  }
+}

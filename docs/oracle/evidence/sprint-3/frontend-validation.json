@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-10",
+  "stream_checks_passed": 8,
+  "commands": [
+    {"command": "node scripts/check-oracle-stream.mjs", "exit_code": 0},
+    {"command": "tsc --noEmit --incremental false", "exit_code": 0},
+    {"command": "eslint src/app/(dashboard)/oracle/page.tsx src/lib/oracle-stream.ts", "exit_code": 0},
+    {"command": "npm run build", "exit_code": 0}
+  ],
+  "warning": "Existing Next.js middleware-to-proxy deprecation",
+  "signed_in_browser_checked": false,
+  "real_provider_called": false,
+  "scope": "Automated stream parser and frontend static/build gates"
+}

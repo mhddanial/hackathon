@@ -61,7 +61,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 | **Port Congestion Prediction** | Random Forest model (95.1% accuracy); fallback to Supabase DB lookup |
 | **Route Optimization** | OSRM routing engine + ML congestion multiplier; Haversine fallback |
 | **Ferry Schedule Access** | Live query to Supabase `ferry_schedules` table (20 schedules) |
-| **AI Assistant** | Google Gemini 2.5 Flash with function-calling tools wired to real APIs |
+| **AI Assistant** | Gemini 3.5 Flash through Google's official Python SDK with validated native tools |
 | **Emission Scoring** | `distance_km × 0.2 kg/km × congestion_multiplier` per route query |
 
 ---
@@ -83,7 +83,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 | # | Story | Acceptance Criteria |
 |---|---|---|
 | US-06 | See Batu Ampar Port capacity utilization | Dashboard congestion % bar for primary port segment (SEG001) |
-| US-07 | System degrades gracefully when external APIs are unavailable | OSRM → Haversine; ML → DB; Gemini → rule-based fallback |
+| US-07 | System degrades gracefully when external APIs are unavailable | OSRM → Haversine; ML → DB; Oracle reports a safe failed outcome when Gemini is unavailable |
 
 ---
 
@@ -131,11 +131,14 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 - Loading state with spinner; polished empty state with Retry button
 
 ### 🤖 Logistic Oracle (AI Chat)
-- Powered by `google/gemini-3.5-flash` through Lightning AI's OpenAI-compatible API, with function-calling
+- Powered by `gemini-3.5-flash` through Google's official `google-genai` Python SDK, with native function calling
 - 3 registered tools: `get_congestion_level`, `get_ferry_schedule`, `get_optimal_route`
 - Quick-action suggestion chips for common queries
 - Typing animation while AI is responding
-- Fallback message if Gemini quota exceeded
+- Verified Supabase authentication, persisted owned turns/tools/results, and stable retry IDs
+- Streamed text remains provisional until persistence succeeds; provider failures return a saved failed outcome when possible
+- Saved conversation list, reopening after refresh, paginated history, and archive/restore
+- Result cards/modal are next; see the [current Oracle context](docs/oracle/context/CURRENT_STATE.md)
 
 ### 📊 Dashboard Overview
 - Live port congestion badge for Yos Sudarso (SEG001) from ML API
@@ -176,7 +179,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 | Supabase Python SDK | 2.31.0 | PostgreSQL client |
 | scikit-learn | 1.9.0 | Random Forest ML model |
 | joblib | 1.5.3 | Model serialization |
-| OpenAI Python SDK | latest | Lightning AI OpenAI-compatible API + function-calling |
+| Google Gen AI Python SDK | 2.29.0 | Official Gemini Developer API + native function calling |
 | Requests | latest | OSRM external API calls |
 | python-dotenv | latest | .env loading |
 
@@ -189,7 +192,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 | Frontend Deployment | Vercel | Auto-deploy from GitHub main |
 | Backend Deployment | Railway | Containerized FastAPI |
 | Routing Engine | OSRM Public API | Road routing GeoJSON |
-| AI Model | `google/gemini-3.5-flash` via Lightning AI | NL logistics assistant |
+| AI Model | `gemini-3.5-flash` via Gemini Developer API | NL logistics assistant |
 
 ---
 
@@ -277,16 +280,18 @@ Retrieve all ferry schedules from Supabase.
 
 ### POST `/agent/chat`
 
-Send a natural language message to the AI logistics assistant.
+Send a logistics question with `Authorization: Bearer <Supabase access token>`.
 
-**Request:** `{ "message": "What is the congestion at Yos Sudarso right now?" }`
+**Request:** `{ "message": "Estimate SEG001 congestion on a weekday at 08:00", "client_request_id": "00000000-0000-4000-8000-000000000031" }`. Add `conversation_id` for a follow-up; reuse the request ID/content for an uncertain retry.
 
-**Response:** `{ "reply": "Based on current data, Yos Sudarso (SEG001) is experiencing HIGH congestion..." }`
+**Response:** `text/event-stream` frames containing JSON events: `metadata`, `status`, `chunk`, `result`, `error`, and `done`. A completed `done` requires persisted server IDs. Auth/ownership/initial DB failures use ordinary HTTP errors before streaming. Terminal retries replay saved outcomes without rerunning the provider/tools.
 
 **AI tools:**
-- `get_congestion_level(segment_id, day_type, hour)` → calls real ML API
-- `get_ferry_schedule(terminal)` → queries Supabase
-- `get_optimal_route(origin, destination)` → returns routing data
+- `get_congestion_level(segment_id, day_type, hour)` → project congestion estimate with provenance
+- `get_ferry_schedule(terminal, destination?)` → up to 20 recorded departures; freshness unverified
+- `get_optimal_route(origin, destination, time, day_type, vessel_etd?, cargo_type?)` → bounded validated route estimates
+
+See the [implemented Oracle API contract](docs/oracle/contracts/ORACLE_API_CONTRACT.md) for limits, failure/retry behavior, and storage. Automated verification passed; real authenticated provider/browser execution remains pending.
 
 ---
 
@@ -406,7 +411,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
 ```
 SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_ANON_KEY=<anon-key>
-LIGHTNING_API_KEY=<lightning-api-key>
+GEMINI_API_KEY=<google-ai-studio-api-key>
+GEMINI_MODEL=gemini-3.5-flash
 ```
 
 ---
@@ -427,7 +433,7 @@ cd hackathon
 cd backend
 python -m venv .venv
 .venv\Scripts\activate
-pip install fastapi uvicorn supabase openai scikit-learn joblib python-dotenv requests
+pip install -r requirements.txt
 cp .env.example .env    # Fill in your keys
 uvicorn main:app --reload
 # → http://127.0.0.1:8000  |  Swagger: /docs
@@ -450,7 +456,8 @@ npm run dev
 ```env
 SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_ANON_KEY=eyJ...
-LIGHTNING_API_KEY=<lightning-api-key>
+GEMINI_API_KEY=<google-ai-studio-api-key>
+GEMINI_MODEL=gemini-3.5-flash
 ```
 
 ### Frontend `.env.local`

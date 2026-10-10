@@ -1,0 +1,720 @@
+{
+  "columns": [
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "conversation_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": "auth.uid()",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "turn_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "client_request_id",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "ordinal_position": 5,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "sequence",
+      "data_type": "bigint",
+      "is_nullable": "NO",
+      "ordinal_position": 6,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "role",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 7,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "content",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 8,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": "'in_progress'::text",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 9,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "tool_call_id",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 10,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "tool_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 11,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "tool_arguments",
+      "data_type": "jsonb",
+      "is_nullable": "YES",
+      "ordinal_position": 12,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "tool_result",
+      "data_type": "jsonb",
+      "is_nullable": "YES",
+      "ordinal_position": 13,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": "'[]'::jsonb",
+      "column_name": "tool_calls",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "ordinal_position": 14,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": "'[]'::jsonb",
+      "column_name": "structured_results",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "ordinal_position": 15,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": null,
+      "column_name": "data_status",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 16,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 17,
+      "table_name": "chat_messages"
+    },
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "conversations"
+    },
+    {
+      "column_default": "auth.uid()",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "conversations"
+    },
+    {
+      "column_default": null,
+      "column_name": "title",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 3,
+      "table_name": "conversations"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "conversations"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "conversations"
+    },
+    {
+      "column_default": null,
+      "column_name": "archived_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "conversations"
+    },
+    {
+      "column_default": "uuid_generate_v4()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "origin",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "destination",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "requested_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 4,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "recommended_departure",
+      "data_type": "time without time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 5,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": null,
+      "column_name": "result_json",
+      "data_type": "jsonb",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "route_query_log"
+    },
+    {
+      "column_default": "auth.uid()",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "ordinal_position": 7,
+      "table_name": "route_query_log"
+    }
+  ],
+  "constraints": [
+    {
+      "constraint_name": "chat_messages_completed_assistant",
+      "definition": "CHECK (((role <> 'assistant'::text) OR (status <> 'completed'::text) OR ((content IS NOT NULL) AND (char_length(btrim(content)) > 0))))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_conversation_owner",
+      "definition": "FOREIGN KEY (conversation_id, user_id) REFERENCES conversations(id, user_id) ON DELETE CASCADE",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_data_status_check",
+      "definition": "CHECK (((data_status IS NULL) OR (data_status = ANY (ARRAY['synthetic_estimate'::text, 'database'::text, 'estimated'::text, 'default_fallback'::text, 'unknown'::text]))))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_identity_owner",
+      "definition": "UNIQUE (id, conversation_id, user_id)",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_order",
+      "definition": "UNIQUE (conversation_id, sequence)",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_pkey",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_request_once",
+      "definition": "UNIQUE (user_id, client_request_id)",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_role_check",
+      "definition": "CHECK ((role = ANY (ARRAY['user'::text, 'assistant'::text, 'tool'::text])))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_status_check",
+      "definition": "CHECK ((status = ANY (ARRAY['in_progress'::text, 'completed'::text, 'failed'::text, 'interrupted'::text])))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_structured_results_check",
+      "definition": "CHECK ((jsonb_typeof(structured_results) = 'array'::text))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_tool_arguments_check",
+      "definition": "CHECK (((tool_arguments IS NULL) OR (jsonb_typeof(tool_arguments) = 'object'::text)))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_tool_calls_check",
+      "definition": "CHECK ((jsonb_typeof(tool_calls) = 'array'::text))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_tool_fields",
+      "definition": "CHECK (((role <> 'tool'::text) OR ((tool_call_id IS NOT NULL) AND (tool_name IS NOT NULL) AND (tool_arguments IS NOT NULL) AND (tool_result IS NOT NULL))))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_tool_name_check",
+      "definition": "CHECK (((tool_name IS NULL) OR (tool_name = ANY (ARRAY['get_congestion_level'::text, 'get_ferry_schedule'::text, 'get_optimal_route'::text]))))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_tool_result_check",
+      "definition": "CHECK (((tool_result IS NULL) OR (jsonb_typeof(tool_result) = 'object'::text)))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_turn_owner",
+      "definition": "FOREIGN KEY (turn_id, conversation_id, user_id) REFERENCES chat_messages(id, conversation_id, user_id) ON DELETE CASCADE",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "chat_messages_user_turn",
+      "definition": "CHECK ((((role = 'user'::text) AND (id = turn_id) AND (client_request_id IS NOT NULL) AND (content IS NOT NULL) AND ((char_length(btrim(content)) >= 1) AND (char_length(btrim(content)) <= 8000))) OR ((role <> 'user'::text) AND (id <> turn_id) AND (client_request_id IS NULL))))",
+      "table_name": "chat_messages"
+    },
+    {
+      "constraint_name": "conversations_id_owner",
+      "definition": "UNIQUE (id, user_id)",
+      "table_name": "conversations"
+    },
+    {
+      "constraint_name": "conversations_pkey",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "conversations"
+    },
+    {
+      "constraint_name": "conversations_title_check",
+      "definition": "CHECK (((title IS NULL) OR ((char_length(btrim(title)) >= 1) AND (char_length(btrim(title)) <= 160))))",
+      "table_name": "conversations"
+    },
+    {
+      "constraint_name": "conversations_user_id_fkey",
+      "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "conversations"
+    },
+    {
+      "constraint_name": "route_query_log_pkey",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "route_query_log"
+    },
+    {
+      "constraint_name": "route_query_log_user_id_fkey",
+      "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE SET NULL",
+      "table_name": "route_query_log"
+    }
+  ],
+  "grants": [
+    {
+      "grantee": "authenticated",
+      "privilege_type": "DELETE",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "INSERT",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "UPDATE",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "chat_messages"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "DELETE",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "INSERT",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "UPDATE",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "conversations"
+    },
+    {
+      "grantee": "authenticated",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "DELETE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "INSERT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "REFERENCES",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "SELECT",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRIGGER",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "TRUNCATE",
+      "table_name": "route_query_log"
+    },
+    {
+      "grantee": "service_role",
+      "privilege_type": "UPDATE",
+      "table_name": "route_query_log"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_messages_delete",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_messages_insert",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM conversations c\n  WHERE ((c.id = chat_messages.conversation_id) AND (c.user_id = ( SELECT auth.uid() AS uid)) AND (c.archived_at IS NULL)))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_messages_select",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_messages_update",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "chat_messages",
+      "with_check": "((user_id = ( SELECT auth.uid() AS uid)) AND (EXISTS ( SELECT 1\n   FROM conversations c\n  WHERE ((c.id = chat_messages.conversation_id) AND (c.user_id = ( SELECT auth.uid() AS uid)) AND (c.archived_at IS NULL)))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "congestion_multipliers_public_read",
+      "qual": "true",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "tablename": "congestion_multipliers",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_conversations_delete",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_conversations_insert",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_conversations_select",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "oracle_conversations_update",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "conversations",
+      "with_check": "(user_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "ferry_schedules_public_read",
+      "qual": "true",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "tablename": "ferry_schedules",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can insert own profile",
+      "qual": null,
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": "(auth.uid() = id)"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can update own profile",
+      "qual": "(auth.uid() = id)",
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can view own profile",
+      "qual": "(auth.uid() = id)",
+      "roles": [
+        "public"
+      ],
+      "tablename": "profiles",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "road_segments_public_read",
+      "qual": "true",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "tablename": "road_segments",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "route_query_log_owner_read",
+      "qual": "(user_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "route_query_log",
+      "with_check": null
+    }
+  ],
+  "tables": [
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "chat_messages"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "congestion_multipliers"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "conversations"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "ferry_schedules"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": false,
+      "table_name": "profiles"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "road_segments"
+    },
+    {
+      "rls_enabled": true,
+      "rls_forced": true,
+      "table_name": "route_query_log"
+    }
+  ]
+}
