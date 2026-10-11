@@ -1,103 +1,86 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Map, Ship, MessageSquare, X, LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, Map, Ship, MessageSquare, X } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
+  SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton,
+  SidebarMenuItem, SidebarRail, SidebarSeparator, useSidebar,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/components/providers/AuthProvider";
-import { createClient } from "@/utils/supabase/client";
+import { NavUser } from "@/components/layout/NavUser";
 
-// Used original icons and links for the sidebar items
-const items = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Route Planner", url: "/planner", icon: Map },
-  { title: "Ferry Schedules", url: "/schedules", icon: Ship },
-  { title: "Logistics Oracle", url: "/oracle", icon: MessageSquare },
+const navigation = [
+  { label: "Overview", items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }] },
+  { label: "Operations", items: [
+    { title: "Route Planner", url: "/planner", icon: Map },
+    { title: "Ferry Schedules", url: "/schedules", icon: Ship },
+  ] },
+  { label: "Intelligence", items: [{ title: "Logistics Oracle", url: "/oracle", icon: MessageSquare }] },
 ];
 
 export function AppSidebar() {
-  const supabase = createClient();
   const pathname = usePathname();
-  const router = useRouter();
   const { setOpenMobile, isMobile } = useSidebar();
-  const { user } = useAuth();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
-  // Get initials from user's full name or email
-  const getInitials = () => {
-    if (user?.user_metadata?.full_name) {
-      const names = user.user_metadata.full_name.split(" ");
-      return names.length > 1 
-        ? `${names[0][0]}${names[1][0]}`.toUpperCase() 
-        : names[0].substring(0, 2).toUpperCase();
-    }
-    return user?.email ? user.email.substring(0, 2).toUpperCase() : "US";
-  };
-
-  const displayName = user?.user_metadata?.full_name || user?.email || "User";
+  const closeMobile = () => { if (isMobile) setOpenMobile(false); };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-[#EFF6FF] group">
-      <SidebarHeader className="h-20 flex flex-row items-center px-6 border-b border-sidebar-border/50 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
-        <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-          <img src="/logo-icon.png" alt="Logo" className="h-10 w-10 object-contain" />
-          <span className="text-xl font-bold text-[#155EEF] group-data-[collapsible=icon]:hidden">
-            SmartFlow
-          </span>
-        </Link>
-        {isMobile && (
-          <Button variant="ghost" size="icon" className="md:hidden ml-auto text-sidebar-foreground hover:bg-sidebar-accent" onClick={() => setOpenMobile(false)}>
-            <X className="w-5 h-5" />
-          </Button>
-        )}
+    <Sidebar variant="inset" collapsible="icon" role="navigation" aria-label="Main navigation">
+      <SidebarHeader className="h-(--header-height) justify-center">
+        <SidebarMenu>
+          <SidebarMenuItem className="flex items-center gap-1">
+            <SidebarMenuButton
+              size="lg"
+              render={<Link href="/dashboard" />}
+              tooltip="SmartFlow dashboard"
+              onClick={closeMobile}
+              className="h-10 rounded-lg hover:bg-sidebar-accent"
+            >
+              <Image src="/logo-icon.png" alt="" width={32} height={32} className="size-6 shrink-0 object-contain" />
+              <span className="text-lg font-semibold tracking-tight text-primary">SmartFlow</span>
+            </SidebarMenuButton>
+            {isMobile && (
+              <Button variant="ghost" size="icon" className="size-9 shrink-0 rounded-lg" aria-label="Close navigation" onClick={() => setOpenMobile(false)}>
+                <X />
+              </Button>
+            )}
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
-      
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent className="pt-4">
-            <SidebarMenu className="gap-4 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center">
-              {items.map((item) => {
-                const isActive = pathname === item.url;
-                
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      render={<Link href={item.url} />}
-                      isActive={isActive}
-                      tooltip={item.title}
-                      className="h-11 px-4 font-semibold transition-colors text-slate-500 hover:text-slate-900 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg"
-                      onClick={() => {
-                        if (isMobile) setOpenMobile(false);
-                      }}
-                    >
-                      <item.icon className="w-5 h-5" />
-                      <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarSeparator />
+      <SidebarContent className="gap-2 py-2">
+        {navigation.map((section) => (
+          <SidebarGroup key={section.label}>
+            <SidebarGroupLabel className="text-[11px] font-medium tracking-wide">{section.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
+                  return (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton
+                        render={<Link href={item.url} aria-current={isActive ? "page" : undefined} />}
+                        isActive={isActive}
+                        tooltip={item.title}
+                        onClick={closeMobile}
+                        className="h-10 rounded-lg px-3 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground data-active:text-sidebar-primary-foreground data-active:hover:text-sidebar-primary-foreground"
+                      >
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
-
+      <SidebarSeparator />
+      <SidebarFooter><NavUser /></SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }

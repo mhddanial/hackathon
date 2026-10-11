@@ -130,12 +130,12 @@ export default function RouteRecommendationPage() {
   const routeCoordinates = routeData?.route_geometry?.coordinates?.map((coord: number[]) => [coord[1], coord[0]]) || null;
 
   return (
-    <div className="flex flex-col bg-[#F8F9FB] rounded-tl-3xl p-8 overflow-y-auto min-h-screen">
+    <div className="flex min-w-0 flex-col">
       
       {/* Header */}
-      <div className="flex justify-between items-end mb-8">
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-[28px] font-semibold text-[#1A1D27] mb-1">Route Recommendation</h1>
+          <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground">Route Recommendation</h1>
           <p className="text-sm text-[#5E6470]">Optimize your logistics path for speed, cost, and reduced emission impact.</p>
         </div>
         <Button className="rounded-lg px-4 h-10 bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm font-medium">
@@ -293,7 +293,7 @@ export default function RouteRecommendationPage() {
           </Card>
 
           {/* Mini Cards Row */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
             
             {/* Departure Window */}
             <Card className="rounded-[16px] p-6 shadow-sm border-[#E2E8F0] bg-white flex flex-col justify-between h-full">
@@ -372,7 +372,7 @@ export default function RouteRecommendationPage() {
           {/* Bottom Summary Bar */}
           <Card className="rounded-[16px] p-6 shadow-sm border-[#E2E8F0] bg-white flex justify-between items-center">
             
-            <div className="flex gap-6 lg:gap-10">
+            <div className="grid w-full grid-cols-2 gap-4 @4xl/main:grid-cols-4">
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">EST. DURATION</span>
                 <span className="text-2xl font-bold text-[#1A1D27]">
@@ -380,7 +380,6 @@ export default function RouteRecommendationPage() {
                 </span>
               </div>
               
-              <div className="w-px h-10 bg-[#E2E8F0]"></div>
               
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">DISTANCE</span>
@@ -389,7 +388,6 @@ export default function RouteRecommendationPage() {
                 </span>
               </div>
               
-              <div className="w-px h-10 bg-[#E2E8F0]"></div>
               
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">CONGESTION</span>
@@ -409,7 +407,6 @@ export default function RouteRecommendationPage() {
                 </div>
               </div>
 
-              <div className="w-px h-10 bg-[#E2E8F0]"></div>
               
               <div className="flex flex-col gap-0.5">
                 <span className="text-[10px] font-bold text-[#2563EB] uppercase tracking-widest">OPTIMAL DEPARTURE</span>

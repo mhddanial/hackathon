@@ -1,75 +1,56 @@
 "use client";
 
-import { Search, LogOut } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Fragment } from "react";
+import {
+  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList,
+  BreadcrumbPage, BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useAuth } from "@/components/providers/AuthProvider";
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+const routeLabels: Record<string, string> = {
+  dashboard: "Dashboard", planner: "Route Planner",
+  schedules: "Ferry Schedules", oracle: "Logistics Oracle",
+};
 
 export default function Topbar() {
-  const { user } = useAuth();
-  const supabase = createClient();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
-
-  const getInitials = () => {
-    if (user?.user_metadata?.full_name) {
-      const names = user.user_metadata.full_name.split(" ");
-      return names.length > 1 
-        ? `${names[0][0]}${names[1][0]}`.toUpperCase() 
-        : names[0].substring(0, 2).toUpperCase();
-    }
-    return user?.email ? user.email.substring(0, 2).toUpperCase() : "US";
-  };
-
-  const displayName = user?.user_metadata?.full_name || user?.email || "User";
+  const segments = usePathname().split("/").filter(Boolean);
 
   return (
-    <header className="h-20 bg-background/80 backdrop-blur-md border-b border-sidebar-border flex items-center justify-between px-8 sticky top-0 z-50">
-      <div className="flex items-center gap-2 md:gap-4">
-        <SidebarTrigger className="text-sidebar-foreground" />
-        <div className="hidden md:block w-[480px]">
-          <div className="relative">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input 
-              type="text" 
-              placeholder="Search shipments or agents..." 
-              className="w-full h-11 bg-accent/50 rounded-full pl-12 pr-4 text-sm border-transparent focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary shadow-none"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="rounded-full text-foreground hover:text-primary md:hidden">
-          <Search className="w-5 h-5" />
-        </Button>
-        
-        {/* User Profile & Sign Out */}
-        <div className="flex items-center gap-3">
-          <span className="text-[#1A1D27] text-sm font-medium hidden md:block">
-            {displayName}
-          </span>
-          <Avatar className="w-10 h-10 border border-sidebar-border bg-sidebar-accent">
-            {user?.user_metadata?.avatar_url ? (
-               <AvatarImage src={user.user_metadata.avatar_url} />
-            ) : (
-               <AvatarFallback className="bg-slate-300 font-bold text-foreground">{getInitials()}</AvatarFallback>
-            )}
-          </Avatar>
-          
-          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-[#5E6470] hover:text-[#1A1D27] hover:bg-slate-100 ml-2" title="Sign Out">
-            <LogOut className="w-5 h-5" />
-          </Button>
-        </div>
-      </div>
+    <header className="sticky top-0 z-30 flex h-(--header-height) shrink-0 items-center gap-3 border-b bg-card px-4 md:rounded-t-xl lg:px-6">
+      <SidebarTrigger className="-ml-2 size-9 rounded-lg" />
+      <Separator orientation="vertical" className="h-4!" />
+      <Breadcrumb className="min-w-0">
+        <BreadcrumbList className="flex-nowrap">
+          {segments[0] !== "dashboard" && (
+            <>
+              <BreadcrumbItem className="hidden sm:inline-flex">
+                <BreadcrumbLink render={<Link href="/dashboard" />}>Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden sm:block" />
+            </>
+          )}
+          {segments.map((segment, index) => {
+            const href = "/" + segments.slice(0, index + 1).join("/");
+            const label = routeLabels[segment] ?? segment.replace(/-/g, " ");
+            const isLast = index === segments.length - 1;
+            return (
+              <Fragment key={href}>
+                {index > 0 && <BreadcrumbSeparator />}
+                <BreadcrumbItem className="min-w-0">
+                  {isLast ? (
+                    <BreadcrumbPage className="truncate font-medium">{label}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink render={<Link href={href} />}>{label}</BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              </Fragment>
+            );
+          })}
+        </BreadcrumbList>
+      </Breadcrumb>
     </header>
   );
 }

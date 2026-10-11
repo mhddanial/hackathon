@@ -63,11 +63,11 @@ export default function FerrySchedulesPage() {
   ];
 
   return (
-    <div className="flex flex-col bg-[#F8F9FB] rounded-tl-3xl p-8 overflow-y-auto min-h-screen">
+    <div className="flex min-w-0 flex-col">
       {/* Header */}
-      <div className="flex justify-between items-end mb-8">
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-[28px] font-semibold text-[#1A1D27] mb-1">Live Port Schedules</h1>
+          <h1 className="mb-1 text-2xl font-semibold tracking-tight text-foreground">Live Port Schedules</h1>
           <p className="text-sm text-[#5E6470]">Real-time departure boards and manifest capacity.</p>
         </div>
         <div className="flex gap-2">
@@ -112,13 +112,14 @@ export default function FerrySchedulesPage() {
         </div>
 
         {/* Right Column: Table area with Tabs */}
-        <div className="lg:col-span-9 flex flex-col">
+        <div className="lg:col-span-9 flex min-w-0 flex-col">
           <Card className="rounded-[16px] shadow-sm border-[#E2E8F0] bg-white flex flex-col overflow-hidden w-full h-[600px]">
             
             <Tabs defaultValue="all" value={selectedTerminal} onValueChange={setSelectedTerminal} className="w-full flex-1 flex flex-col">
               
-              <div className="flex justify-between items-center p-4 border-b border-[#E2E8F0] bg-[#F8F9FB]/50">
-                <TabsList className="bg-transparent space-x-2">
+              <div className="flex flex-col items-start justify-between gap-3 border-b border-[#E2E8F0] bg-[#F8F9FB]/50 p-4 xl:flex-row xl:items-center">
+                <div className="w-full min-w-0 overflow-x-auto xl:w-auto">
+                <TabsList className="w-max bg-transparent space-x-2">
                   {terminals.map(term => (
                     <TabsTrigger 
                       key={term.id} 
@@ -129,6 +130,7 @@ export default function FerrySchedulesPage() {
                     </TabsTrigger>
                   ))}
                 </TabsList>
+                </div>
                 
                 <div className="flex items-center bg-white px-4 py-2 rounded-lg border border-[#E2E8F0]">
                   <Calendar className="w-4 h-4 text-[#5E6470] mr-2" />

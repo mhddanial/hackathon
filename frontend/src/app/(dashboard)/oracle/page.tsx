@@ -273,8 +273,8 @@ function OracleChat({ userId }: { userId: string }) {
   const recentActive = hasRecentActiveTurn(storedRows);
   const blocked = loading || historyLoading || mutating || !!historyError || !!messageCursor || !!retryTurn || recentActive || !!selected?.archived_at;
 
-  return <div className="flex flex-col min-h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)] gap-4">
-    <header className="shrink-0"><h1 className="text-[28px] font-semibold text-[#1A1D27] flex items-center gap-2"><Sparkles className="w-6 h-6 text-[#2563EB]" />Logistic Oracle</h1>
+  return <div className="flex min-w-0 flex-col gap-4 lg:h-[calc(100svh-var(--header-height)-var(--dashboard-inset)-var(--dashboard-padding)-var(--dashboard-padding))] lg:min-h-[36rem]">
+    <header className="shrink-0"><h1 className="mb-1 flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground"><Sparkles className="w-6 h-6 text-primary" />Logistic Oracle</h1>
       <p className="text-sm text-[#5E6470]">Your saved logistics conversations</p></header>
     <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-4">
       <ConversationList items={conversations} selected={selectedId} loading={listLoading} error={listError} includeArchived={includeArchived}
