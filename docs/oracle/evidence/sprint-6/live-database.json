@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-11",
+  "project_ref": "rrkafcbuhnnwnduvwluq",
+  "ownership": {
+    "scope": "Direct database roles/claims with existing identities; no valid JWT login tested; synthetic rows rolled back",
+    "checks": [
+      {
+        "name": "user_a_select_isolation",
+        "passed": true
+      },
+      {
+        "name": "foreign_update_delete_isolation",
+        "passed": true
+      },
+      {
+        "name": "foreign_append_denied",
+        "passed": true
+      },
+      {
+        "name": "forged_owner_denied",
+        "passed": true
+      },
+      {
+        "name": "owner_transfer_denied",
+        "passed": true
+      },
+      {
+        "name": "own_append_allowed",
+        "passed": true
+      },
+      {
+        "name": "duplicate_retry_denied",
+        "passed": true
+      },
+      {
+        "name": "archive_append_denied_history_preserved",
+        "passed": true
+      },
+      {
+        "name": "user_b_select_isolation",
+        "passed": true
+      },
+      {
+        "name": "anonymous_privileges_denied",
+        "passed": true
+      }
+    ]
+  },
+  "lifecycle": {
+    "scope": "Installed RPCs and RLS with simulated claims",
+    "checks_passed": 11,
+    "persistent_test_data": "none; rolled back"
+  },
+  "counts_before": {
+    "messages": 30,
+    "conversations": 8
+  },
+  "counts_after": {
+    "messages": 30,
+    "conversations": 8
+  }
+}

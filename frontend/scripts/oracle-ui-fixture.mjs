@@ -14,7 +14,7 @@ const jwt = owner => `${Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })
 const session = owner => ({ access_token: jwt(owner), refresh_token: owner === owners.a ? "synthetic-refresh-a" : "synthetic-refresh-b", token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, user: user(owner) });
 function ownerOf(req) { try { const token = req.headers.authorization?.replace(/^Bearer /, ""); const owner = JSON.parse(Buffer.from(token.split(".")[1], "base64url")).sub; return Object.values(owners).includes(owner) ? owner : null; } catch { return null; } }
 const conversations = new Map(), turns = new Map(), requests = [];
-let sequence = 0, nextMode = "normal", listFailure = false, emptyList = false, authFailures = 0, executions = 0;
+let sequence = 0, nextMode = "normal", nextResults, listFailure = false, emptyList = false, authFailures = 0, executions = 0;
 function createConversation(owner, title, key = randomUUID(), archived = false) {
   const time = new Date(Date.now() - 60000).toISOString();
   const value = { id: key, title, created_at: time, updated_at: time, archived_at: archived ? time : null, owner, messages: [] };
@@ -53,6 +53,14 @@ const server = createServer(async (req, res) => {
   const owner = ownerOf(req);
   if (url.pathname === "/__control" && req.method === "POST") {
     if (body.mode) nextMode = body.mode;
+    if (Array.isArray(body.nextResults)) nextResults = body.nextResults;
+    if (body.savedResults) {
+      const conversation = conversations.get(body.savedResults.conversationId);
+      if (!conversation) { sendJson(res, {}, 404); return; }
+      const answer = conversation.messages.filter(row => row.role === "assistant").at(-1);
+      answer.structured_results = body.savedResults.results;
+      if (body.savedResults.status) for (const row of conversation.messages.filter(row => row.turn_id === answer.turn_id)) row.status = body.savedResults.status;
+    }
     if (typeof body.listFailure === "boolean") listFailure = body.listFailure;
     if (typeof body.emptyList === "boolean") emptyList = body.emptyList;
     if (typeof body.authFailures === "number") authFailures = body.authFailures;
@@ -88,7 +96,7 @@ const server = createServer(async (req, res) => {
     let turn = turns.get(`${owner}:${body.client_request_id}`);
     const replay = !!turn;
     if (turn && turn.answer.status === "in_progress") { sendJson(res, {}, 409); return; }
-    const mode = nextMode; nextMode = "normal";
+    const mode = nextMode, results = nextResults; nextMode = "normal"; nextResults = undefined;
     if (!turn && mode === "conflict") { sendJson(res, {}, 409); return; }
     if (!turn) {
       const conversation = body.conversation_id ? conversations.get(body.conversation_id) : createConversation(owner, body.message.slice(0, 80));
@@ -99,13 +107,14 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" });
     frame(res, metadata(turn));
     if (replay) { frame(res, { type: "chunk", content: turn.answer.content }); terminal(res, turn); return; }
-    if (mode === "failed") { finish(turn, "failed"); frame(res, { type: "error", content: "Synthetic provider failure" }); terminal(res, turn); return; }
+    if (mode === "failed") { finish(turn, "failed"); if (results) turn.answer.structured_results = results; frame(res, { type: "error", content: "Synthetic provider failure" }); terminal(res, turn); return; }
     if (mode === "slow") {
       frame(res, { type: "chunk", content: "Partial old-conversation response" });
       setTimeout(() => { if (turn.answer.status === "in_progress") finish(turn); frame(res, { type: "chunk", content: " LATE old-conversation response" }); terminal(res, turn); }, 2500); return;
     }
-    if (mode === "save-failure") { frame(res, { type: "chunk", content: "Provisional answer" }); terminal(res, turn, false); return; }
+    if (mode === "save-failure") { if (results) turn.answer.structured_results = results; frame(res, { type: "chunk", content: "Provisional answer" }); terminal(res, turn, false); return; }
     finish(turn);
+    if (results) turn.answer.structured_results = results;
     frame(res, { type: "chunk", content: turn.answer.content });
     if (mode === "drop") { res.end(); return; }
     terminal(res, turn); return;

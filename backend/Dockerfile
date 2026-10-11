@@ -17,4 +17,4 @@ COPY . .
 # Expose port (Removed to allow Railway auto-detection of $PORT)
 
 # Start command (using Railway's PORT environment variable)
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}"]

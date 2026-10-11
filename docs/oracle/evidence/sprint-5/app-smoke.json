@@ -1,0 +1,19 @@
+{
+  "checks": {
+    "backend_health": {
+      "status": 200,
+      "body": {
+        "status": "ok"
+      }
+    },
+    "public_reference": {
+      "status": 200,
+      "success": true
+    },
+    "anonymous_oracle": {
+      "status": 307,
+      "login_redirect": true
+    }
+  },
+  "scope": "Normal local configuration restored on ports 3000/8000; public reference read and anonymous redirect only; no signed-in chat/history test"
+}

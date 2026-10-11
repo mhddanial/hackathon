@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-11",
+  "timezone": "Asia/Jakarta",
+  "branch": "danial",
+  "status": "Local implementation and automated gates passed; live acceptance partial",
+  "backend_suite": { "passed": 282, "failed": 0, "skipped": 0, "elapsed_seconds": 52.0, "expected_malformed_fixture_warnings": 2, "scope": "Actual disposable PostgreSQL with real SDK/RPC/RLS; synthetic Auth/provider transports" },
+  "new_backend_coverage": { "congestion_cases": 65, "actual_tool_persistence_cases": 2, "additional_native_sdk_429_case": 1 },
+  "frontend_checks": { "passed": 44, "result_contract": 16, "api_history": 20, "stream": 8 },
+  "chromium_checks": { "passed": 35, "result_scenarios": 16, "history_scenarios": 17, "edges": 2, "scope": "Real Next/React/Supabase SDK with local synthetic Auth/API and two simulated accounts" },
+  "installed_live_database": { "passed": 21, "ownership": 10, "lifecycle": 11, "scope": "Installed Supabase roles/claims; not genuine JWT login", "all_test_rows_rolled_back": true, "existing_counts_preserved": true },
+  "model_audit": { "public_source_segments": 6, "public_source_windows": 25, "synthetic_rows": 14400, "accuracy": 0.9506944444444444, "test_rows": 2880, "test_inputs_also_in_training": 2880, "artifact_predictions_match_reproduction": true, "artifact_unchanged": true, "real_traffic_evaluation": false },
+  "typescript": { "passed": true },
+  "targeted_eslint": { "passed": true },
+  "production_build": { "passed": true, "existing_warning": "Next middleware convention deprecated in favor of proxy" },
+  "local_smoke": { "passed": true, "checks": 7, "frontend_port": 3000, "backend_port": 8000, "provider_called": false, "signed_in_persistence": false },
+  "artifact_syntax_credentials_encoding_whitespace": { "passed": true },
+  "live_provider": { "completed_gate": false, "attempted_turns": 4, "valid_public_tools_in_first_turn": 2, "separate_direct_sdk_status": 429, "exact_quota_bucket_or_reset_known": false, "calls_stopped": true, "configured_model": "gemini-3.6-flash", "configuration_changed": false },
+  "remaining_live_gates": ["Genuine Supabase A/B JWT/API/REST/browser persistence and result inspection", "Completed Gemini multi-tool answer and saved-reference follow-up", "Live missing-input clarification and unrelated-domain response adherence"],
+  "unchanged": ["Historical hackathon documents", "Model artifact", "Training notebook", "Route/departure owner business logic", "Real environment credentials/configuration", "Database schema/policies/migration history", "Auth accounts", "Package dependencies"],
+  "deployment_performed": false,
+  "git_commit_or_push_performed": false
+}

@@ -2,9 +2,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
 
-const source = await readFile(new URL("../src/lib/oracle-stream.ts", import.meta.url), "utf8");
-const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ES2022 } }).outputText;
-const { consumeOracleStream } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
+async function compile(path, dependencies = {}) {
+  const source = await readFile(new URL(path, import.meta.url), "utf8");
+  const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const exports = {};
+  new Function("require", "exports", code)(name => { assert.ok(name in dependencies, `Unexpected dependency ${name}`); return dependencies[name]; }, exports);
+  return exports;
+}
+const results = await compile("../src/lib/oracle-results.ts");
+const { consumeOracleStream } = await compile("../src/lib/oracle-stream.ts", { "./oracle-results": results });
 const id = "00000000-0000-4000-8000-000000000001";
 const events = [
   { type: "metadata", conversation_id: id, turn_id: id, user_message_id: id, assistant_message_id: id },

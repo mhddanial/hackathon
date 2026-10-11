@@ -1,0 +1,229 @@
+{
+  "scope": "Current public project reference data; synthetic notebook reproduction and unchanged stored artifact. No real traffic evaluation.",
+  "source": {
+    "road_segments": 6,
+    "source_windows": 25,
+    "ordered_rows_sha256": "84996e10225029fca269b98598664b23eebdb04fe7c456365ef517f6c66b975c",
+    "coverage": {
+      "SEG001/weekday": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG001/weekend": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG002/weekday": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG002/weekend": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG003/weekday": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG003/weekend": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG004/weekday": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG004/weekend": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG005/weekday": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG005/weekend": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG006/weekday": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      },
+      "SEG006/weekend": {
+        "missing_hours": [],
+        "overlapping_hours": []
+      }
+    }
+  },
+  "generation": {
+    "samples_per_hour": 50,
+    "noise_range": 0.1,
+    "numpy_seed": 42,
+    "rows": 14400,
+    "class_counts": {
+      "low": 11750,
+      "medium": 1750,
+      "high": 900
+    },
+    "unique_input_patterns": 144,
+    "contradictory_label_patterns": 15,
+    "noise_feature_used": false,
+    "segment_id_feature_used": false
+  },
+  "split": {
+    "method": "Stratified random row split",
+    "test_size": 0.2,
+    "random_state": 42,
+    "train_rows": 11520,
+    "test_rows": 2880,
+    "test_rows_with_identical_training_inputs": 2880
+  },
+  "artifact": {
+    "sha256": "2923e269b053082861e435a66e0737c109c2c66dbc025d20e824cd1657ac4b97",
+    "package_keys": [
+      "model",
+      "feature_columns",
+      "level_to_multiplier"
+    ],
+    "features": [
+      "hour",
+      "is_peak",
+      "day_type_weekday",
+      "day_type_weekend",
+      "corridor_type_access_road",
+      "corridor_type_industrial_arterial",
+      "corridor_type_urban_arterial"
+    ],
+    "classes": [
+      "high",
+      "low",
+      "medium"
+    ],
+    "parameters": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": null,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 50,
+      "n_jobs": null,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "level_to_multiplier": {
+      "high": 1.818,
+      "low": 1.066,
+      "medium": 1.227
+    },
+    "load_warning_categories": [],
+    "unchanged": true,
+    "predictions_equal_reproduction": true,
+    "feature_order_equal_reproduction": true,
+    "mapping_equal_reproduction": true
+  },
+  "metrics": {
+    "labels": [
+      "high",
+      "low",
+      "medium"
+    ],
+    "stored_artifact": {
+      "accuracy": 0.9506944444444444,
+      "report": {
+        "high": {
+          "precision": 0.7219512195121951,
+          "recall": 0.8222222222222222,
+          "f1-score": 0.7688311688311689,
+          "support": 180.0
+        },
+        "low": {
+          "precision": 0.9712020033388982,
+          "recall": 0.9902127659574468,
+          "f1-score": 0.9806152549515381,
+          "support": 2350.0
+        },
+        "medium": {
+          "precision": 0.942652329749104,
+          "recall": 0.7514285714285714,
+          "f1-score": 0.8362480127186009,
+          "support": 350.0
+        },
+        "accuracy": 0.9506944444444444,
+        "macro avg": {
+          "precision": 0.8786018508667324,
+          "recall": 0.8546211865360801,
+          "f1-score": 0.8618981455004361,
+          "support": 2880.0
+        },
+        "weighted avg": {
+          "precision": 0.9521542509620805,
+          "recall": 0.9506944444444444,
+          "f1-score": 0.9498341194365401,
+          "support": 2880.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          148,
+          16,
+          16
+        ],
+        [
+          23,
+          2327,
+          0
+        ],
+        [
+          34,
+          53,
+          263
+        ]
+      ]
+    },
+    "temporary_reproduction": {
+      "accuracy": 0.9506944444444444,
+      "confusion_matrix": [
+        [
+          148,
+          16,
+          16
+        ],
+        [
+          23,
+          2327,
+          0
+        ],
+        [
+          34,
+          53,
+          263
+        ]
+      ]
+    }
+  },
+  "environment": {
+    "python": "3.13.0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "scikit_learn": "1.9.0",
+    "joblib": "1.5.3"
+  },
+  "limitations": [
+    "Synthetic labels derive from 25 reference windows, not independent observed traffic.",
+    "Repeated identical feature patterns occur in both training and test rows; row-split accuracy is not unseen-window or field generalization.",
+    "Multiplier noise is excluded from model inputs; repeated samples do not add new input information.",
+    "Segment ID is excluded; corridors may share identical input patterns with conflicting labels.",
+    "Level multipliers use all generated rows, including test rows, per the original notebook; these are project constants, not held-out calibrated travel times.",
+    "No grouped evaluation, model export, notebook overwrite, or retraining deployment was performed."
+  ]
+}

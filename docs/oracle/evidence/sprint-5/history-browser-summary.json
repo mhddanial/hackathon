@@ -1,0 +1,24 @@
+{
+  "checks_passed": 17,
+  "checks": [
+    "new chat persists IDs/results, refresh reopens it, follow-up uses same conversation",
+    "message pagination is explicit and blocks premature follow-ups",
+    "switch and browser back restore the intended chat",
+    "archive preserves history, restore enables follow-up",
+    "conversation pagination and empty/error/retry states",
+    "lost terminal acknowledgment retries same ID without duplicate execution",
+    "switch during stream ignores late chunks and reopens saved outcome",
+    "busy guard accepts one send and stop offers same-ID recovery",
+    "saved failure permits a new ID; save failure remains uncertain",
+    "invalid URL and foreign UUID do not reveal another account's messages",
+    "401 refresh failure state recovers through manual reload",
+    "untrusted saved text renders as text",
+    "switching back preserves the pending UUID and saved replay unblocks follow-up",
+    "mobile history and composer remain usable without horizontal overflow",
+    "logout during a pending stream clears state for another account",
+    "next account cannot reopen the prior account URL",
+    "later login restores original saved text and result metadata"
+  ],
+  "scope": "Real Chromium/Next UI with local synthetic Auth/API; no live Supabase JWT or provider",
+  "record": "Observed completed playwright-cli run-code output; existing history scenarios rerun during Sprint 5"
+}

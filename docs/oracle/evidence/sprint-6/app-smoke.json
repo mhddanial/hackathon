@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-11",
+  "checks": {
+    "backend_health": {
+      "status": 200,
+      "elapsed_seconds": 0.02,
+      "response": {
+        "status": "ok"
+      }
+    },
+    "public_reference": {
+      "status": 200,
+      "elapsed_seconds": 1.885,
+      "success": true
+    },
+    "congestion": {
+      "status": 200,
+      "elapsed_seconds": 2.169,
+      "response": {
+        "source": "ml_model",
+        "segment_id": "SEG001",
+        "day_type": "weekday",
+        "hour": 8,
+        "congestion_level": "LOW",
+        "multiplier": 1.07,
+        "data_status": "synthetic_estimate",
+        "disclaimer": "Model trained on synthetic project data; not observed or real-time traffic.",
+        "observed_at": null,
+        "calculated_at": "2026-10-11T03:53:38.699012+00:00"
+      }
+    },
+    "invalid_segment": {
+      "status": 400,
+      "elapsed_seconds": 0.026,
+      "response": {
+        "detail": "segment_id must be SEG001 through SEG006"
+      }
+    },
+    "anonymous_history": {
+      "status": 401,
+      "elapsed_seconds": 0.017,
+      "response": {
+        "detail": "Invalid or expired authentication credentials"
+      }
+    },
+    "anonymous_chat": {
+      "status": 401,
+      "elapsed_seconds": 0.025,
+      "response": {
+        "detail": "Invalid or expired authentication credentials"
+      }
+    },
+    "anonymous_oracle": {
+      "status": 307,
+      "elapsed_seconds": 0.251,
+      "login_redirect": true
+    }
+  },
+  "scope": "Fresh current-code backend 8000 and normal frontend 3000; real public project data and anonymous boundaries only, no signed-in chat/provider call",
+  "samples_per_endpoint": 1,
+  "latency_claim": "Smoke sample timings, not a performance benchmark"
+}

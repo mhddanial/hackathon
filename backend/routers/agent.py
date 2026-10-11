@@ -3,13 +3,14 @@
 import asyncio
 from contextlib import aclosing
 import json
+import logging
 from uuid import uuid4
 
 import anyio
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from google.genai import types
+from google.genai import errors, types
 
 from auth import AuthenticatedContext, get_authenticated_context
 from schemas.oracle import ChatRequest, MetadataEvent, TextEvent, ResultEvent, DoneEvent, ToolCall
@@ -20,6 +21,7 @@ from services.oracle_provider import GeminiProvider
 load_dotenv()
 router = APIRouter()
 provider = GeminiProvider.from_environment()
+logger = logging.getLogger(__name__)
 
 TURN_TIMEOUT = 90
 TOOL_TIMEOUT = 15
@@ -42,6 +44,26 @@ class OracleStreamingResponse(StreamingResponse):
 
 def sse_event(event) -> str:
     return f"data: {event.model_dump_json()}\n\n"
+
+
+def turn_failure_message(error: Exception) -> str:
+    """Expose only trusted error categories, never raw SDK diagnostics."""
+    message = "The Oracle turn could not complete."
+    if isinstance(error, errors.APIError):
+        if error.code == 429:
+            message = ("Gemini reached a rate or quota limit (HTTP 429). "
+                "Wait for the limit to reset or check the project's quota in Google AI Studio.")
+        elif error.code in (401, 403):
+            message = ("Gemini rejected the server's API credentials or model access. "
+                "Check the backend provider configuration.")
+        elif error.code == 404:
+            message = ("The configured Gemini model is unavailable. "
+                "Check the backend model configuration.")
+        elif 500 <= error.code < 600:
+            message = "Gemini is temporarily unavailable. Send a new turn later."
+    elif isinstance(error, TimeoutError):
+        message = "The Oracle turn timed out. Send a new turn to try again."
+    return message + " Any streamed text is provisional."
 
 
 def metadata(turn: ReservedTurn) -> MetadataEvent:
@@ -169,8 +191,11 @@ async def stream_turn(turn: ReservedTurn, store: OracleTurns, model_context: lis
     except (asyncio.CancelledError, GeneratorExit):
         outcome = "interrupted"
         raise
-    except Exception:
-        yield sse_event(TextEvent(type="error",content="The Oracle turn could not complete. Any streamed text is provisional."))
+    except Exception as error:
+        # Raw messages/tracebacks can contain credentials, prompts or tool data.
+        logger.warning("Oracle turn failed: error_type=%s provider_http_status=%s",
+            type(error).__name__, error.code if isinstance(error, errors.APIError) else None)
+        yield sse_event(TextEvent(type="error",content=turn_failure_message(error)))
         saved = False
         try:
             await persist(store,turn,"".join(text),"failed",calls,results)

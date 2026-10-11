@@ -9,15 +9,16 @@ async function compile(path, dependencies = {}) {
   new Function("require", "exports", code)(name => { assert.ok(name in dependencies, `Unexpected dependency ${name}`); return dependencies[name]; }, exports);
   return exports;
 }
-const stream = await compile("../src/lib/oracle-stream.ts");
-const { createOracleApi, OracleApiError } = await compile("../src/lib/oracle-api.ts", { "./oracle-stream": stream });
+const results = await compile("../src/lib/oracle-results.ts");
+const stream = await compile("../src/lib/oracle-stream.ts", { "./oracle-results": results });
+const { createOracleApi, OracleApiError } = await compile("../src/lib/oracle-api.ts", { "./oracle-stream": stream, "./oracle-results": results });
 const { selectedConversation, mergeMessages, restoreMessages, hasRecentActiveTurn } = await compile("../src/lib/oracle-history.ts", { "./oracle-stream": stream });
 const id = n => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const user = id(1), convo = id(2), turn = id(3), assistant = id(4);
 const now = new Date().toISOString();
 const conversation = { id: convo, title: "Saved chat", created_at: now, updated_at: now, archived_at: null };
 const row = { id: turn, conversation_id: convo, turn_id: turn, sequence: 1, role: "user", content: "Question", status: "completed", structured_results: [], created_at: now };
-const answer = { ...row, id: assistant, sequence: 2, role: "assistant", content: "Saved answer", structured_results: [{ type: "route", data: { distance_km: 2 } }] };
+const answer = { ...row, id: assistant, sequence: 2, role: "assistant", content: "Saved answer", structured_results: [{ type: "route", title: "Saved route", source: "test_fixture", data_status: "estimated", disclaimer: "Test estimate", data: { distance_km: 2, final_time_min: 5, routing_source: "test_fixture" } }] };
 const signal = () => new AbortController().signal;
 const session = (token = "old-test-token", owner = user) => ({ data: { session: { access_token: token, user: { id: owner } } }, error: null });
 const auth = { getSession: async () => session(), refreshSession: async () => session("new-test-token") };

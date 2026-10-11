@@ -52,7 +52,7 @@ export default function RouteRecommendationPage() {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
         const res = await fetch(`${API_URL}/schedules`);
         const data = await res.json();
         setSchedules(data.schedules || []);
@@ -94,7 +94,7 @@ export default function RouteRecommendationPage() {
         return;
       }
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
 
       // Backend RouteRequest schema: origin/destination as {lat, lng} objects, time as "HH:MM"
       const res = await fetch(`${API_URL}/route`, {

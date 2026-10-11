@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-11",
+  "scope": "One direct native Google SDK request after incomplete live Oracle turns",
+  "requested_model": "gemini-3.6-flash",
+  "error_type": "ClientError",
+  "http_status": 429,
+  "completed_answer": false,
+  "action": "Stopped provider calls; no retry, key/model change, or billing change",
+  "limitations": "Diagnostic confirms rate/resource exhaustion. Exact quota bucket and reset time were not retrieved. Prior incomplete turns are not retrospectively assigned an unobserved SDK error code."
+}

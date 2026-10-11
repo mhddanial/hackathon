@@ -6,6 +6,9 @@ Documentation: [Current Oracle implementation](docs/oracle/README.md) ·
 [Original hackathon materials](docs/hackathon/README.md) · [Documentation index](docs/README.md).
 The sections below retain the original project overview; use the Oracle context
 for the extension's current implementation and verification status.
+The [current congestion validation](docs/oracle/ml/CONGESTION_MODEL_VALIDATION.md)
+reproduces the synthetic evaluation and documents its train/test overlap;
+historical accuracy figures are not independent real-traffic validation.
 
 [![Backend](https://img.shields.io/badge/Backend-FastAPI%200.138-009688?logo=fastapi)](https://smartflow-api.up.railway.app)
 [![Frontend](https://img.shields.io/badge/Frontend-Next.js%2016.3-black?logo=next.js)](https://frontend-nine-blue-dx6g6mxt1e.vercel.app)
@@ -138,7 +141,7 @@ Operator Query → AI Agent (Gemini) → Tool Calls → ML Model + Supabase + OS
 - Verified Supabase authentication, persisted owned turns/tools/results, and stable retry IDs
 - Streamed text remains provisional until persistence succeeds; provider failures return a saved failed outcome when possible
 - Saved conversation list, reopening after refresh, paginated history, and archive/restore
-- Result cards/modal are next; see the [current Oracle context](docs/oracle/context/CURRENT_STATE.md)
+- Validated congestion, schedule, route, and generic result cards with accessible saved-detail dialogs, source/status labels, and limitations; see the [current Oracle context](docs/oracle/context/CURRENT_STATE.md)
 
 ### 📊 Dashboard Overview
 - Live port congestion badge for Yos Sudarso (SEG001) from ML API
@@ -435,8 +438,8 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env    # Fill in your keys
-uvicorn main:app --reload
-# → http://127.0.0.1:8000  |  Swagger: /docs
+uvicorn main:app --reload --port 8080
+# → http://127.0.0.1:8080  |  Swagger: /docs
 ```
 
 ### 3. Frontend
@@ -462,7 +465,7 @@ GEMINI_MODEL=gemini-3.5-flash
 
 ### Frontend `.env.local`
 ```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8080
 NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```

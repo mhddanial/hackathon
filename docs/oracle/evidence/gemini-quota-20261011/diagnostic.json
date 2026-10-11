@@ -1,0 +1,18 @@
+{
+  "checked_on": "2026-10-11",
+  "timezone": "Asia/Jakarta",
+  "check_type": "direct_native_sdk_no_fastapi_or_database",
+  "model": "gemini-3.6-flash",
+  "error_type": "ClientError",
+  "http_status": 429,
+  "status": "RESOURCE_EXHAUSTED",
+  "quota_violations": [
+    {
+      "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+      "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+      "quotaValue": "20"
+    }
+  ],
+  "retry_delay": "71431s",
+  "completed_answer": false
+}

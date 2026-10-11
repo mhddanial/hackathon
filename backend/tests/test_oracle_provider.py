@@ -53,8 +53,11 @@ class WireProvider(GeminiProvider):
             assert request.url.path.endswith("gemini-3.5-flash:streamGenerateContent")
             self.requests.append(json.loads(request.content))
             data = self.rounds.pop(0)
+            if isinstance(data, Exception):
+                raise data
             if isinstance(data, int):
-                return httpx.Response(data, json={"error": {"code": data, "message": "private diagnostic", "status": "UNAVAILABLE"}})
+                status = "RESOURCE_EXHAUSTED" if data == 429 else "UNAVAILABLE"
+                return httpx.Response(data, json={"error": {"code": data, "message": "private diagnostic", "status": status}})
             body = b"".join(("data: " + json.dumps(event) + "\r\n\r\n").encode() for event in data)
             return httpx.Response(200, headers={"content-type": "text/event-stream"}, content=body)
         transport = httpx.AsyncClient(transport=httpx.MockTransport(handle))
@@ -161,11 +164,43 @@ def test_thinking_text_is_not_sent_to_user_or_saved(monkeypatch):
     assert "Private thinking" not in json.dumps(events) and store.saved[-1]["content"] == "Answer."
 
 
-def test_sdk_does_not_retry_503_or_leak_diagnostics(monkeypatch):
-    provider = WireProvider([503])
+@pytest.mark.parametrize("status,expected", [
+    (400, "The Oracle turn could not complete."),
+    (401, "server's API credentials or model access"),
+    (403, "server's API credentials or model access"),
+    (404, "configured Gemini model is unavailable"),
+    (429, "rate or quota limit (HTTP 429)"),
+    (500, "Gemini is temporarily unavailable"),
+    (503, "Gemini is temporarily unavailable"),
+])
+def test_sdk_errors_are_specific_without_retry_or_private_diagnostics(monkeypatch, caplog, status, expected):
+    provider = WireProvider([status])
     events, store = run(provider, monkeypatch)
     assert len(provider.requests) == 1 and events[-1]["outcome"] == "failed"
-    assert "private diagnostic" not in json.dumps(events) and store.saved[-1]["outcome"] == "failed"
+    message = next(event["content"] for event in events if event["type"] == "error")
+    assert expected in message and "Any streamed text is provisional." in message
+    assert "private diagnostic" not in json.dumps(events) + caplog.text
+    assert f"provider_http_status={status}" in caplog.text
+    assert events[-1]["persisted"] and store.saved[-1]["outcome"] == "failed"
+
+
+def test_quota_failure_after_tool_round_keeps_partial_answer_failed(monkeypatch):
+    provider = WireProvider([[answer("Provisional answer", calls=[call()])], 429])
+    monkeypatch.setattr(agent, "execute_tool", lambda *args: ({"schedules": []}, None))
+    events, store = run(provider, monkeypatch)
+    assert len(provider.requests) == 2 and len(store.calls) == 1
+    assert store.saved[-1]["content"] == "Provisional answer"
+    assert events[-1]["outcome"] == "failed" and events[-1]["persisted"]
+    assert "HTTP 429" in next(event["content"] for event in events if event["type"] == "error")
+
+
+def test_timeout_is_specific_without_exposing_details(monkeypatch, caplog):
+    provider = WireProvider([TimeoutError("private diagnostic")])
+    events, store = run(provider, monkeypatch)
+    assert len(provider.requests) == 1
+    assert "timed out" in next(event["content"] for event in events if event["type"] == "error")
+    assert "private diagnostic" not in json.dumps(events) + caplog.text
+    assert events[-1]["outcome"] == "failed" and store.saved[-1]["outcome"] == "failed"
 
 
 @pytest.mark.parametrize("tool", [call(name="unknown"), call(args={"terminal":"sekupang","user_id":"forged"}),

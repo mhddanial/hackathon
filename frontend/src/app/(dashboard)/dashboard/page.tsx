@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SlidersHorizontal, Ship, Leaf, Anchor, Map, RefreshCw, ArrowRight } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
 
 interface Schedule {
   id: string;

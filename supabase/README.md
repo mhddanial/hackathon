@@ -46,6 +46,13 @@ Deploy the matching authenticated backend and frontend together: the chat
 contract now requires a Bearer token and `client_request_id`. No application
 deployment was performed during this implementation.
 
+Sprint 6 rechecked the installed ownership and lifecycle behavior on 11 October
+2026: ten A/B ownership and 11 RPC checks passed inside rollback-only
+transactions. Counts stayed unchanged; no new schema/policy/migration or account
+change was made. See [current acceptance evidence](../docs/oracle/evidence/sprint-6/live-database.json).
+These simulated database claims do not replace genuine JWT/REST/browser checks;
+the remaining live checklist is in [Sprint 6](../docs/oracle/sprints/SPRINT_6_IMPLEMENTATION.md#deployment-and-remaining-live-acceptance).
+
 ## Local verification
 
 The backend tests use existing `pytest`, `httpx`, `psycopg`, and Pydantic dependencies. Auth tests exercise the real Supabase SDK against a mocked HTTP transport. Real PostgreSQL RLS tests require an explicitly configured loopback admin database:

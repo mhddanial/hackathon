@@ -100,7 +100,16 @@ done      → conversation_id, turn_id, message_id, outcome, persisted
 
 HTTP failures before reservation/context success return normal JSON errors. Once SSE opens, missing provider configuration, provider exceptions, truncation, empty final answers, malformed tools, or persistence failures produce safe `error` and failed `done` events. A save failure can have `persisted: false` and no message ID. Cancellation makes a bounded best-effort interrupted save; a disconnected client may receive no terminal event. Live success is emitted only after the terminal RPC acknowledgment. Normal results are emitted after that save; replay may return stored partial results alongside a failed/interrupted outcome.
 
-The caller keeps React messages provisional until the terminal event, validates IDs, buffers fragmented/batched UTF-8/CRLF frames, rejects invalid completion acknowledgments, guards concurrent sends, and clears scoped state on account change. New conversation starts a fresh local view without deleting saved history. History list/reopening and archive/restore are implemented in Sprint 4; displaying result cards/modal remains Sprint 5.
+Gemini SDK HTTP 429 produces a rate/quota-limit message; 401/403 identifies
+server credentials/model access, 404 identifies unavailable model configuration,
+and 5xx identifies a temporary provider outage. A turn deadline produces a
+timeout message. Other errors retain the generic safe diagnostic. Messages keep
+the provisional-text warning and never include raw provider diagnostics.
+Provider 401/403 within SSE does not mean the user's Supabase token is invalid.
+Server logs record only exception type and provider HTTP status. The public
+event shape and failed-turn replay contract are unchanged.
+
+The caller keeps React messages provisional until the terminal event, validates IDs, buffers fragmented/batched UTF-8/CRLF frames, rejects invalid completion acknowledgments, guards concurrent sends, and clears scoped state on account change. New conversation starts a fresh local view without deleting saved history. History list/reopening and archive/restore are implemented in Sprint 4; validated result cards and detail dialogs are implemented in Sprint 5.
 
 ## Implemented history interface (Sprint 4)
 
@@ -113,6 +122,40 @@ The API helper obtains the current session for each request, checks that it stil
 Selecting a different chat aborts pending reads/streams/updates, clears visible old messages, and ignores results from older view generations. Uncertain retry state is cached only in memory per conversation in the mounted signed-in page; the latest unassigned request can be checked separately if metadata was lost. A terminal replay clears the earlier active state and permits a follow-up. Logout/account change clears that cache. Full refresh does not persist/replay pending request bodies: it reloads server state and offers explicit reload for a recent active turn, with the existing three-minute stale recovery rule.
 
 Archive/restore uses the existing PATCH endpoint. Archived history remains readable and its composer is disabled until restored. Archive is disabled during local active/uncertain work, while the database guard handles concurrent active turns. Successful list/archive updates are refreshed from the API. Native buttons/labels and responsive history/message panes provide the existing shared UI styling.
+
+## Implemented result interface (Sprint 5)
+
+Both the SSE `result` event and stored `structured_results` use one client
+validator. Each item needs known type/status, nonempty bounded metadata, object
+data, and its typed required fields. Numbers must be finite and meet the variant
+bounds. Clock times are `HH:MM[:SS]`; optional timestamps need valid calendar
+dates, times, and an explicit ISO timezone. Null optional fields remain absent.
+Known variants retain only their supported fields. One invalid/unsupported item
+adds an unavailable count; it does not hide the answer or other valid results.
+Rejected raw payloads are excluded from display state. Invalid outer arrays or
+more than 12 items remain transport errors.
+
+Rendering is bounded to 16,000 serialized UTF-8 bytes per result, 100 schedule
+rows, and six JSON nesting levels/1,000 nodes for generic data. This is a client
+display boundary; the existing schedule tool returns at most 20 rows. Generic
+data is escaped plain JSON. Source text, titles, and disclaimers never become
+HTML or executable links.
+
+Completed, failed, and interrupted saved outcomes can display multiple preview
+cards and independent detail dialogs. Failed/interrupted dialogs warn that the
+turn is incomplete. Provisional, active, or unconfirmed outcomes offer no detail
+trigger. The installed Base UI Dialog provides accessible names/descriptions,
+focus containment/return, keyboard opening, Escape, backdrop dismissal, and
+close buttons. Long tables scroll within a viewport-bounded mobile dialog.
+Conversation/account lifecycle continues to remove old result state.
+
+Cards/modal read restored metadata and perform no fetch/provider/tool call.
+Source/status and limitations are displayed, with explicit unknown freshness
+when observation time is absent. Supplied absolute timestamps display in WIB;
+schedule/route clock times do not imply a source timezone or service date.
+Optional emissions, capacity, departure, and gate-in fields display only when
+provided; numeric zero is preserved. No independent departure variant exists.
+See [Sprint 5 implementation and verification](../sprints/SPRINT_5_IMPLEMENTATION.md).
 
 ## Implemented limits and storage
 
@@ -127,6 +170,28 @@ The additive `oracle_reserve_turn`, `oracle_record_tool`, and `oracle_finish_tur
 Tool argument models in `backend/services/oracle_tools.py` generate provider schemas and validate execution: `SEG001`–`SEG006`, explicit weekday/weekend and hour 0–23, finite bounded coordinates, explicit `HH:MM`, supported terminal/destination, and paired vessel ETD/cargo type. Missing planning inputs belong in a clarification; Oracle does not invent coordinates or a host-clock departure time. The server prompt instructs scope/provenance behavior, but real model adherence remains an acceptance check.
 
 ## Structured results
+
+### Congestion runtime provenance (Sprint 6)
+
+The public `/congestion` endpoint keeps existing core fields and source values
+`ml_model`, `database`, `fallback_default`, and adds `day_type`/`hour` consistently,
+`data_status`, `disclaimer`, `observed_at=null`, and UTC `calculated_at`. Oracle
+normalizes those into its existing congestion result and forwards the service
+disclaimer. Synthetic model output is not observed/live traffic; recorded window
+data has unknown freshness. No source name or route-service response field was
+renamed.
+
+Model package/feature/category/label/mapping errors fall back to validated recorded
+windows. Empty/no-match data after a successful read may return the labelled
+assumed LOW/1.0 default. Initial corridor DB failure, recorded DB failure,
+malformed data or ambiguous matching windows return safe HTTP 503 and no Oracle
+result card. Known valid segment absent is 404; invalid segment/day/hour is 400
+before DB work, while a non-integer HTTP hour remains 422. See
+[verified runtime/model methodology](../ml/CONGESTION_MODEL_VALIDATION.md).
+
+Current local gates are in [Sprint 6](../sprints/SPRINT_6_IMPLEMENTATION.md).
+Real signed-in persistence and current completed live provider answer remain
+unverified; Google 429 is recorded separately from controlled failure fixtures.
 
 Supported discriminators are `congestion`, `schedule`, `route`, and `generic`. A departure discriminator/tool is intentionally not registered without an established tested service contract.
 

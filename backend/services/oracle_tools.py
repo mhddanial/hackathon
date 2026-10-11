@@ -101,6 +101,7 @@ def execute_tool(name: str, args: dict) -> tuple[dict, object | None]:
             disclaimer = "Project-data estimate; not real-time traffic."
             if status == "default_fallback":
                 disclaimer = "No matching recorded estimate; assumed default, not observed traffic."
+            disclaimer = raw.get("disclaimer") or disclaimer
             result = CongestionResult(type="congestion", title="Congestion estimate", data=data,
                 source=source, data_status=status, disclaimer=disclaimer, calculated_at=calculated_at)
         elif name == "get_ferry_schedule":

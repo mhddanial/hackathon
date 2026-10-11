@@ -1,0 +1,23 @@
+{
+  "checks_passed": 16,
+  "checks": [
+    "four independent saved cards show actual previews and source/status",
+    "congestion dialog includes provenance, limitations and timezone timestamps",
+    "keyboard opens dialog, traps focus, Escape closes and returns focus",
+    "route omits missing emission/departure fields and marks unverified freshness",
+    "schedule preserves zero capacity and clearly marks partial optional fields",
+    "provided route optional fields retain zeroes and source clock limitations",
+    "generic and metadata HTML render as text without creating elements",
+    "unsupported/malformed results are isolated without hiding saved answer",
+    "empty schedule and assumed default have explicit limitations",
+    "failed and interrupted saved results are marked incomplete",
+    "refresh restores same data and inspection makes no API/tool request",
+    "conversation navigation removes open dialog; foreign chat exposes no cards",
+    "mobile long schedule scrolls within a bounded dialog; backdrop closes",
+    "no result opens no modal",
+    "unconfirmed stream results cannot open a recommendation dialog",
+    "streamed valid multiple results become inspectable after persistence"
+  ],
+  "scope": "Real Chromium/Next UI with local synthetic Auth/API; no signed-in Supabase/provider",
+  "screenshot_directory": "output/playwright"
+}

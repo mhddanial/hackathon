@@ -6,13 +6,14 @@ import { Card } from "@/components/ui/card";
 import { Archive, ArchiveRestore, Send, Bot, Sparkles, RefreshCw, Square } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { ConversationList } from "@/components/oracle/ConversationList";
+import { OracleResults } from "@/components/oracle/OracleResults";
 import { createClient } from "@/utils/supabase/client";
 import { createOracleApi, OracleApiError } from "@/lib/oracle-api";
 import { consumeOracleStream, validUuid } from "@/lib/oracle-stream";
 import { selectedConversation, mergeMessages, restoreMessages, hasRecentActiveTurn } from "@/lib/oracle-history";
 import type { Conversation, DisplayMessage, PendingTurn, StoredMessage } from "@/types/oracle";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
 const greeting: DisplayMessage = { id: "oracle-greeting", role: "agent",
   content: "I can check project congestion estimates, recorded ferry schedules, or route estimates. How can I assist you?" };
 const errorText = (error: unknown) => error instanceof OracleApiError ? error.message
@@ -190,7 +191,7 @@ function OracleChat({ userId }: { userId: string }) {
     const controller = new AbortController(); streamAbort.current = controller;
     const current = () => epoch.current === currentEpoch && streamAbort.current === controller && !controller.signal.aborted;
     view.current.pending = pending; setRetryTurn(null); setNotice(""); setLoading(true); setInput("");
-    if (retry) display(old => old.map(message => message.id === pending.agentMessageId ? { ...message, content: "", results: [], outcome: "streaming" } : message));
+    if (retry) display(old => old.map(message => message.id === pending.agentMessageId ? { ...message, content: "", results: [], unavailableResults: 0, outcome: "streaming" } : message));
     else display(old => [...old.filter(item => item.id !== greeting.id),
       { id: pending.userMessageId, role: "user", content: pending.message },
       { id: pending.agentMessageId, role: "agent", content: "", outcome: "streaming" }]);
@@ -216,7 +217,7 @@ function OracleChat({ userId }: { userId: string }) {
         } else if (!receivedMetadata) throw new Error("Missing turn metadata");
         else if (event.type === "chunk") display(old => old.map(message => message.id === pending.agentMessageId ? { ...message, content: message.content + event.content } : message));
         else if (event.type === "status" || event.type === "error") display(old => [...old, { id: crypto.randomUUID(), role: event.type as "status" | "error", content: event.content ?? "" }]);
-        else if (event.type === "result") display(old => old.map(message => message.id === pending.agentMessageId ? { ...message, results: event.results } : message));
+        else if (event.type === "result") display(old => old.map(message => message.id === pending.agentMessageId ? { ...message, results: event.results, unavailableResults: event.unavailable_results ?? 0 } : message));
         else if (event.type === "done") {
           if (event.turn_id !== pending.turnId || event.conversation_id !== pending.conversationId
               || (event.persisted && event.message_id !== pending.assistantServerId)) throw new Error("Mismatched saved outcome");
@@ -297,7 +298,7 @@ function OracleChat({ userId }: { userId: string }) {
               {message.role === "agent" && message.outcome && message.outcome !== "completed" && <p className="mt-2 text-xs text-[#5E6470]">
                 {message.outcome === "streaming" ? "Provisional response…" : message.outcome === "in_progress" ? "Turn in progress. Reload to check its outcome."
                   : message.outcome === "unknown" ? "Saved outcome not confirmed." : `This turn ${message.outcome === "interrupted" ? "was interrupted" : "failed"}.`}</p>}
-              {!!message.results?.length && <p className="mt-2 text-xs text-[#5E6470]">{message.results.length} result record{message.results.length === 1 ? "" : "s"}</p>}
+              {message.role === "agent" && <OracleResults results={message.results} unavailable={message.unavailableResults} outcome={message.outcome} />}
             </div>
           </div>)}
           {historyLoading && <p role="status" className="text-sm text-[#5E6470]">Loading messages…</p>}

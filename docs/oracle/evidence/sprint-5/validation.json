@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-10",
+  "timezone": "Asia/Jakarta",
+  "branch": "danial",
+  "result_contract_checks": {
+    "passed": 16,
+    "command": "node scripts/check-oracle-results.mjs"
+  },
+  "api_history_checks": {
+    "passed": 20,
+    "command": "node scripts/check-oracle-history.mjs"
+  },
+  "stream_checks": {
+    "passed": 8,
+    "command": "node scripts/check-oracle-stream.mjs"
+  },
+  "browser_checks": {
+    "passed": 35,
+    "result_scenarios": 16,
+    "history_scenarios": 17,
+    "history_edges": 2,
+    "scope": "Real Chromium/Next/React/Supabase SDK with loopback synthetic Auth/API; no live signed-in Supabase or Gemini"
+  },
+  "typescript": {
+    "passed": true,
+    "command": "tsc --noEmit --incremental false"
+  },
+  "targeted_eslint": {
+    "passed": true,
+    "scope": "Oracle page, result component, result/API/history/stream helpers and shared Oracle types"
+  },
+  "production_build": {
+    "passed": true,
+    "command": "npm run build",
+    "existing_warning": "Next middleware file convention is deprecated in favor of proxy"
+  },
+  "screenshots": {
+    "reviewed": true,
+    "desktop_viewport": [
+      1440,
+      1000
+    ],
+    "mobile_viewport": [
+      390,
+      844
+    ],
+    "mobile_dialog_bounds_and_scrolling": "passed",
+    "source_time_note": "Moved outside the horizontal schedule table and verified in final browser pass"
+  },
+  "git_diff_check": {
+    "passed": true
+  },
+  "backend": {
+    "changed": false,
+    "suite_rerun": false,
+    "prior_provider_migration_tests": 214
+  },
+  "dependencies_added": 0,
+  "migrations_added": 0,
+  "historical_hackathon_docs_changed": false,
+  "application_deployed": false,
+  "live_signed_in_persistence": "Pending Sprint 6 acceptance; synthetic browser checks are separate from prior direct Gemini and database role/claim evidence",
+  "artifact_audit": {
+    "changed_text_artifacts_checked": 25,
+    "branch": "danial",
+    "credential_scan": "passed without exposing values",
+    "json_and_document_links": "passed",
+    "whitespace": "passed under repository line-ending settings",
+    "historical_docs_backend_migrations": "unchanged"
+  }
+}

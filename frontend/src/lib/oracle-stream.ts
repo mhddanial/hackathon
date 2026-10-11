@@ -1,3 +1,6 @@
+import type { OracleResult } from "../types/oracle";
+import { parseResults } from "./oracle-results";
+
 export type OracleEvent = {
   type: "metadata" | "status" | "chunk" | "error" | "result" | "done";
   content?: string;
@@ -6,7 +9,8 @@ export type OracleEvent = {
   user_message_id?: string;
   assistant_message_id?: string;
   message_id?: string | null;
-  results?: unknown[];
+  results?: OracleResult[];
+  unavailable_results?: number;
   outcome?: "completed" | "failed" | "interrupted";
   persisted?: boolean;
 };
@@ -25,7 +29,10 @@ function parseFrame(frame: string): OracleEvent | null {
   const event = value as OracleEvent;
   if (["status", "chunk", "error"].includes(event.type) && typeof event.content === "string") return event;
   if (event.type === "metadata" && [event.conversation_id, event.turn_id, event.user_message_id, event.assistant_message_id].every(validUuid)) return event;
-  if (event.type === "result" && Array.isArray(event.results) && event.results.length <= 12) return event;
+  if (event.type === "result" && Array.isArray(event.results) && event.results.length <= 12) {
+    const parsed = parseResults(event.results);
+    return { type: "result", results: parsed.results, ...(parsed.unavailable ? { unavailable_results: parsed.unavailable } : {}) };
+  }
   if (event.type === "done" && validUuid(event.conversation_id) && validUuid(event.turn_id)
       && ["completed", "failed", "interrupted"].includes(event.outcome ?? "") && typeof event.persisted === "boolean"
       && (event.outcome !== "completed" || (event.persisted && validUuid(event.message_id)))) return event;

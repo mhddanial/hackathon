@@ -9,7 +9,7 @@ url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_ANON_KEY")
 supabase: Client = create_client(url, key)
 
-API_URL = "http://127.0.0.1:8000/user/history"
+API_URL = "http://127.0.0.1:8080/user/history"
 
 def run_tests():
     print("--- Testing Auth Scenario ---")

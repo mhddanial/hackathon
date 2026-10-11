@@ -1,6 +1,6 @@
 # Oracle current implementation context
 
-Updated: 10 October 2026 (Asia/Jakarta). Working branch: `danial`.
+Updated: 11 October 2026 (Asia/Jakarta). Working branch: `danial`.
 This file is the starting context for continued Oracle implementation. Dated
 reports and evidence retain the detailed history.
 
@@ -25,6 +25,8 @@ with its respective owners; Oracle consumes those contracts. The original
 | Sprint 2 | Five authenticated conversation operations, bounded pagination, title edits, archive/restore, ordered message reads | [Report](../sprints/SPRINT_2_IMPLEMENTATION.md) |
 | Sprint 3 | Authenticated streaming, atomic turn reservation, bounded context/tools, saved outcomes/results, stable retry IDs | [Report](../sprints/SPRINT_3_IMPLEMENTATION.md) |
 | Sprint 4 | Saved conversation list/reopening, URL selection, paginated messages, archive/restore, isolated streams/retries | [Report](../sprints/SPRINT_4_IMPLEMENTATION.md) |
+| Sprint 5 | Per-result runtime validation, multiple preview cards, accessible details, source/limitations, and saved-result restoration | [Report](../sprints/SPRINT_5_IMPLEMENTATION.md) |
+| Sprint 6 | Safe congestion/artifact validation, actual-tool persistence tests, final automated gates and verified model methodology; live acceptance partial | [Report](../sprints/SPRINT_6_IMPLEMENTATION.md) |
 | Provider migration | Official `google-genai` SDK, native Gemini streaming/tools, compatible saved history | [Record](../providers/GEMINI_PROVIDER_MIGRATION.md) |
 
 Implemented conversation routes:
@@ -67,6 +69,35 @@ history becomes untrusted reference text, so old saved turns do not need
 fabricated Gemini signatures or a database migration. SSE and public contracts
 are unchanged. See the [provider record](../providers/GEMINI_PROVIDER_MIGRATION.md).
 
+The current local `GEMINI_MODEL` override selects `gemini-3.6-flash`; the code
+default above remains unchanged. On 11 October, attempted live turns did not
+complete. A follow-up direct SDK diagnostic confirmed HTTP 429
+`RESOURCE_EXHAUSTED`: the selected model's free-tier daily request quota is 20,
+with a reported retry delay of 71,431 seconds at the time of the check. Further
+live calls were stopped. Oracle now distinguishes safe quota/access/model/outage
+and timeout messages while keeping failed-turn persistence and replay behavior.
+No key/model/billing change was made. See the
+[quota diagnosis](../providers/GEMINI_QUOTA_INCIDENT_20261011.md) and the earlier
+[Sprint 6 evidence](../evidence/sprint-6/README.md).
+
+## Congestion model and provenance
+
+The endpoint retains `ml_model`, `database`, and `fallback_default` source names.
+It now validates artifact keys/features/order/classes/mappings, categories and
+recorded windows. Model errors fall back to valid recorded data; unavailable
+DB data or malformed/ambiguous windows return safe HTTP 503. Only successful
+empty/no-match reads return the existing assumed LOW/1.0 default, explicitly
+labelled `default_fallback`. All successful paths include planning day/hour,
+status/disclaimer and calculation time, with `observed_at=null`.
+
+The current six segments/25 windows reproduce 14,400 synthetic rows and
+95.0694% random-row test accuracy. All 2,880 test input patterns occur in training;
+this is not evidence of real-traffic generalization. Artifact/notebook remain
+unchanged. Use the [verified methodology](../ml/CONGESTION_MODEL_VALIDATION.md)
+and [report evidence map](../reports/REPORT_EVIDENCE_MAP.md), rather than treating
+historical pitch figures as independent validation. Route-owner emission/default
+logic remains separate and estimated.
+
 ## Verification and limits
 
 - Provider migration checks: **195 existing backend tests** passed again with
@@ -86,9 +117,25 @@ are unchanged. See the [provider record](../providers/GEMINI_PROVIDER_MIGRATION.
   code with local synthetic Auth/API services, including two simulated accounts.
   TypeScript, targeted lint, and production build passed. Desktop/mobile
   screenshots were inspected; no new dependencies or migration were added.
-- Normal local app is running on ports 3000/8000. Health and a public Supabase
-  reference read passed; anonymous Oracle access redirects to login. These are
-  separate from signed-in history/provider acceptance.
+- Earlier local smoke checks on ports 3000/8000 passed health/public reference
+  reads and anonymous Oracle redirects. FastAPI is now stopped at the user's
+  request. All future local FastAPI starts must use port **8080**; frontend
+  defaults and local environment now target it. The frontend remains on 3000.
+  These earlier checks are separate from signed-in history/provider acceptance.
+- Sprint 5 frontend: **16 result contract checks**, **20 API/history checks**,
+  **8 stream checks**, and **35 Chromium checks** passed (16 result scenarios and
+  19 history regressions). TypeScript, targeted lint, production build, and
+  desktop/mobile screenshot review passed. Browser Auth/API data was synthetic;
+  this sprint did not invoke Gemini or change the database.
+- Sprint 6: **282 backend tests** passed with zero skips and real disposable
+  PostgreSQL; **44 frontend helper checks** and **35 synthetic Chromium checks**
+  passed again. TypeScript, targeted lint, build and artifact/whitespace checks
+  passed. **21 installed live role/claim checks** passed and rolled back all test
+  rows; counts were preserved. Current-code local health/public congestion/read
+  and anonymous auth smoke passed. This is separate from real JWT acceptance.
+- Quota-error follow-up: **27 native SDK/provider tests**, **8 stream checks**,
+  and TypeScript passed without starting FastAPI or a database. Provider failure
+  messages and logs exclude raw diagnostics; partial answers remain failed.
 - Live legacy repair: **46 policy checks** and **16 anonymous REST checks** passed;
   counts, existing policies, and privileged grants were preserved.
 - Application changes are local; no application deployment or Git push was made.
@@ -98,7 +145,7 @@ are unchanged. See the [provider record](../providers/GEMINI_PROVIDER_MIGRATION.
 - Existing Auth password-protection and profile/performance advisor findings are
   recorded in the security report; global advisor cleanliness is not claimed.
 
-## Next: Sprint 5
+## Next: finish Sprint 6 live acceptance
 
 `/agent/chat` now requires a verified token and a stable `client_request_id`.
 It atomically reserves owned user/assistant messages before provider work, loads
@@ -119,16 +166,35 @@ network/5xx failures require manual retry with the existing request UUID.
 Switching aborts old work and guards late responses with a view generation.
 Pending retry IDs survive switching within the mounted signed-in page. Account
 change/logout clears them; a full page reload restores server history rather
-than automatically resending an uncertain turn. Structured result metadata is
-restored and shown as a record count; cards/modal remain Sprint 5.
+than automatically resending an uncertain turn. Structured results now pass the
+same per-item runtime validation for SSE and history. Congestion, schedule,
+route, and generic cards open a reusable Base UI dialog with keyboard/focus
+handling, source/status, limitations, and supplied timestamps. Invalid items
+produce an unavailable count without hiding the answer or other valid cards.
+Inspection uses saved data without API/tool execution. Unknown/provisional turns
+cannot open details; failed/interrupted saved turns carry an incomplete-result
+warning. Missing optional values stay absent, zero values remain visible, and
+untrusted text renders as text. Dates shown in WIB have explicit source offsets;
+source schedule/route clock times still have unknown date/time-zone context.
 
-Continue from the [Sprint 5 backlog](../planning/ORACLE_IMPLEMENTATION_SPRINTS.md).
+Use the [Sprint 6 remaining live checklist](../sprints/SPRINT_6_IMPLEMENTATION.md#deployment-and-remaining-live-acceptance).
 S3-08 remains partial: real authenticated browser/HTTP persistence validation
-is pending despite the successful direct Gemini/provider/tool checks. Carry this check
-into live integration and Sprint 6 acceptance. The entire feature is not
-complete yet. ML/time/emission outputs retain estimate and provenance labels.
+is pending despite prior successful direct Gemini/provider/tool checks. Current
+provider completion also remains open after the 429 diagnostic. No real test
+JWTs were configured for this run, and the earlier user choice of automated
+verification was retained. Complete A/B signed-in API/REST/browser persistence,
+then live multi-tool/follow-up/clarification/domain behavior when provider capacity
+is available. The entire feature is not release-accepted yet. ML/time/emission
+outputs retain estimate and provenance labels.
 
 ## Operational boundaries
+
+Local FastAPI must always start on **8080**, per the user's instruction on
+11 October 2026. From `backend/`, use
+`uvicorn main:app --reload --port 8080`; Swagger is at
+`http://127.0.0.1:8080/docs`. Keep the server stopped until a restart is requested.
+Frontend `NEXT_PUBLIC_API_URL` and all local API fallbacks use 8080. Historical
+reports retain the ports actually used during their dated checks.
 
 Never run `backend/database/schema.sql` against the live project: it contains
 destructive reset statements. Preserve remote historical migration

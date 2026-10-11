@@ -1,0 +1,116 @@
+{
+  "scope": "Live Gemini plus public Supabase tools; terminal acknowledgments use an in-memory store, not HTTP login or database history persistence.",
+  "requested_model": "gemini-3.6-flash",
+  "samples_per_case": 1,
+  "samples": 4,
+  "cases": [
+    {
+      "name": "congestion_and_schedule",
+      "prompt": "Check SEG001 congestion on a weekday at 08:00 Asia/Jakarta and recorded ferry departures from Batu Ampar. Use both registered tools and distinguish synthetic estimates from recorded schedules with unknown freshness.",
+      "completed_in_memory": false,
+      "elapsed_seconds": 10.016,
+      "first_text_seconds": null,
+      "tools": [
+        {
+          "name": "get_congestion_level",
+          "arguments": {
+            "segment_id": "SEG001",
+            "day_type": "weekday",
+            "hour": 8
+          },
+          "error_code": null
+        },
+        {
+          "name": "get_ferry_schedule",
+          "arguments": {
+            "terminal": "batu_ampar"
+          },
+          "error_code": null
+        }
+      ],
+      "results": [
+        {
+          "type": "congestion",
+          "source": "ml_model",
+          "data_status": "synthetic_estimate",
+          "observed_at": null,
+          "disclaimer": "Model trained on synthetic project data; not observed or real-time traffic."
+        },
+        {
+          "type": "schedule",
+          "source": "database",
+          "data_status": "database",
+          "observed_at": null,
+          "disclaimer": "Recorded project schedule; freshness unverified. At most 20 departures returned."
+        }
+      ],
+      "event_types": [
+        "metadata",
+        "status",
+        "status",
+        "status",
+        "error",
+        "done"
+      ],
+      "answer": ""
+    },
+    {
+      "name": "saved_reference_followup",
+      "prompt": "Explain why the previously recorded congestion estimate should not be treated as live traffic. Use only the saved result; do not refetch.",
+      "completed_in_memory": false,
+      "elapsed_seconds": 2.694,
+      "first_text_seconds": null,
+      "tools": [],
+      "results": [],
+      "event_types": [
+        "metadata",
+        "error",
+        "done"
+      ],
+      "answer": ""
+    },
+    {
+      "name": "missing_route_inputs",
+      "prompt": "Please find the best route for my delivery.",
+      "completed_in_memory": false,
+      "elapsed_seconds": 2.536,
+      "first_text_seconds": null,
+      "tools": [],
+      "results": [],
+      "event_types": [
+        "metadata",
+        "error",
+        "done"
+      ],
+      "answer": ""
+    },
+    {
+      "name": "unrelated_request",
+      "prompt": "Write a fantasy story about a dragon.",
+      "completed_in_memory": false,
+      "elapsed_seconds": 2.281,
+      "first_text_seconds": null,
+      "tools": [],
+      "results": [],
+      "event_types": [
+        "metadata",
+        "error",
+        "done"
+      ],
+      "answer": ""
+    }
+  ],
+  "checks": {
+    "all_completed_in_memory": false,
+    "both_tools_used": true,
+    "both_validated_result_types": true,
+    "followup_no_refetch": true,
+    "missing_inputs_no_invented_tool_args": true,
+    "unrelated_request_no_tools": true
+  },
+  "limitations": [
+    "One sample per prompt; latency is not a benchmark.",
+    "Clarification and domain-response wording require review; no universal model adherence claim.",
+    "No signed-in HTTP, Supabase JWT or database persistence tested."
+  ]
+}

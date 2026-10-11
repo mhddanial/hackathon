@@ -1,4 +1,5 @@
 import { validUuid } from "./oracle-stream";
+import { parseResults } from "./oracle-results";
 import type { Conversation, ConversationPage, MessagePage, StoredMessage } from "../types/oracle";
 
 type SessionResponse = {
@@ -40,9 +41,10 @@ function message(value: unknown, conversationId: string): StoredMessage {
       || typeof item.status !== "string" || !["in_progress", "completed", "failed", "interrupted"].includes(item.status)
       || !(item.content === null || (typeof item.content === "string" && item.content.length <= 32000))
       || !Array.isArray(item.structured_results) || item.structured_results.length > 12 || !date(item.created_at)) throw unavailable();
+  const parsed = parseResults(item.structured_results);
   return { id: item.id, conversation_id: conversationId, turn_id: item.turn_id, sequence: Number(item.sequence),
     role: item.role as StoredMessage["role"], content: item.content, status: item.status as StoredMessage["status"],
-    structured_results: item.structured_results, created_at: item.created_at };
+    structured_results: parsed.results, unavailable_results: parsed.unavailable, created_at: item.created_at };
 }
 
 export function createOracleApi(userId: string, auth: Auth, baseUrl: string, fetcher: typeof fetch = fetch) {

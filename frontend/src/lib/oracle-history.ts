@@ -21,7 +21,7 @@ export function restoreMessages(rows: StoredMessage[], pending?: PendingTurn, pr
     const prior = provisional.find(item => item.id === localId);
     return { id: localId, serverId: row.id, role: row.role === "user" ? "user" : "agent",
       content: row.content ?? (row.status === "in_progress" ? prior?.content ?? "" : ""),
-      outcome: row.status, results: row.structured_results };
+      outcome: row.status, results: row.structured_results, unavailableResults: row.unavailable_results };
   });
   if (unresolved) {
     for (const id of [unresolved.userMessageId, unresolved.agentMessageId]) {

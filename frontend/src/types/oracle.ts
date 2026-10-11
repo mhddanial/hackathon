@@ -1,5 +1,32 @@
 export type TurnStatus = "in_progress" | "completed" | "failed" | "interrupted";
 
+export type DataStatus = "synthetic_estimate" | "database" | "estimated" | "default_fallback" | "unknown";
+export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
+export type ResultMetadata = {
+  title: string; source: string; data_status: DataStatus; disclaimer: string;
+  observed_at?: string; calculated_at?: string;
+};
+export type CongestionData = {
+  segment_id: string; day_type: "weekday" | "weekend"; hour: number;
+  congestion_level: "LOW" | "MEDIUM" | "HIGH"; multiplier: number;
+};
+export type ScheduleEntry = {
+  terminal: string; destination: string; departure_time: string;
+  cutoff_time?: string; vessel_type?: string; cargo_capacity_tons?: number;
+};
+export type RouteData = {
+  distance_km: number; final_time_min: number; routing_source: string;
+  base_time_min?: number; congestion_level?: "LOW" | "MEDIUM" | "HIGH";
+  congestion_multiplier?: number; emission_kg?: number; matched_segment_id?: string;
+  latest_gate_in?: string; optimal_departure?: string;
+};
+export type OracleResult = ResultMetadata & (
+  { type: "congestion"; data: CongestionData } |
+  { type: "schedule"; data: { schedules: ScheduleEntry[] } } |
+  { type: "route"; data: RouteData } |
+  { type: "generic"; data: { [key: string]: JsonValue } }
+);
+
 export type Conversation = {
   id: string;
   title: string | null;
@@ -15,7 +42,8 @@ export type StoredMessage = {
   role: "user" | "assistant" | "tool";
   content: string | null;
   status: TurnStatus;
-  structured_results: unknown[];
+  structured_results: OracleResult[];
+  unavailable_results?: number;
   created_at: string;
 };
 export type ConversationPage = { conversations: Conversation[]; next_cursor: string | null };
@@ -26,7 +54,8 @@ export type DisplayMessage = {
   role: "user" | "agent" | "status" | "error";
   content: string;
   outcome?: TurnStatus | "streaming" | "unknown";
-  results?: unknown[];
+  results?: OracleResult[];
+  unavailableResults?: number;
 };
 export type PendingTurn = {
   message: string;
