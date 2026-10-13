@@ -73,12 +73,12 @@ class Store:
     def record_tool(self, turn, call): self.calls.append(call)
 
 
-def run(provider, monkeypatch, history=None, *, stop_early=False, store=None):
+def run(provider, monkeypatch, history=None, *, stop_early=False, store=None, message="Logistics question"):
     monkeypatch.setattr(agent, "provider", provider)
     turn = ReservedTurn(conversation_id=uuid4(), turn_id=uuid4(), user_message_id=uuid4(),
         assistant_message_id=uuid4(), replay=False, outcome="in_progress", content=None, tool_calls=[], results=[])
     class Request:
-        state = SimpleNamespace(oracle_message="Logistics question")
+        state = SimpleNamespace(oracle_message=message)
         async def is_disconnected(self): return False
     store = store or Store()
     async def consume():
@@ -109,6 +109,37 @@ def test_native_sdk_serializes_schema_system_prompt_and_manual_execution(monkeyp
     assert body["toolConfig"]["functionCallingConfig"] == {"mode": "AUTO"}
     assert body["generationConfig"]["maxOutputTokens"] == 2048
     assert "automaticFunctionCalling" not in body
+
+
+def test_named_road_prompt_reaches_native_sdk_and_validated_congestion_result(monkeypatch):
+    from agent_config import SEGMENT_NAMES
+    from services import oracle_tools
+
+    message = "Estimate Yos Sudarso congestion on a weekday at 08:00."
+    args = {"segment_id": "SEG001", "day_type": "weekday", "hour": 8}
+    provider = WireProvider([[answer(calls=[call(name="get_congestion_level", args=args)])],
+        [answer("Yos Sudarso weekday 08:00 Asia/Jakarta: synthetic estimate.")]])
+    seen = []
+    def congestion(**values):
+        seen.append(values)
+        return {"source": "ml_model", "congestion_level": "HIGH", "multiplier": 1.8}
+    monkeypatch.setattr(oracle_tools, "get_congestion", congestion)
+
+    events, store = run(provider, monkeypatch, message=message)
+    body = provider.requests[0]
+    assert body["contents"][0]["parts"][0]["text"] == message
+    instruction = body["systemInstruction"]["parts"][0]["text"]
+    declarations = body["tools"][0]["functionDeclarations"]
+    congestion_tool = next(tool for tool in declarations if tool["name"] == "get_congestion_level")
+    for segment_id, name in SEGMENT_NAMES.items():
+        assert f"{segment_id}: {name}" in instruction
+        assert f"{segment_id}: {name}" in congestion_tool["description"]
+    assert "unknown or ambiguous" in instruction and "never guess a segment" in instruction
+    assert seen == [args] and store.calls[0].arguments == args
+    result = next(event for event in events if event["type"] == "result")["results"][0]
+    assert result["data"] == {**args, "congestion_level": "HIGH", "multiplier": 1.8}
+    assert result["data_status"] == "synthetic_estimate"
+    assert events[-1]["outcome"] == "completed" and events[-1]["persisted"]
 
 
 def test_native_parts_signatures_parallel_calls_and_optional_ids_survive_round_trip(monkeypatch):

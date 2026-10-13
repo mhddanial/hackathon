@@ -100,6 +100,21 @@ def test_active_archive_is_blocked_and_archive_after_finish_is_readable(turn_db)
     assert exc.value.sqlstate=='PT409'
 
 
+def test_active_delete_blocks_then_removes_all_turn_rows_and_late_writes(turn_db):
+    turn = reserve(turn_db)
+    with pytest.raises(psycopg.DatabaseError) as exc, turn_db.transaction():
+        turn_db.execute("DELETE FROM conversations WHERE id=%s", (turn["conversation_id"],))
+    assert exc.value.sqlstate == "PT409"
+    turn_db.execute("SELECT oracle_record_tool(%s,'call-1','get_ferry_schedule','{}','{}')", (turn["turn_id"],))
+    finish(turn_db, turn)
+    assert turn_db.execute("SELECT count(*) FROM chat_messages WHERE conversation_id=%s", (turn["conversation_id"],)).fetchone()[0] == 3
+    turn_db.execute("DELETE FROM conversations WHERE id=%s", (turn["conversation_id"],))
+    assert turn_db.execute("SELECT count(*) FROM chat_messages WHERE conversation_id=%s", (turn["conversation_id"],)).fetchone()[0] == 0
+    with pytest.raises(psycopg.DatabaseError) as late, turn_db.transaction():
+        finish(turn_db, turn)
+    assert late.value.sqlstate == "PT404"
+
+
 def test_tool_record_duplicate_and_late_writes_are_denied(turn_db):
     turn=reserve(turn_db)
     query="SELECT oracle_record_tool(%s,'call-test','get_ferry_schedule','{\"terminal\":\"sekupang\"}','{\"schedules\":[]}')"
@@ -132,6 +147,7 @@ def test_concurrent_duplicate_request_creates_one_turn(turn_database):
     with psycopg.connect(turn_database,autocommit=True) as conn:
         row=conn.execute('SELECT conversation_id FROM chat_messages WHERE client_request_id=%s',(request,)).fetchone()
         assert conn.execute('SELECT count(*) FROM chat_messages WHERE conversation_id=%s',row).fetchone()[0]==2
+        conn.execute("UPDATE chat_messages SET status='interrupted' WHERE conversation_id=%s", row)
         conn.execute('DELETE FROM conversations WHERE id=%s',row)
 
 

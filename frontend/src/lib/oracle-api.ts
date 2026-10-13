@@ -116,6 +116,10 @@ export function createOracleApi(userId: string, auth: Auth, baseUrl: string, fet
       if (item.id !== id) throw unavailable();
       return item;
     },
+    async delete(id: string, signal: AbortSignal): Promise<void> {
+      const response = await request(`/user/conversations/${requireId(id)}`, signal, undefined, "DELETE");
+      if (response.status !== 204) { await response.body?.cancel(); throw unavailable(); }
+    },
     async chat(message: string, requestId: string, conversationId: string | undefined, signal: AbortSignal): Promise<Response> {
       requireId(requestId);
       if (conversationId) requireId(conversationId);

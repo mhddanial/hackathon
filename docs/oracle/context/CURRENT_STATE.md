@@ -1,6 +1,6 @@
 # Oracle current implementation context
 
-Updated: 11 October 2026 (Asia/Jakarta). Working branch: `danial`.
+Updated: 13 October 2026 (Asia/Jakarta). Working branch: `danial`.
 This file is the starting context for continued Oracle implementation. Dated
 reports and evidence retain the detailed history.
 
@@ -28,6 +28,7 @@ with its respective owners; Oracle consumes those contracts. The original
 | Sprint 5 | Per-result runtime validation, multiple preview cards, accessible details, source/limitations, and saved-result restoration | [Report](../sprints/SPRINT_5_IMPLEMENTATION.md) |
 | Sprint 6 | Safe congestion/artifact validation, actual-tool persistence tests, final automated gates and verified model methodology; live acceptance partial | [Report](../sprints/SPRINT_6_IMPLEMENTATION.md) |
 | Provider migration | Official `google-genai` SDK, native Gemini streaming/tools, compatible saved history | [Record](../providers/GEMINI_PROVIDER_MIGRATION.md) |
+| Delete chat | Confirmed permanent deletion, owner filtering/RLS, message cascade, and active-turn guard applied to Supabase | [Record](../security/CHAT_DELETION.md) |
 
 Implemented conversation routes:
 
@@ -36,6 +37,7 @@ POST  /user/conversations
 GET   /user/conversations
 GET   /user/conversations/{id}
 PATCH /user/conversations/{id}
+DELETE /user/conversations/{id}
 GET   /user/conversations/{id}/messages
 POST  /agent/chat
 ```
@@ -43,7 +45,8 @@ POST  /agent/chat
 Ownership comes from server-verified Supabase identity. Request bodies cannot
 assign `user_id`; queries include an owner filter and use the verified user's
 JWT. Foreign/missing conversations share 404. Archive keeps history readable
-and allows restore; no hard-delete endpoint is exposed. `/user/history` remains
+and allows restore. DELETE permanently removes a chat and its messages after UI
+confirmation; recent active turns are protected. `/user/history` remains
 the separate route-log API. See the [contract](../contracts/ORACLE_API_CONTRACT.md).
 
 Applied migration files remain in `supabase/migrations/`:
@@ -51,6 +54,7 @@ Applied migration files remain in `supabase/migrations/`:
 - `20261005135325_oracle_history.sql`
 - `20261006140252_legacy_table_rls.sql`
 - `20261010105115_oracle_turn_lifecycle.sql`
+- `20261013145929_oracle_conversation_delete_guard.sql`
 
 All seven current public tables have RLS enabled; both Oracle tables and the four
 repaired legacy tables force it. `profiles` retains its existing policies. The

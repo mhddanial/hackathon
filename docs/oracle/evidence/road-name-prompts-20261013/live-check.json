@@ -1,0 +1,53 @@
+{
+  "scope": "One live Gemini turn with public Supabase congestion data and an in-memory store; no login or database history writes.",
+  "requested_model": "gemini-2.5-flash",
+  "samples": 1,
+  "checks": {
+    "completed_in_memory": true,
+    "correct_segment_day_hour": true,
+    "validated_congestion_result": true
+  },
+  "case": {
+    "name": "natural_road_name",
+    "prompt": "Estimate Yos Sudarso congestion on a weekday at 08:00.",
+    "completed_in_memory": true,
+    "elapsed_seconds": 9.99,
+    "first_text_seconds": 9.563,
+    "tools": [
+      {
+        "name": "get_congestion_level",
+        "arguments": {
+          "segment_id": "SEG001",
+          "day_type": "weekday",
+          "hour": 8
+        },
+        "error_code": null
+      }
+    ],
+    "results": [
+      {
+        "type": "congestion",
+        "source": "ml_model",
+        "data_status": "synthetic_estimate",
+        "observed_at": null,
+        "disclaimer": "Model trained on synthetic project data; not observed or real-time traffic."
+      }
+    ],
+    "event_types": [
+      "metadata",
+      "status",
+      "status",
+      "chunk",
+      "chunk",
+      "chunk",
+      "chunk",
+      "result",
+      "done"
+    ],
+    "answer": "The projected congestion level for Jl. Yos Sudarso on a weekday at 08:00 is LOW. This is a synthetic estimate, not real-time traffic data, and was calculated as of 2026-10-13T14:42:07.512670Z (Asia/Jakarta planning time)."
+  },
+  "limitations": [
+    "One prompt sample, not universal name-resolution proof.",
+    "No authenticated browser or saved-history persistence test."
+  ]
+}

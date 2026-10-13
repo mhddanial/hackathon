@@ -1,0 +1,73 @@
+{
+  "verified_at": "2026-10-13",
+  "branch": "danial",
+  "migration": "20261013145929_oracle_conversation_delete_guard.sql",
+  "backend": {
+    "passed": 300,
+    "skipped": 0,
+    "scope": "Full backend suite; real disposable loopback PostgreSQL, synthetic Auth HTTP, provider mock transports.",
+    "warnings": "Two expected serializer warnings from intentionally malformed provider argument fixtures."
+  },
+  "frontend": {
+    "api_history_checks_passed": 22,
+    "typescript_passed": true,
+    "targeted_page_api_lint_passed": true,
+    "diff_whitespace_passed": true
+  },
+  "browser": {
+    "checks_passed": 6,
+    "checks": [
+      "confirmation cancellation keeps the chat and sends no DELETE",
+      "failed deletion keeps the selected chat and shows a safe error",
+      "confirmed deletion clears messages, selection URL, saved list and result cards",
+      "deleted bookmark returns unavailable after refresh",
+      "archived chats can be permanently deleted",
+      "delete is blocked during streaming and after an unresolved active turn"
+    ],
+    "scope": "Chromium/Next.js with loopback synthetic Auth/API. Separate test app omits network Google Fonts download.",
+    "real_user_chats_deleted": 0,
+    "gemini_calls": 0
+  },
+  "live_supabase": {
+    "scope": "Direct database roles and simulated claims; synthetic history rolled back; no signed-in HTTP tested",
+    "checks": [
+      {
+        "name": "foreign_delete_denied",
+        "passed": true
+      },
+      {
+        "name": "active_delete_blocked_with_rows_preserved",
+        "passed": true
+      },
+      {
+        "name": "completed_delete_cascades_user_assistant_tool",
+        "passed": true
+      },
+      {
+        "name": "late_finish_rejected",
+        "passed": true
+      },
+      {
+        "name": "archived_delete_allowed",
+        "passed": true
+      },
+      {
+        "name": "stale_delete_allowed_and_cascaded",
+        "passed": true
+      },
+      {
+        "name": "foreign_rows_preserved_and_anonymous_delete_denied",
+        "passed": true
+      }
+    ]
+  },
+  "security_advisor": {
+    "new_findings": 0,
+    "existing_warning": "Auth leaked password protection remains disabled; unrelated to this change."
+  },
+  "limitations": [
+    "Live database checks use roles/simulated claims with all synthetic rows rolled back.",
+    "No genuine signed-in HTTP/browser deletion was performed.",
+    "No deployment, commit or push."
+  ]
+}

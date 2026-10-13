@@ -77,7 +77,7 @@ class OracleHistory:
             return data
         except APIError as exc:
             if exc.code == "PT409":
-                raise HTTPException(409, "Wait for the active turn before archiving") from None
+                raise HTTPException(409, "Wait for the active turn before changing this conversation") from None
             raise _unavailable() from None
         except (httpx.HTTPError, ValueError):
             raise _unavailable() from None
@@ -130,7 +130,6 @@ class OracleHistory:
         return ConversationPage(conversations=items, next_cursor=next_cursor)
 
     def update(self, conversation_id: UUID, payload: ConversationUpdate) -> Conversation:
-        # No hard-delete endpoint: archived conversations remain readable/restorable.
         values = {}
         if "title" in payload.model_fields_set:
             values["title"] = payload.title
@@ -143,6 +142,16 @@ class OracleHistory:
         if len(rows) != 1:
             raise _unavailable()
         return self._parse(Conversation, {key: rows[0].get(key) for key in CONVERSATION_COLUMNS.split(",")})
+
+    def delete(self, conversation_id: UUID) -> None:
+        # One database statement cascades messages atomically. RLS and the active
+        # turn trigger apply to this request-scoped, JWT-authenticated client.
+        rows = self._rows(self.database.table("conversations").delete()
+                          .eq("user_id", self.user_id).eq("id", str(conversation_id)))
+        if not rows:
+            raise HTTPException(404, "Conversation not found")
+        if len(rows) != 1:
+            raise _unavailable()
 
     def messages(self, conversation_id: UUID, *, limit: int = 30,
                  cursor: str | None = None) -> MessagePage:

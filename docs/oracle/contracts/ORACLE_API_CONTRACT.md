@@ -1,6 +1,6 @@
-# Oracle history and persistent chat contract — Sprints 1–4
+# Oracle history and persistent chat contract
 
-Updated: 10 October 2026. Python definitions: `backend/schemas/oracle.py`.
+Updated: 13 October 2026. Python definitions: `backend/schemas/oracle.py`.
 
 The conversation endpoints and authenticated persistent chat below are implemented. The Oracle caller now sends its session token and request ID together. SSE retains `status`, `chunk`, `error`, and `done`, with typed `metadata` and `result` events. Backend checks are recorded in the [Sprint 3 report](../sprints/SPRINT_3_IMPLEMENTATION.md), and history UI checks in the [Sprint 4 report](../sprints/SPRINT_4_IMPLEMENTATION.md). The [Gemini provider migration](../providers/GEMINI_PROVIDER_MIGRATION.md) uses the official native SDK; live direct-answer/tool/follow-up checks passed with an in-memory turn store. Real signed-in browser/HTTP persistence remains unverified.
 
@@ -14,7 +14,7 @@ Every new history/chat request requires `Authorization: Bearer <Supabase access 
 | 503 | Auth/network service unavailable or invalid upstream response; `Retry-After: 5`. |
 | 404 | Owned conversation not found, including foreign IDs; do not disclose another user's existence. |
 | 422 | Request validation failure (UUID, length, unsupported field/value). |
-| 409 | Request ID conflicts with saved content/conversation, a turn is already active, a conversation is archived, or archive races an active turn. |
+| 409 | Request ID conflicts with saved content/conversation, a turn is already active, a conversation is archived, or archive/delete races an active turn. |
 
 Authentication, request validation, ownership lookup, and initial persistence occur before the SSE response opens. Runtime stream errors use safe `error` content and a terminal failed/interrupted outcome rather than claiming success.
 
@@ -26,9 +26,19 @@ GET   /user/conversations
 GET   /user/conversations/{conversation_id}
 GET   /user/conversations/{conversation_id}/messages
 PATCH /user/conversations/{conversation_id}
+DELETE /user/conversations/{conversation_id}
 ```
 
-POST returns HTTP 201. Create body: `{ "title": "Batu Ampar trip" }`; title is optional, nullable, trimmed, and limited to 160 characters. Update accepts only `title` and/or `archived`; an explicit `title: null` resets the title, and an omitted field leaves it unchanged. Empty updates are rejected. Archive with `{ "archived": true }`; restore with `{ "archived": false }`. No DELETE alias or hard-delete API is exposed.
+POST returns HTTP 201. Create body: `{ "title": "Batu Ampar trip" }`; title is optional, nullable, trimmed, and limited to 160 characters. Update accepts only `title` and/or `archived`; an explicit `title: null` resets the title, and an omitted field leaves it unchanged. Empty updates are rejected. Archive with `{ "archived": true }`; restore with `{ "archived": false }`.
+
+DELETE permanently removes the owned conversation and cascades all its saved user,
+assistant, tool, and structured-result records in one database statement. It takes
+no body and returns HTTP 204 with an empty response. Active and archived chats can
+be deleted; a recent in-progress assistant turn (under three minutes old) blocks
+deletion with 409. Missing/foreign/already-deleted IDs share 404. The UI asks for
+confirmation and clears its selection/history only after the 204 acknowledgment.
+Network and service failures never cause an automatic delete retry. See the
+[delete implementation record](../security/CHAT_DELETION.md).
 
 Conversation response:
 

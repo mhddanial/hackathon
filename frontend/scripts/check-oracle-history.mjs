@@ -144,4 +144,33 @@ await check("tools are hidden, raw text remains text, active age has a stale bou
   const active = { ...answer, status: "in_progress" }; assert.equal(hasRecentActiveTurn([active], Date.parse(now) + 179999), true);
   assert.equal(hasRecentActiveTurn([active], Date.parse(now) + 180000), false);
 });
+await check("delete sends the exact authenticated ID, accepts an empty 204, and refreshes once on 401", async () => {
+  const requests = [];
+  const api = createOracleApi(user, auth, "http://test/", async (url, init) => {
+    requests.push({ url, ...init });
+    return requests.length === 1 ? json({}, 401) : new Response(null, { status: 204 });
+  });
+  assert.equal(await api.delete(convo, signal()), undefined);
+  assert.equal(requests.length, 2);
+  for (const request of requests) {
+    assert.equal(request.url, `http://test/user/conversations/${convo}`);
+    assert.equal(request.method, "DELETE"); assert.equal(request.body, undefined);
+  }
+  assert.equal(requests[1].headers.Authorization, "Bearer new-test-token");
+});
+await check("delete validates IDs and never retries conflicts, missing chats, outages or transport failures", async () => {
+  let calls = 0;
+  const invalid = createOracleApi(user, auth, "http://test", async () => { calls++; throw new Error("Must not fetch"); });
+  await assert.rejects(invalid.delete("bad-id", signal()), error => error.status === 422);
+  assert.equal(calls, 0);
+  for (const status of [404, 409, 503, 200, "network"]) {
+    calls = 0;
+    const api = createOracleApi(user, auth, "http://test", async () => {
+      calls++; if (status === "network") throw new Error("private-detail");
+      return json({ detail: "private-detail" }, status);
+    });
+    await assert.rejects(api.delete(convo, signal()), error => error.status === (status === "network" || status === 200 ? 503 : status) && !error.message.includes("private"));
+    assert.equal(calls, 1);
+  }
+});
 console.log(`${passed} Oracle API/history checks passed.`);

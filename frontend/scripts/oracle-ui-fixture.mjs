@@ -14,7 +14,8 @@ const jwt = owner => `${Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })
 const session = owner => ({ access_token: jwt(owner), refresh_token: owner === owners.a ? "synthetic-refresh-a" : "synthetic-refresh-b", token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, user: user(owner) });
 function ownerOf(req) { try { const token = req.headers.authorization?.replace(/^Bearer /, ""); const owner = JSON.parse(Buffer.from(token.split(".")[1], "base64url")).sub; return Object.values(owners).includes(owner) ? owner : null; } catch { return null; } }
 const conversations = new Map(), turns = new Map(), requests = [];
-let sequence = 0, nextMode = "normal", nextResults, listFailure = false, emptyList = false, authFailures = 0, executions = 0;
+let sequence = 0, nextMode = "normal", nextResults, listFailure = false, deleteFailure = false, emptyList = false, authFailures = 0, executions = 0;
+let uiChecks = [];
 function createConversation(owner, title, key = randomUUID(), archived = false) {
   const time = new Date(Date.now() - 60000).toISOString();
   const value = { id: key, title, created_at: time, updated_at: time, archived_at: archived ? time : null, owner, messages: [] };
@@ -46,12 +47,13 @@ function terminal(res, turn, persisted = true) {
   frame(res, { type: "done", conversation_id: turn.conversation.id, turn_id: turn.row.id, message_id: persisted ? turn.answer.id : null, outcome: persisted ? turn.answer.status : "failed", persisted }); res.end();
 }
 const server = createServer(async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*"); res.setHeader("Access-Control-Allow-Headers", "authorization,content-type,apikey,x-client-info,x-supabase-api-version"); res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
+  res.setHeader("Access-Control-Allow-Origin", "*"); res.setHeader("Access-Control-Allow-Headers", "authorization,content-type,apikey,x-client-info,x-supabase-api-version"); res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
   if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
   const url = new URL(req.url, origin); let body = {};
   try { const chunks = []; for await (const chunk of req) chunks.push(chunk); if (chunks.length) body = JSON.parse(Buffer.concat(chunks).toString()); } catch { sendJson(res, {}, 422); return; }
   const owner = ownerOf(req);
   if (url.pathname === "/__control" && req.method === "POST") {
+    if (Array.isArray(body.uiChecks)) uiChecks = body.uiChecks;
     if (body.mode) nextMode = body.mode;
     if (Array.isArray(body.nextResults)) nextResults = body.nextResults;
     if (body.savedResults) {
@@ -62,12 +64,13 @@ const server = createServer(async (req, res) => {
       if (body.savedResults.status) for (const row of conversation.messages.filter(row => row.turn_id === answer.turn_id)) row.status = body.savedResults.status;
     }
     if (typeof body.listFailure === "boolean") listFailure = body.listFailure;
+    if (typeof body.deleteFailure === "boolean") deleteFailure = body.deleteFailure;
     if (typeof body.emptyList === "boolean") emptyList = body.emptyList;
     if (typeof body.authFailures === "number") authFailures = body.authFailures;
     if (body.finishActive) for (const turn of turns.values()) if (turn.answer.status === "in_progress") finish(turn, body.finishActive);
     sendJson(res, { ok: true }); return;
   }
-  if (url.pathname === "/__stats") { sendJson(res, { executions, requests, conversations: [...conversations.values()].map(item => ({ id: item.id, owner: item.owner, message_count: item.messages.length })) }); return; }
+  if (url.pathname === "/__stats") { sendJson(res, { uiChecks, executions, requests, conversations: [...conversations.values()].map(item => ({ id: item.id, owner: item.owner, message_count: item.messages.length })) }); return; }
   if (url.pathname === "/auth/v1/token") { sendJson(res, session(body.email?.startsWith("b@") || body.refresh_token === "synthetic-refresh-b" ? owners.b : owners.a)); return; }
   if (url.pathname === "/auth/v1/user") { sendJson(res, owner ? user(owner) : { message: "Invalid fixture session" }, owner ? 200 : 401); return; }
   if (url.pathname === "/auth/v1/logout") { res.writeHead(204); res.end(); return; }
@@ -88,6 +91,13 @@ const server = createServer(async (req, res) => {
     if (match[2]) {
       const offset = Number(url.searchParams.get("cursor") || 0), items = conversation.messages;
       sendJson(res, { messages: items.slice(offset, offset + 2), next_cursor: offset + 2 < items.length ? String(offset + 2) : null }); return;
+    }
+    if (req.method === "DELETE") {
+      if (deleteFailure) { sendJson(res, {}, 503); return; }
+      if (conversation.messages.some(row => row.role === "assistant" && row.status === "in_progress" && Date.now() - Date.parse(row.created_at) < 180000)) { sendJson(res, {}, 409); return; }
+      conversations.delete(conversation.id);
+      for (const [key, turn] of turns) if (turn.conversation.id === conversation.id) turns.delete(key);
+      res.writeHead(204); res.end(); return;
     }
     if (req.method === "PATCH") conversation.archived_at = body.archived ? now() : null;
     sendJson(res, publicConversation(conversation)); return;

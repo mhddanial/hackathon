@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from auth import AuthenticatedContext, get_authenticated_context, get_current_user, get_authenticated_database
 from schemas.oracle import Conversation, ConversationCreate, ConversationPage, ConversationUpdate, MessagePage
 from services.oracle_history import OracleHistory
@@ -48,6 +48,12 @@ def get_conversation_messages(
     history: OracleHistory = Depends(get_oracle_history),
 ):
     return history.messages(conversation_id, limit=limit, cursor=cursor)
+
+
+@router.delete("/conversations/{conversation_id}", status_code=204, response_class=Response)
+def delete_conversation(conversation_id: UUID, history: OracleHistory = Depends(get_oracle_history)):
+    history.delete(conversation_id)
+    return Response(status_code=204)
 
 @router.get("/history")
 def get_user_history(user = Depends(get_current_user), supabase = Depends(get_authenticated_database)):

@@ -29,12 +29,14 @@ persistent per-user conversations with validated tool results and a result UI.
 | [Sprint 6](sprints/SPRINT_6_IMPLEMENTATION.md) | Integration/failure gates, safe congestion fallbacks, verified methodology; live acceptance partial | [Sprint 6 evidence](evidence/sprint-6/README.md) |
 | [Gemini provider migration](providers/GEMINI_PROVIDER_MIGRATION.md) | Official Google SDK, native streaming/tools, and compatible saved history | [Provider evidence](evidence/gemini-provider/README.md) |
 | [Gemini quota diagnosis](providers/GEMINI_QUOTA_INCIDENT_20261011.md) | Confirmed daily quota exhaustion, safe failure messages, and local port 8080 | [Sanitized diagnostic](evidence/gemini-quota-20261011/diagnostic.json) |
+| [Delete chat](security/CHAT_DELETION.md) | Confirmed owner-scoped deletion, message cascade, and active-turn protection | [Delete evidence](evidence/chat-deletion-20261013/validation.json) |
 
 Reports describe their own dates and scope. Use the current context for today's
 status; older reports can contain findings resolved by later work. Evidence files
 are retained unchanged, including historical output paths recorded inside them.
 
 For ML claims use the [verified congestion methodology](ml/CONGESTION_MODEL_VALIDATION.md).
+For natural road-name questions use the [road-name prompt guide](providers/ROAD_NAME_PROMPTS.md).
 For BAB III/IV writing use the [evidence map](reports/REPORT_EVIDENCE_MAP.md).
 Sprint 6 records passed automated gates separately from the current Google 429
 and pending genuine Supabase JWT/browser acceptance.

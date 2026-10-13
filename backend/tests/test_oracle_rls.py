@@ -61,6 +61,8 @@ def test_database_url():
             """)
             migration = next((ROOT / "supabase" / "migrations").glob("*_oracle_history.sql"))
             conn.execute(migration.read_text(encoding="utf-8"))
+            delete_guard = next((ROOT / "supabase" / "migrations").glob("*_oracle_conversation_delete_guard.sql"))
+            conn.execute(delete_guard.read_text(encoding="utf-8"))
         yield test_url
     finally:
         with psycopg.connect(admin_url, autocommit=True) as admin:

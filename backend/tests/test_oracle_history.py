@@ -97,6 +97,20 @@ def api(test_database_url, monkeypatch):
                 conditions.append(sql.SQL("(updated_at<%s OR (updated_at=%s AND id<%s))"))
                 values.extend(boundary.groups())
             where = sql.SQL(" WHERE ") + sql.SQL(" AND ").join(conditions) if conditions else sql.SQL("")
+            if request.method == "DELETE":
+                assert table == "conversations" and params["user_id"] == "eq." + user
+                assert "id" in params and request.content in (b"", b"{}")
+                try:
+                    with conn.transaction():
+                        conn.execute("SET LOCAL ROLE authenticated")
+                        conn.execute("SELECT set_config('request.jwt.claim.sub',%s,true)", (user,))
+                        rows = conn.execute(sql.SQL("DELETE FROM public.{}").format(sql.Identifier(table))
+                            + where + sql.SQL(" RETURNING *"), values).fetchall()
+                    return httpx.Response(200, json=json.loads(json.dumps(rows, default=str)))
+                except psycopg.DatabaseError as exc:
+                    code = exc.sqlstate or "XX000"
+                    status = int(code[2:]) if code.startswith("PT") else 500
+                    return httpx.Response(status, json={"code": code, "message": "private SQL diagnostic", "details": None, "hint": None})
             with conn.transaction():
                 conn.execute("SET LOCAL ROLE authenticated")
                 conn.execute("SELECT set_config('request.jwt.claim.sub',%s,true)", (user,))
@@ -181,7 +195,7 @@ def test_create_read_update_reset_title_and_response_privacy(api):
     assert len(writes) == 2 and all(call[2] == "test-a" for call in writes)
 
 
-@pytest.mark.parametrize("method,suffix,body", [("GET", "", None), ("GET", "/messages", None), ("PATCH", "", {"title": "stolen"}), ("PATCH", "", {"archived": True})])
+@pytest.mark.parametrize("method,suffix,body", [("GET", "", None), ("GET", "/messages", None), ("PATCH", "", {"title": "stolen"}), ("PATCH", "", {"archived": True}), ("DELETE", "", None)])
 def test_foreign_and_missing_conversations_have_identical_404(api, method, suffix, body):
     foreign = create(api, "B", HEADERS_B)
     client = api[0]
@@ -200,9 +214,44 @@ def test_archive_restore_and_read_archived_messages(api):
     assert client.get(BASE, headers=HEADERS_A).json()["conversations"] == []
     assert len(client.get(BASE, params={"include_archived": "true"}, headers=HEADERS_A).json()["conversations"]) == 1
     assert len(client.get(BASE + "/" + item["id"] + "/messages", headers=HEADERS_A).json()["messages"]) == 1
-    assert client.delete(BASE + "/" + item["id"], headers=HEADERS_A).status_code == 405
     assert client.patch(BASE + "/" + item["id"], json={"archived": False}, headers=HEADERS_A).json()["archived_at"] is None
     assert len(client.get(BASE, headers=HEADERS_A).json()["conversations"]) == 1
+
+
+@pytest.mark.parametrize("archived", [False, True])
+def test_delete_owned_conversation_cascades_messages_and_leaves_other_chats(api, archived):
+    item = create(api, "Delete this")
+    keep = create(api, "Keep this")
+    foreign = create(api, "Other account", HEADERS_B)
+    for convo, user in ((item, USER_A), (keep, USER_A), (foreign, USER_B)):
+        seed_messages(api[1], convo["id"], user=user, count=1)
+    if archived:
+        assert api[0].patch(BASE + "/" + item["id"], json={"archived": True}, headers=HEADERS_A).status_code == 200
+    response = api[0].delete(BASE + "/" + item["id"], headers=HEADERS_A)
+    assert response.status_code == 204 and response.content == b""
+    assert api[0].get(BASE + "/" + item["id"] + "/messages", headers=HEADERS_A).status_code == 404
+    api[1].execute("RESET ROLE")
+    assert api[1].execute("SELECT count(*) FROM chat_messages WHERE conversation_id=%s", (item["id"],)).fetchone()["count"] == 0
+    assert api[1].execute("SELECT count(*) FROM chat_messages").fetchone()["count"] == 2
+    assert api[0].delete(BASE + "/" + item["id"], headers=HEADERS_A).status_code == 404
+
+
+@pytest.mark.parametrize("stale", [False, True])
+def test_delete_active_turn_conflict_or_stale_cleanup(api, stale):
+    item = create(api, "Active turn")
+    conn = api[1]
+    seed_messages(conn, item["id"], count=1)
+    conn.execute("UPDATE chat_messages SET status='in_progress' WHERE conversation_id=%s", (item["id"],))
+    conn.execute("""INSERT INTO chat_messages(conversation_id,user_id,turn_id,role)
+        SELECT conversation_id,user_id,id,'assistant' FROM chat_messages WHERE conversation_id=%s""", (item["id"],))
+    if stale:
+        conn.execute("UPDATE chat_messages SET created_at=now()-interval '4 minutes' WHERE conversation_id=%s", (item["id"],))
+    response = api[0].delete(BASE + "/" + item["id"], headers=HEADERS_A)
+    assert response.status_code == (204 if stale else 409)
+    if not stale:
+        assert response.json() == {"detail": "Wait for the active turn before changing this conversation"}
+        conn.execute("RESET ROLE")
+        assert conn.execute("SELECT count(*) FROM chat_messages WHERE conversation_id=%s", (item["id"],)).fetchone()["count"] == 2
 
 
 def test_conversation_pagination_handles_identical_timestamps_without_duplicates(api):
@@ -237,7 +286,7 @@ def test_messages_are_paginated_by_sequence_with_no_private_fields(api):
     assert seen == sequences and cursor is None
 
 
-@pytest.mark.parametrize("method,suffix,body", [("GET", "", None), ("POST", "", {}), ("GET", "/00000000-0000-4000-8000-000000000011", None), ("PATCH", "/00000000-0000-4000-8000-000000000011", {"archived": True}), ("GET", "/00000000-0000-4000-8000-000000000011/messages", None)])
+@pytest.mark.parametrize("method,suffix,body", [("GET", "", None), ("POST", "", {}), ("GET", "/00000000-0000-4000-8000-000000000011", None), ("PATCH", "/00000000-0000-4000-8000-000000000011", {"archived": True}), ("GET", "/00000000-0000-4000-8000-000000000011/messages", None), ("DELETE", "/00000000-0000-4000-8000-000000000011", None)])
 @pytest.mark.parametrize("headers", [{}, {"Authorization": "Bearer expired-token"}])
 def test_all_history_routes_require_verified_auth(api, method, suffix, body, headers):
     response = api[0].request(method, BASE + suffix, json=body, headers=headers)
@@ -270,9 +319,10 @@ def test_cursor_cannot_switch_resource_or_archive_filter(api):
 
 
 @pytest.mark.parametrize("error", ["database", "network"])
-def test_database_failures_return_safe_retryable_error(api, error):
+@pytest.mark.parametrize("method", ["GET", "DELETE"])
+def test_database_failures_return_safe_retryable_error(api, error, method):
     api[3]["error"] = error
-    response = api[0].get(BASE, headers=HEADERS_A)
+    response = api[0].request(method, BASE if method == "GET" else BASE + "/" + str(uuid4()), headers=HEADERS_A)
     assert response.status_code == 503 and response.headers["Retry-After"] == "5"
     assert "private" not in response.text
 
@@ -280,6 +330,7 @@ def test_database_failures_return_safe_retryable_error(api, error):
 def test_invalid_uuid_is_rejected_and_empty_messages_have_no_cursor(api):
     item = create(api)
     assert api[0].get(BASE + "/bad-id", headers=HEADERS_A).status_code == 422
+    assert api[0].delete(BASE + "/bad-id", headers=HEADERS_A).status_code == 422
     assert api[0].get(BASE + "/" + item["id"] + "/messages", headers=HEADERS_A).json() == {"messages": [], "next_cursor": None}
 
 
