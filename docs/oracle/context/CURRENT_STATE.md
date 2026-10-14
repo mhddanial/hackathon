@@ -1,6 +1,6 @@
 # Oracle current implementation context
 
-Updated: 13 October 2026 (Asia/Jakarta). Working branch: `danial`.
+Updated: 14 October 2026 (Asia/Jakarta). Working branch: `danial`.
 This file is the starting context for continued Oracle implementation. Dated
 reports and evidence retain the detailed history.
 
@@ -29,6 +29,7 @@ with its respective owners; Oracle consumes those contracts. The original
 | Sprint 6 | Safe congestion/artifact validation, actual-tool persistence tests, final automated gates and verified model methodology; live acceptance partial | [Report](../sprints/SPRINT_6_IMPLEMENTATION.md) |
 | Provider migration | Official `google-genai` SDK, native Gemini streaming/tools, compatible saved history | [Record](../providers/GEMINI_PROVIDER_MIGRATION.md) |
 | Delete chat | Confirmed permanent deletion, owner filtering/RLS, message cascade, and active-turn guard applied to Supabase | [Record](../security/CHAT_DELETION.md) |
+| Named routes and map results | Shared Batam location resolution, date-aware vessel cutoffs, bounded saved geometry, and Planner map reused in Oracle dialogs | [Record](../providers/NAMED_ROUTES_AND_MAPS.md) |
 
 Implemented conversation routes:
 

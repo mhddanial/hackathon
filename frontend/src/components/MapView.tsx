@@ -1,8 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Building2, Ship, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Building2, Ship } from "lucide-react";
 
 // Dynamically import MapComponent to disable SSR
 const MapComponent = dynamic(() => import("./MapComponent"), {
@@ -16,48 +15,51 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 
 export default function MapView({
   routeCoordinates = null,
-  originStr = "Batam Central Hub",
-  destStr = "Batu Ampar Terminal",
+  originStr = "Origin",
+  destStr = "Destination",
   originCoords,
-  destCoords
+  destCoords,
+  approximate = false,
 }: {
   routeCoordinates?: [number, number][] | null,
   originStr?: string,
   destStr?: string,
   originCoords?: [number, number],
-  destCoords?: [number, number]
+  destCoords?: [number, number],
+  approximate?: boolean,
 }) {
   return (
-    <div className="w-full h-full relative">
+    <div className="flex h-full w-full flex-col">
       {/* The Actual Leaflet Map */}
-      <div className="absolute inset-0 z-0">
+      <div className="relative z-0 order-2 min-h-0 flex-1">
         <MapComponent 
           routeCoordinates={routeCoordinates} 
           origin={originCoords}
           destination={destCoords}
           originName={originStr}
           destName={destStr}
+          approximate={approximate}
         />
       </div>
       
-      {/* Top Overlays */}
-      <div className="absolute top-6 left-6 right-6 flex justify-between pointer-events-none z-10">
-        <div className="bg-white/95 backdrop-blur shadow-sm px-6 py-4 rounded-full flex items-center gap-4 pointer-events-auto border border-border">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+      {/* Endpoint labels occupy their own row so they cannot cover markers. */}
+      <div className="order-1 grid shrink-0 grid-cols-2 gap-3 border-b bg-card p-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Building2 className="w-4 h-4" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Origin</p>
-            <p className="text-sm font-bold text-foreground">{originStr}</p>
+            <p className="break-words text-xs font-semibold text-foreground sm:text-sm" title={originStr}>{originStr}</p>
           </div>
         </div>
         
-        <div className="bg-white/95 backdrop-blur shadow-sm px-6 py-4 rounded-full flex items-center gap-4 pointer-events-auto border border-border">
-          <div>
+        <div className="flex min-w-0 items-center justify-end gap-2">
+          <div className="min-w-0">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-right">Destination</p>
-            <p className="text-sm font-bold text-foreground text-right">{destStr}</p>
+            <p className="break-words text-right text-xs font-semibold text-foreground sm:text-sm" title={destStr}>{destStr}</p>
           </div>
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
             <Ship className="w-4 h-4" />
           </div>
         </div>

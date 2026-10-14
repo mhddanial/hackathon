@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -18,20 +18,21 @@ const createCustomIcon = (colorClass: string) => {
 };
 
 const originIcon = createCustomIcon("bg-primary");
-const destIcon = createCustomIcon("bg-primary-deep");
-
-const BATAM_CENTER: [number, number] = [1.1291, 104.0494];
-const BATU_AMPAR: [number, number] = [1.1633, 104.0044];
+const destIcon = createCustomIcon("bg-emerald-600");
 
 // Component to handle dynamic map bounds
 function BoundsUpdater({ coordinates }: { coordinates: [number, number][] | null }) {
   const map = useMap();
   
   useEffect(() => {
-    if (coordinates && coordinates.length > 0) {
-      const bounds = L.latLngBounds(coordinates);
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
+    const resize = () => {
+      map.invalidateSize({ pan: false });
+      if (coordinates && coordinates.length > 0) map.fitBounds(L.latLngBounds(coordinates), { padding: [30, 30], maxZoom: 15, animate: false });
+    };
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
   }, [coordinates, map]);
 
   return null;
@@ -39,48 +40,45 @@ function BoundsUpdater({ coordinates }: { coordinates: [number, number][] | null
 
 export default function MapComponent({ 
   routeCoordinates = null,
-  origin = BATAM_CENTER,
-  destination = BATU_AMPAR,
+  origin,
+  destination,
   originName = "Origin",
-  destName = "Destination"
+  destName = "Destination",
+  approximate = false,
 }: { 
   routeCoordinates?: [number, number][] | null,
   origin?: [number, number],
   destination?: [number, number],
   originName?: string,
-  destName?: string
+  destName?: string,
+  approximate?: boolean,
 }) {
-  const [mounted, setMounted] = useState(false);
-  const [mapId, setMapId] = useState("");
-
-  useEffect(() => {
-    setMapId(`map-${Math.random().toString(36).substring(2, 9)}`);
-    setMounted(true);
-  }, []);
-
-  if (!mounted || !mapId) return null;
+  const mapId = useId();
+  if (!origin || !destination) return <div className="p-4 text-sm">Location coordinates unavailable.</div>;
 
   return (
     <MapContainer
       key={mapId}
-      center={[1.1462, 104.0269]}
+      center={origin}
       zoom={13}
       style={{ height: "100%", width: "100%" }}
-      zoomControl={false}
-      attributionControl={false}
+      zoomControl={true}
+      attributionControl={true}
     >
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        maxZoom={19}
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
 
-      <Marker position={origin} icon={originIcon}>
-        <Tooltip direction="right" offset={[15, 0]} opacity={1} permanent>
+      <Marker position={origin} icon={originIcon} title={originName} alt={originName}>
+        <Tooltip direction="top" offset={[0, -15]} opacity={1}>
           {originName}
         </Tooltip>
       </Marker>
       
-      <Marker position={destination} icon={destIcon}>
-        <Tooltip direction="right" offset={[15, 0]} opacity={1} permanent>
+      <Marker position={destination} icon={destIcon} title={destName} alt={destName}>
+        <Tooltip direction="top" offset={[0, -15]} opacity={1}>
           {destName}
         </Tooltip>
       </Marker>
@@ -89,23 +87,11 @@ export default function MapComponent({
         <>
           <Polyline
             positions={routeCoordinates}
-            pathOptions={{ color: "#0064e0", weight: 5, opacity: 0.9 }}
-          />
-          <BoundsUpdater coordinates={routeCoordinates} />
-        </>
-      ) : (
-        <>
-          {/* Default Mock Routes if no data is provided */}
-          <Polyline
-            positions={[BATAM_CENTER, [1.1400, 104.0300], [1.1550, 104.0150], BATU_AMPAR]}
-            pathOptions={{ color: "#0064e0", weight: 4, opacity: 0.8 }}
-          />
-          <Polyline
-            positions={[BATAM_CENTER, [1.1350, 104.0200], [1.1480, 104.0080], BATU_AMPAR]}
-            pathOptions={{ color: "#f7b928", weight: 4, opacity: 0.5, dashArray: "10, 10" }}
+            pathOptions={{ color: approximate ? "#b45309" : "#0064e0", weight: 5, opacity: 0.9, ...(approximate ? { dashArray: "8, 8" } : {}) }}
           />
         </>
-      )}
+      ) : null}
+      <BoundsUpdater coordinates={[origin, destination, ...(routeCoordinates || [])]} />
     </MapContainer>
   );
 }

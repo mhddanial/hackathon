@@ -181,6 +181,39 @@ Tool argument models in `backend/services/oracle_tools.py` generate provider sch
 
 ## Structured results
 
+### Named route inputs and saved maps (14 October 2026)
+
+The route tool accepts names/IDs from a shared Batam location catalog as well as
+coordinates within the project's planning envelope. Required planning inputs
+remain explicit; cargo and vessel ETD are paired. Optional `departure_date`
+and ISO vessel ETD support date-aware WIB cutoffs. Unknown or ambiguous locations
+produce model-visible clarification choices and no route result.
+
+Route results optionally retain endpoint names/coordinates, validated GeoJSON
+LineString geometry (2–160 points), planning date/time zone, cargo/ETD,
+date-aware departure/gate-in timestamps, feasibility, congestion status and
+warnings. Old route results still validate without those fields. SSE and saved
+results include the geometry; tool/model output omits it and adds `map_available`.
+Map previews remain within 16 KB; existing JSONB/RPC limits remain unchanged.
+The dialog reuses the Planner map, labels fallback connections, and shows an
+unavailable state for legacy results without map data. See
+[implementation and verification](../providers/NAMED_ROUTES_AND_MAPS.md).
+
+### Readable road names (14 October 2026)
+
+Congestion data adds optional `segment_name`; route data adds optional
+`matched_segment_name`. Names are trimmed, nonempty strings of at most 256
+characters. Internal `segment_id` and `matched_segment_id` values remain
+unchanged for validation, lookups, tool calls, and history. New service responses
+prefer `road_segments.name` from the existing reference query, with the supported
+catalog as fallback. Oracle preserves the name in tool output and saved/streamed
+results. The frontend validator retains names, and cards/details prefer them;
+older results without names use the frontend catalog without another request.
+Unknown legacy route IDs remain visible rather than being assigned a guessed
+road. The route label refers to the corridor matched near the origin for the
+congestion estimate. Existing JSONB storage accepts these added fields; no
+database migration is needed.
+
 ### Congestion runtime provenance (Sprint 6)
 
 The public `/congestion` endpoint keeps existing core fields and source values
@@ -213,6 +246,7 @@ Every result requires `type`, `title`, typed `data`, `source`, `data_status`, an
   "title": "Congestion estimate",
   "data": {
     "segment_id": "SEG001",
+    "segment_name": "Jl. Yos Sudarso (Koridor Utama)",
     "day_type": "weekday",
     "hour": 8,
     "congestion_level": "LOW",

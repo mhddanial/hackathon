@@ -11,6 +11,7 @@ import joblib
 from sklearn.exceptions import InconsistentVersionWarning
 
 from database import get_supabase_client
+from road_segments import segment_name
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -119,10 +120,11 @@ def get_congestion(
     # A database outage here cannot be repaired by another query to that database.
     try:
         supabase = get_supabase_client()
-        segments = supabase.table('road_segments').select('corridor_type').eq('segment_id', segment_id).execute().data
+        segments = supabase.table('road_segments').select('corridor_type,name').eq('segment_id', segment_id).execute().data
         if not isinstance(segments, list): raise ValueError('Invalid corridor response')
         if not segments: raise HTTPException(404, 'Road segment not found')
         corridor = segments[0]['corridor_type']
+        name = segment_name(segment_id, segments[0].get('name'))
     except HTTPException:
         raise
     except Exception:
@@ -131,7 +133,7 @@ def get_congestion(
     if rf_model is not None:
         try:
             level, multiplier = model_prediction(corridor, day_type, hour)
-            return response('ml_model', segment_id, day_type, hour, level, multiplier)
+            return response('ml_model', segment_id, day_type, hour, level, multiplier, segment_name=name)
         except Exception:
             logger.warning('Congestion prediction unavailable; checking recorded estimates')
 
@@ -143,8 +145,9 @@ def get_congestion(
         if matches:
             row = matches[0]
             return response('database', segment_id, day_type, hour, row['congestion_level'].upper(),
-                positive_multiplier(row['multiplier']), description=row.get('description') or '')
+                positive_multiplier(row['multiplier']), segment_name=name, description=row.get('description') or '')
         return response('fallback_default', segment_id, day_type, hour, 'LOW', 1.0,
+            segment_name=name,
             note='No data found for this segment and day type.' if not rows else 'Hour did not match any recorded window.')
     except Exception:
         raise HTTPException(503, 'Recorded congestion estimates are temporarily unavailable') from None

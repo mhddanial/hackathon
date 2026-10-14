@@ -137,7 +137,7 @@ def test_named_road_prompt_reaches_native_sdk_and_validated_congestion_result(mo
     assert "unknown or ambiguous" in instruction and "never guess a segment" in instruction
     assert seen == [args] and store.calls[0].arguments == args
     result = next(event for event in events if event["type"] == "result")["results"][0]
-    assert result["data"] == {**args, "congestion_level": "HIGH", "multiplier": 1.8}
+    assert result["data"] == {**args, "segment_name": SEGMENT_NAMES['SEG001'], "congestion_level": "HIGH", "multiplier": 1.8}
     assert result["data_status"] == "synthetic_estimate"
     assert events[-1]["outcome"] == "completed" and events[-1]["persisted"]
 

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { roadName } from "@/lib/road-segments";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
 
@@ -19,7 +20,7 @@ interface Schedule {
 }
 
 type CongestionLevel = "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
-interface Congestion { congestion_level: CongestionLevel; multiplier: number }
+interface Congestion { segment_id: string; segment_name?: string; congestion_level: CongestionLevel; multiplier: number }
 interface DashboardData {
   schedules: Schedule[];
   congestion: Congestion | null;
@@ -95,6 +96,7 @@ export default function DashboardPage() {
   ).sort((a, b) => a.time.localeCompare(b.time)).slice(0, 3);
   const status = data.congestion ? congestionStyles[data.congestion.congestion_level] : undefined;
   const isHighCongestion = status ? status.percent > 55 : false;
+  const corridorName = roadName(data.congestion?.segment_id ?? "SEG001", data.congestion?.segment_name);
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -123,7 +125,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3 px-5 pb-5">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-medium">Yos Sudarso</span>
+              <span className="min-w-0 break-words text-sm font-medium">{corridorName}</span>
               {loading ? <Skeleton className="h-6 w-24 rounded-md" /> : (
                 <Badge variant="outline" className={"rounded-md font-medium " + (status?.className || "text-muted-foreground")}>
                   {status?.label || "Unavailable"}
@@ -134,7 +136,7 @@ export default function DashboardPage() {
               <span className="text-sm font-medium">Sudirman</span>
               <Badge variant="outline" className="rounded-md border-[#A7F3D0] bg-[#ECFDF5] font-medium text-[#10B981]">Clear · demo</Badge>
             </div>
-            <p className="text-xs text-muted-foreground">SEG001 road estimate; Sudirman is illustrative.</p>
+            <p className="text-xs text-muted-foreground">Estimate for {corridorName}; Sudirman is illustrative.</p>
           </CardContent>
         </Card>
 
@@ -212,7 +214,7 @@ export default function DashboardPage() {
               <div className="h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true">
                 <div className={"h-full rounded-full transition-[width] motion-reduce:transition-none " + (isHighCongestion ? "bg-[#EF4444]" : "bg-[#10B981]")} style={{ width: (status?.percent ?? 0) + "%" }} />
               </div>
-              <p className="text-xs leading-relaxed text-muted-foreground">Based on the SEG001 road estimate. Berth availability is demo data.</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">Based on the {corridorName} estimate. Berth availability is demo data.</p>
             </div>
           </CardContent>
         </Card>

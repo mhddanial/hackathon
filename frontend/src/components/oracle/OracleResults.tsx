@@ -3,7 +3,9 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MapView from "@/components/MapView";
 import { resultStatusLabels } from "@/lib/oracle-results";
+import { roadName } from "@/lib/road-segments";
 import type { DisplayMessage, OracleResult, ScheduleEntry } from "@/types/oracle";
 
 const format = (value: number) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 }).format(value);
@@ -47,26 +49,42 @@ function ScheduleDetails({ schedules }: { schedules: ScheduleEntry[] }) {
 function ResultDetails({ result }: { result: OracleResult }) {
   if (result.type === "congestion") {
     const data = result.data;
-    return <Facts values={[["Road segment", data.segment_id], ["Day type", data.day_type], ["Hour bucket", `${data.hour}:00`],
+    return <Facts values={[["Road corridor", roadName(data.segment_id, data.segment_name)], ["Day type", data.day_type], ["Hour bucket", `${data.hour}:00`],
       ["Congestion level", data.congestion_level], ["Time multiplier", `${format(data.multiplier)}×`]]} />;
   }
   if (result.type === "schedule") return <ScheduleDetails schedules={result.data.schedules} />;
   if (result.type === "route") {
     const data = result.data;
+    const absoluteOrClock = (absolute?: string, clock?: string) => absolute ? date(absolute) : clock ? `${clock}${data.planning_timezone ? " WIB" : ""}` : undefined;
+    const approximate = data.routing_source === "Haversine Fallback";
     return <>
-      <Facts values={[["Distance", `${format(data.distance_km)} km`], ["Travel time", `${format(data.final_time_min)} min`],
+      {data.route_geometry && data.origin && data.destination ? <section aria-label="Saved route map" className="mb-4">
+        <div className="relative h-[320px] overflow-hidden rounded-xl border sm:h-[380px]">
+          <MapView routeCoordinates={data.route_geometry.coordinates.map(([lng, lat]) => [lat, lng])}
+            originCoords={[data.origin.lat, data.origin.lng]} destCoords={[data.destination.lat, data.destination.lng]}
+            originStr={data.origin_name || "Origin"} destStr={data.destination_name || "Destination"} approximate={approximate} />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">{approximate ? "Approximate straight-line connection; road routing was unavailable." : "Simplified saved route preview."} Location points may represent an area or access road.</p>
+      </section> : <p className="mb-4 text-xs text-muted-foreground">Map unavailable for this saved result.</p>}
+      {data.planning_warning && <p className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-950">{data.planning_warning}</p>}
+      <Facts values={[["Origin", data.origin_name], ["Destination", data.destination_name],
+        ["Planned departure", absoluteOrClock(data.departure_datetime, data.departure_time)], ["Day type", data.day_type],
+        ["Cargo type", data.cargo_type?.replaceAll("_", " ")], ["Vessel ETD", data.vessel_etd?.includes("T") ? date(data.vessel_etd) : absoluteOrClock(undefined, data.vessel_etd)],
+        ["Distance", `${format(data.distance_km)} km`], ["Travel time", `${format(data.final_time_min)} min`],
         ["Routing source", data.routing_source], ["Base travel time", data.base_time_min !== undefined ? `${format(data.base_time_min)} min` : undefined],
         ["Congestion level", data.congestion_level], ["Time multiplier", data.congestion_multiplier !== undefined ? `${format(data.congestion_multiplier)}×` : undefined],
-        ["Emission estimate", data.emission_kg !== undefined ? `${format(data.emission_kg)} kg` : undefined], ["Matched road segment", data.matched_segment_id],
-        ["Latest gate-in", data.latest_gate_in], ["Suggested departure", data.optimal_departure]]} />
-      {(data.latest_gate_in !== undefined || data.optimal_departure !== undefined) && <p className="mt-3 text-xs text-muted-foreground">Clock times come from this result. A service date and source time zone were not provided.</p>}
+        ["Emission estimate", data.emission_kg !== undefined ? `${format(data.emission_kg)} kg` : undefined], ["Matched road corridor", roadName(data.matched_segment_id, data.matched_segment_name)],
+        ["Latest gate-in", absoluteOrClock(data.latest_gate_in_datetime, data.latest_gate_in)], ["Suggested departure", absoluteOrClock(data.optimal_departure_datetime, data.optimal_departure)],
+        ["Departure feasibility", data.departure_feasible === undefined ? undefined : data.departure_feasible ? "Within estimated cutoff" : "Too late for estimated cutoff"],
+        ["Congestion estimate status", data.congestion_status?.replaceAll("_", " ")]]} />
+      {(data.latest_gate_in !== undefined || data.optimal_departure !== undefined) && <p className="mt-3 text-xs text-muted-foreground">{data.planning_timezone ? "Times use Asia/Jakarta (WIB). Suggested departure is the latest safe departure for this estimate." : "Clock times come from this result. A service date and source time zone were not provided."}</p>}
     </>;
   }
   return <pre className="max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg bg-muted p-3 text-xs">{JSON.stringify(result.data, null, 2)}</pre>;
 }
 
 function Preview({ result }: { result: OracleResult }) {
-  if (result.type === "congestion") return <p>{result.data.segment_id} · {result.data.congestion_level} · {format(result.data.multiplier)}× travel time</p>;
+  if (result.type === "congestion") return <p>{roadName(result.data.segment_id, result.data.segment_name)} · {result.data.congestion_level} · {format(result.data.multiplier)}× travel time</p>;
   if (result.type === "schedule") return <p>{result.data.schedules.length} recorded departure{result.data.schedules.length === 1 ? "" : "s"}</p>;
   if (result.type === "route") return <p>{format(result.data.distance_km)} km · {format(result.data.final_time_min)} min</p>;
   return <p>Additional structured data</p>;

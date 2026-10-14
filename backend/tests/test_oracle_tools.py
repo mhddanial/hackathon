@@ -37,19 +37,24 @@ def test_congestion_output_has_source_status_and_no_invented_freshness(monkeypat
     output,result=tools.execute_tool('get_congestion_level',args)
     assert output['data_status']==status and output['source']==source and output['observed_at'] is None
     assert result.data.day_type=='weekend' and result.data.hour==8
+    assert output['data']['segment_name']=='Jl. Yos Sudarso (Koridor Utama)'
 
 
-def test_route_preserves_explicit_weekend_time_and_removes_geometry(monkeypatch):
+def test_route_preserves_planning_and_keeps_geometry_out_of_model_output(monkeypatch):
     seen=[]
     def route(req):
         seen.append(req)
-        return {'distance_km':5,'final_time_min':10,'routing_source':'Haversine Fallback','route_geometry':{'large':'excluded'}}
+        return {'distance_km':5,'final_time_min':10,'routing_source':'Haversine Fallback',
+            'matched_segment_id':'SEG002','matched_segment_name':'Updated Sudirman corridor',
+            'route_geometry':{'type':'LineString','coordinates':[[104,1],[104,1.1]]}}
     monkeypatch.setattr(tools,'calculate_route',route)
-    args=tools.validate_arguments('get_optimal_route',json.dumps({'origin':'1,104','destination':'2,104','time':'17:30','day_type':'weekend'}))
+    args=tools.validate_arguments('get_optimal_route',json.dumps({'origin':'1,104','destination':'1.1,104','time':'17:30','day_type':'weekend'}))
     output,result=tools.execute_tool('get_optimal_route',args)
     assert seen[0].day_type=='weekend' and seen[0].time=='17:30'
     assert 'route_geometry' not in output['data'] and output['data_status']=='estimated'
+    assert output['data']['map_available'] and result.data.route_geometry.type=='LineString'
     assert '17:30' in output['disclaimer'] and 'measured' in output['disclaimer']
+    assert output['data']['matched_segment_id']=='SEG002' and output['data']['matched_segment_name']=='Updated Sudirman corridor'
 
 
 def test_schedule_filter_empty_data_and_capacity_contract(monkeypatch):

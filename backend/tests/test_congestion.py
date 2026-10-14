@@ -26,7 +26,7 @@ class Model:
 
 @pytest.fixture
 def setup(monkeypatch):
-    state = {'corridor': 'industrial_arterial', 'windows': [], 'calls': [], 'segment_error': False, 'fallback_error': False, 'missing': False}
+    state = {'corridor': 'industrial_arterial', 'name': 'Jl. Yos Sudarso (Koridor Utama)', 'windows': [], 'calls': [], 'segment_error': False, 'fallback_error': False, 'missing': False}
     class Query:
         def table(self, name): self.name=name; return self
         def select(self, *args): return self
@@ -34,7 +34,7 @@ def setup(monkeypatch):
         def execute(self):
             state['calls'].append(self.name)
             if state['segment_error'] and self.name=='road_segments' or state['fallback_error'] and self.name=='congestion_multipliers': raise RuntimeError('private database diagnostic')
-            return NS(data=([] if state['missing'] else [{'corridor_type': state['corridor']}]) if self.name=='road_segments' else state['windows'])
+            return NS(data=([] if state['missing'] else [{'corridor_type': state['corridor'], 'name': state['name']}]) if self.name=='road_segments' else state['windows'])
     monkeypatch.setattr(c, 'get_supabase_client', Query)
     monkeypatch.setattr(c, 'rf_model', None)
     monkeypatch.setattr(c, 'feature_columns', FEATURES)
@@ -57,6 +57,19 @@ def test_default_preserves_planning_fields_and_explicit_uncertainty(setup):
     assert out['source']=='fallback_default' and out['day_type']=='weekday' and out['hour']==8
     assert out['data_status']=='default_fallback' and out['observed_at'] is None
     assert 'assumed' in out['disclaimer'].lower() and out['multiplier']==1.0
+
+
+@pytest.mark.parametrize('source', ['ml_model', 'database', 'fallback_default'])
+def test_road_name_reaches_endpoint_and_oracle_for_every_source(setup, monkeypatch, source):
+    setup['name'] = 'Updated Yos Sudarso corridor'
+    if source == 'ml_model': monkeypatch.setattr(c, 'rf_model', Model())
+    if source == 'database':
+        setup['windows'] = [{'hour_start': 0, 'hour_end': 24, 'congestion_level': 'LOW', 'multiplier': 1.1}]
+    out = call()
+    assert out['source'] == source and out['segment_id'] == 'SEG001'
+    assert out['segment_name'] == setup['name']
+    output, result = oracle_tools.execute_tool('get_congestion_level', {'segment_id': 'SEG001', 'day_type': 'weekday', 'hour': 8})
+    assert result is not None and output['data']['segment_name'] == setup['name']
 
 
 @pytest.mark.parametrize('hour',range(24))

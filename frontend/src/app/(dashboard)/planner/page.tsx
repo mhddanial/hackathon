@@ -11,8 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, MapPin, Search, Clock, Leaf, Target, Layers, Loader2 } from "lucide-react";
+import { Plus, MapPin, Search, Clock, Leaf, Target, Loader2 } from "lucide-react";
 import MapView from "@/components/MapView";
+import { batamLocations as BATAM_LOCATIONS } from "@/lib/locations";
 
 interface Schedule {
   id: string;
@@ -25,18 +26,9 @@ interface Schedule {
   cargo_capacity_tons: number;
 }
 
-const BATAM_LOCATIONS = [
-  { name: "Batu Ampar Port", coords: "1.1633, 104.0044" },
-  { name: "Sekupang Ferry Terminal", coords: "1.1291, 104.0494" },
-  { name: "Batam Center Terminal", coords: "1.1278, 104.0536" },
-  { name: "Batamindo Industrial Park", coords: "1.0667, 104.0333" },
-  { name: "Kabil Industrial Estate", coords: "1.0833, 104.1333" },
-  { name: "Hang Nadim Airport", coords: "1.1167, 104.1167" },
-];
-
 export default function RouteRecommendationPage() {
-  const [origin, setOrigin] = useState("1.1291, 104.0494");
-  const [destination, setDestination] = useState("1.1633, 104.0044");
+  const [origin, setOrigin] = useState(BATAM_LOCATIONS.find(location => location.id === "sekupang_terminal")!.coords);
+  const [destination, setDestination] = useState(BATAM_LOCATIONS.find(location => location.id === "batu_ampar_port")!.coords);
   
   // Default to current time, but let user change it
   const defaultTime = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
@@ -103,6 +95,8 @@ export default function RouteRecommendationPage() {
         body: JSON.stringify({
           origin: { lat: originLat, lng: originLng },
           destination: { lat: destLat, lng: destLng },
+          origin_name: BATAM_LOCATIONS.find(location => location.coords === origin)?.name,
+          destination_name: BATAM_LOCATIONS.find(location => location.coords === destination)?.name,
           time: time,
           day_type: dayType,
           vessel_etd: vesselEtd,
@@ -366,6 +360,7 @@ export default function RouteRecommendationPage() {
               destStr={BATAM_LOCATIONS.find(loc => loc.coords === destination)?.name || destination}
               originCoords={origin.split(',').length === 2 ? [parseFloat(origin.split(',')[0]), parseFloat(origin.split(',')[1])] : undefined}
               destCoords={destination.split(',').length === 2 ? [parseFloat(destination.split(',')[0]), parseFloat(destination.split(',')[1])] : undefined}
+              approximate={routeData?.routing_source === "Haversine Fallback"}
             />
           </div>
 
@@ -401,7 +396,7 @@ export default function RouteRecommendationPage() {
                       routeData.congestion_level === 'MEDIUM' ? 'bg-[#FEF3C7] text-[#D97706]' : 
                       'bg-[#FEE2E2] text-[#DC2626]'
                     }`}>
-                      {routeData.congestion_level}
+                      {routeData.congestion_level || "Unavailable"}
                     </span>
                   )}
                 </div>

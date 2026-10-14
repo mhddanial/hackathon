@@ -1,0 +1,8 @@
+[
+  {"id":"batu_ampar_port","name":"Batu Ampar Port","aliases":["Batu Ampar","Pelabuhan Batu Ampar"],"lat":1.1629505,"lng":104.0024883,"source":"https://www.openstreetmap.org/way/818376558","point_kind":"approximate access point"},
+  {"id":"sekupang_terminal","name":"Sekupang Ferry Terminal","aliases":["Sekupang","Sekupang International Ferry Terminal","Pelabuhan Sekupang"],"lat":1.125047,"lng":103.9249678,"source":"https://www.openstreetmap.org/node/624972788","point_kind":"mapped terminal point"},
+  {"id":"batam_center_terminal","name":"Batam Center Terminal","aliases":["Batam Centre","Batam Center","Batam Centre Ferry Terminal","Batam Center Ferry Terminal"],"lat":1.1317546,"lng":104.0554292,"source":"https://www.openstreetmap.org/node/8396655666","point_kind":"mapped terminal point"},
+  {"id":"batamindo_industrial_park","name":"Batamindo Industrial Park","aliases":["Batamindo","Kawasan Industri Batamindo"],"lat":1.0604795,"lng":104.0303214,"source":"https://www.openstreetmap.org/way/41373817","point_kind":"approximate area center"},
+  {"id":"kabil_industrial_estate","name":"Kabil Industrial Estate","aliases":["Kabil","Kabil Integrated Industrial Estate","Kawasan Industri Terpadu Kabil"],"lat":1.11737,"lng":104.13739,"source":"https://www.openstreetmap.org/node/760493879","point_kind":"approximate area point"},
+  {"id":"hang_nadim_airport","name":"Hang Nadim Airport","aliases":["Hang Nadim","Bandara Hang Nadim","Hang Nadim International Airport"],"lat":1.1236677,"lng":104.1153622,"source":"https://www.openstreetmap.org/way/60754253","point_kind":"approximate access point"}
+]

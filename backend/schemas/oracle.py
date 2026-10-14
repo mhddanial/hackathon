@@ -4,10 +4,12 @@ from datetime import datetime
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints, model_validator, field_validator
+from route_planning import planning_date, vessel_time
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=8000)]
 Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=160)]
+RoadName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=256)]
 ClockTime = Annotated[str, StringConstraints(pattern=r"^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$")]
 NonNegative = Annotated[float, Field(ge=0, allow_inf_nan=False)]
 Positive = Annotated[float, Field(gt=0, allow_inf_nan=False)]
@@ -61,6 +63,7 @@ class ResultMetadata(Contract):
 
 class CongestionData(Contract):
     segment_id: Annotated[str, StringConstraints(pattern=r"^SEG00[1-6]$")]
+    segment_name: RoadName | None = None
     day_type: Literal["weekday", "weekend"]
     hour: Annotated[int, Field(strict=True, ge=0, le=23)]
     congestion_level: Literal["LOW", "MEDIUM", "HIGH"]
@@ -80,6 +83,17 @@ class ScheduleData(Contract):
     schedules: list[ScheduleEntry] = Field(max_length=100)
 
 
+class LocationPoint(Contract):
+    lat: Annotated[float, Field(strict=True, ge=-90, le=90, allow_inf_nan=False)]
+    lng: Annotated[float, Field(strict=True, ge=-180, le=180, allow_inf_nan=False)]
+
+
+class RouteGeometry(Contract):
+    type: Literal['LineString']
+    coordinates: list[tuple[Annotated[float, Field(strict=True, ge=-180, le=180, allow_inf_nan=False)],
+        Annotated[float, Field(strict=True, ge=-90, le=90, allow_inf_nan=False)]]] = Field(min_length=2, max_length=160)
+
+
 class RouteData(Contract):
     distance_km: NonNegative
     final_time_min: NonNegative
@@ -89,8 +103,29 @@ class RouteData(Contract):
     congestion_multiplier: Positive | None = None
     emission_kg: NonNegative | None = None
     matched_segment_id: str | None = None
+    matched_segment_name: RoadName | None = None
     latest_gate_in: ClockTime | None = None
     optimal_departure: ClockTime | None = None
+    origin: LocationPoint | None = None
+    destination: LocationPoint | None = None
+    origin_name: RoadName | None = None
+    destination_name: RoadName | None = None
+    route_geometry: RouteGeometry | None = None
+    departure_time: ClockTime | None = None
+    departure_date: Annotated[str, StringConstraints(pattern=r'^\d{4}-\d{2}-\d{2}$')] | None = None
+    planning_timezone: Literal['Asia/Jakarta'] | None = None
+    day_type: Literal['weekday', 'weekend'] | None = None
+    cargo_type: Literal['CONTAINER', 'FAST_FREIGHT'] | None = None
+    vessel_etd: str | None = None
+    departure_datetime: AwareDatetime | None = None
+    latest_gate_in_datetime: AwareDatetime | None = None
+    optimal_departure_datetime: AwareDatetime | None = None
+    departure_feasible: bool | None = None
+    planning_warning: Annotated[str, StringConstraints(max_length=2000)] | None = None
+    congestion_status: Literal['synthetic_estimate', 'default_fallback', 'unavailable'] | None = None
+
+    _date = field_validator('departure_date', mode='before')(planning_date)
+    _etd = field_validator('vessel_etd', mode='before')(vessel_time)
 
 
 class CongestionResult(ResultMetadata):

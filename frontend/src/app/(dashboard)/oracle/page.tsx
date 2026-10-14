@@ -35,6 +35,7 @@ const MAX_MESSAGE_LENGTH = 8000;
 const SUGGESTIONS = [
   "Estimate Yos Sudarso congestion on a weekday at 08:00.",
   "Show recorded ferry departures from Batu Ampar.",
+  "Estimate a fast freight route from Batamindo Industrial Park to Batu Ampar Port on a weekday at 10:00 WIB, with vessel ETD at 19:00 WIB.",
 ];
 
 const greeting: DisplayMessage = {
