@@ -43,6 +43,13 @@ export async function consumeOracleStream(body: ReadableStream<Uint8Array>, onEv
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  let terminal = false;
+  const emit = (event: OracleEvent) => {
+    if (terminal) throw new Error("Data after terminal event");
+    // The caller validates turn ownership before we accept the terminal event.
+    onEvent(event);
+    terminal = event.type === "done";
+  };
   const drain = () => {
     // Normalize CRLF only after decoding; a CR/LF pair can span read chunks.
     buffer = buffer.replace(/\r\n/g, "\n");
@@ -51,7 +58,7 @@ export async function consumeOracleStream(body: ReadableStream<Uint8Array>, onEv
       if (end > 300000) throw new Error("Oracle event exceeded the limit");
       const event = parseFrame(buffer.slice(0, end));
       buffer = buffer.slice(end + 2);
-      if (event) onEvent(event);
+      if (event) emit(event);
       end = buffer.indexOf("\n\n");
     }
     if (buffer.length > 300000) throw new Error("Oracle event exceeded the limit");
@@ -62,17 +69,24 @@ export async function consumeOracleStream(body: ReadableStream<Uint8Array>, onEv
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
       drain();
+      if (terminal) {
+        // Reject any trailing event already received, but do not wait for EOF.
+        if (buffer.trim()) {
+          const event = parseFrame(buffer);
+          if (event) emit(event);
+        }
+        return;
+      }
     }
     buffer += decoder.decode();
     drain();
     if (buffer.trim()) {
       const event = parseFrame(buffer);
-      if (event) onEvent(event);
+      if (event) emit(event);
     }
-  } catch (error) {
-    await reader.cancel().catch(() => undefined);
-    throw error;
   } finally {
+    // Transport teardown must not keep a finished or failed request busy.
+    void reader.cancel().catch(() => undefined);
     reader.releaseLock();
   }
 }

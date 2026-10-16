@@ -10,7 +10,7 @@ async (page) => {
   const control = async data => { const r = await page.request.post(`${fixture}/__control`, { data }); if (!r.ok()) throw new Error("Fixture control failed"); };
   const stats = async () => (await page.request.get(`${fixture}/__stats`)).json();
   const assert = (value, message) => { if (!value) throw new Error(message); };
-  const ready = async () => { await page.getByRole("textbox", { name: "Message Oracle" }).waitFor(); await page.waitForFunction(() => !document.querySelector('input[aria-label="Message Oracle"]').disabled); };
+  const ready = async () => { await page.getByRole("textbox", { name: "Message Oracle" }).waitFor(); await page.waitForFunction(() => !document.querySelector('[aria-label="Message Oracle"]').disabled); };
   const saved = async (results, status = "completed") => {
     await control({ savedResults: { conversationId: id, results, status } });
     await page.goto(`${origin}/oracle?conversation=${id}`); await page.getByText("Saved answer: Road question", { exact: false }).waitFor();

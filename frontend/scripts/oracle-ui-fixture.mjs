@@ -14,7 +14,7 @@ const jwt = owner => `${Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })
 const session = owner => ({ access_token: jwt(owner), refresh_token: owner === owners.a ? "synthetic-refresh-a" : "synthetic-refresh-b", token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, user: user(owner) });
 function ownerOf(req) { try { const token = req.headers.authorization?.replace(/^Bearer /, ""); const owner = JSON.parse(Buffer.from(token.split(".")[1], "base64url")).sub; return Object.values(owners).includes(owner) ? owner : null; } catch { return null; } }
 const conversations = new Map(), turns = new Map(), requests = [];
-let sequence = 0, nextMode = "normal", nextResults, listFailure = false, deleteFailure = false, emptyList = false, authFailures = 0, executions = 0;
+let sequence = 0, nextMode = "normal", nextResults, nextAnswer, listFailure = false, deleteFailure = false, emptyList = false, authFailures = 0, executions = 0;
 let uiChecks = [];
 function createConversation(owner, title, key = randomUUID(), archived = false) {
   const time = new Date(Date.now() - 60000).toISOString();
@@ -42,9 +42,10 @@ const publicConversation = ({ id, title, created_at, updated_at, archived_at }) 
 const sendJson = (res, data, status = 200) => { res.writeHead(status, { "Content-Type": "application/json" }); res.end(JSON.stringify(data)); };
 const frame = (res, data) => { if (!res.destroyed) res.write(`data: ${JSON.stringify(data)}\r\n\r\n`); };
 function metadata(turn) { return { type: "metadata", conversation_id: turn.conversation.id, turn_id: turn.row.id, user_message_id: turn.row.id, assistant_message_id: turn.answer.id }; }
-function terminal(res, turn, persisted = true) {
+function terminal(res, turn, persisted = true, close = true) {
   if (turn.answer.structured_results.length) frame(res, { type: "result", results: turn.answer.structured_results });
-  frame(res, { type: "done", conversation_id: turn.conversation.id, turn_id: turn.row.id, message_id: persisted ? turn.answer.id : null, outcome: persisted ? turn.answer.status : "failed", persisted }); res.end();
+  frame(res, { type: "done", conversation_id: turn.conversation.id, turn_id: turn.row.id, message_id: persisted ? turn.answer.id : null, outcome: persisted ? turn.answer.status : "failed", persisted });
+  if (close) res.end();
 }
 const server = createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); res.setHeader("Access-Control-Allow-Headers", "authorization,content-type,apikey,x-client-info,x-supabase-api-version"); res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
@@ -56,6 +57,13 @@ const server = createServer(async (req, res) => {
     if (Array.isArray(body.uiChecks)) uiChecks = body.uiChecks;
     if (body.mode) nextMode = body.mode;
     if (Array.isArray(body.nextResults)) nextResults = body.nextResults;
+    if (typeof body.nextAnswer === "string") nextAnswer = body.nextAnswer;
+    if (body.savedAnswer) {
+      const conversation = conversations.get(body.savedAnswer.conversationId);
+      const answer = conversation?.messages.filter(row => row.role === "assistant").at(-1);
+      if (!answer || typeof body.savedAnswer.content !== "string") { sendJson(res, {}, 404); return; }
+      answer.content = body.savedAnswer.content;
+    }
     if (body.savedResults) {
       const conversation = conversations.get(body.savedResults.conversationId);
       if (!conversation) { sendJson(res, {}, 404); return; }
@@ -106,7 +114,7 @@ const server = createServer(async (req, res) => {
     let turn = turns.get(`${owner}:${body.client_request_id}`);
     const replay = !!turn;
     if (turn && turn.answer.status === "in_progress") { sendJson(res, {}, 409); return; }
-    const mode = nextMode, results = nextResults; nextMode = "normal"; nextResults = undefined;
+    const mode = nextMode, results = nextResults, answer = nextAnswer; nextMode = "normal"; nextResults = undefined; nextAnswer = undefined;
     if (!turn && mode === "conflict") { sendJson(res, {}, 409); return; }
     if (!turn) {
       const conversation = body.conversation_id ? conversations.get(body.conversation_id) : createConversation(owner, body.message.slice(0, 80));
@@ -117,17 +125,40 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" });
     frame(res, metadata(turn));
     if (replay) { frame(res, { type: "chunk", content: turn.answer.content }); terminal(res, turn); return; }
+    frame(res, { type: "status", content: "Checking recorded ferry schedules…" });
+    if (mode === "progress") {
+      setTimeout(() => frame(res, { type: "status", content: "Generating an answer from the available tool data…" }), 700);
+      setTimeout(() => {
+        if (turn.answer.status === "in_progress") finish(turn);
+        frame(res, { type: "chunk", content: turn.answer.content }); terminal(res, turn);
+      }, 1400);
+      return;
+    }
+    frame(res, { type: "status", content: "Generating an answer from the available tool data…" });
+    if (mode === "markdown-slow" && answer !== undefined) {
+      const marker = answer.indexOf("**");
+      const split = marker >= 0 ? marker + 4 : Math.min(20, answer.length);
+      frame(res, { type: "chunk", content: answer.slice(0, split) });
+      setTimeout(() => {
+        if (turn.answer.status === "in_progress") finish(turn);
+        turn.answer.content = answer;
+        if (results) turn.answer.structured_results = results;
+        frame(res, { type: "chunk", content: answer.slice(split) }); terminal(res, turn);
+      }, 1200);
+      return;
+    }
     if (mode === "failed") { finish(turn, "failed"); if (results) turn.answer.structured_results = results; frame(res, { type: "error", content: "Synthetic provider failure" }); terminal(res, turn); return; }
     if (mode === "slow") {
       frame(res, { type: "chunk", content: "Partial old-conversation response" });
       setTimeout(() => { if (turn.answer.status === "in_progress") finish(turn); frame(res, { type: "chunk", content: " LATE old-conversation response" }); terminal(res, turn); }, 2500); return;
     }
-    if (mode === "save-failure") { if (results) turn.answer.structured_results = results; frame(res, { type: "chunk", content: "Provisional answer" }); terminal(res, turn, false); return; }
+    if (mode === "save-failure" || mode === "terminal-open-save-failure") { if (results) turn.answer.structured_results = results; frame(res, { type: "chunk", content: "Provisional answer" }); terminal(res, turn, false, mode !== "terminal-open-save-failure"); return; }
     finish(turn);
+    if (answer !== undefined) turn.answer.content = answer;
     if (results) turn.answer.structured_results = results;
     frame(res, { type: "chunk", content: turn.answer.content });
     if (mode === "drop") { res.end(); return; }
-    terminal(res, turn); return;
+    terminal(res, turn, true, mode !== "terminal-open"); return;
   }
   sendJson(res, {}, 404);
 });

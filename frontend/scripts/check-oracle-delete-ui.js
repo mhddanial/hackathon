@@ -27,11 +27,12 @@ async (page) => {
 
   await check("confirmation cancellation keeps the chat and sends no DELETE", async () => {
     const before = (await stats()).requests.filter(item => item.method === "DELETE").length;
-    page.once("dialog", async dialog => {
-      assert(dialog.message().includes("Harbour planning") && dialog.message().includes("cannot be undone"), "Missing deletion consequence/title");
-      await dialog.dismiss();
-    });
     await remove.click();
+    const dialog = page.getByRole("alertdialog", { name: "Delete conversation?" });
+    await dialog.waitFor();
+    assert((await dialog.textContent()).includes("Harbour planning") && (await dialog.textContent()).includes("cannot be undone"), "Missing deletion consequence/title");
+    await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+    await dialog.waitFor({ state: "hidden" });
     assert((await stats()).requests.filter(item => item.method === "DELETE").length === before, "Cancellation deleted data");
     assert(page.url() === originalUrl, "Cancellation changed selection");
     assert(await log.getByText("Saved answer: Harbour question", { exact: false }).count(), "Cancellation cleared messages");
@@ -39,8 +40,8 @@ async (page) => {
 
   await check("failed deletion keeps the selected chat and shows a safe error", async () => {
     await control({ deleteFailure: true });
-    page.once("dialog", dialog => dialog.accept());
     await remove.click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Delete permanently", exact: true }).click();
     await page.getByRole("alert").filter({ hasText: "Oracle is unavailable. Please retry." }).waitFor();
     await ready();
     assert(page.url() === originalUrl, "Failed deletion changed selection");
@@ -49,11 +50,10 @@ async (page) => {
   });
 
   await check("confirmed deletion clears messages, selection URL, saved list and result cards", async () => {
-    page.once("dialog", dialog => dialog.accept());
     await remove.click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Delete permanently", exact: true }).click();
     await page.waitForURL(url => !url.searchParams.has("conversation"));
-    await page.getByRole("heading", { name: "New conversation", exact: true }).waitFor();
-    await page.waitForFunction(() => !document.querySelector('button[aria-label="Reload conversations"]').disabled);
+    await page.getByRole("heading", { name: "What are you planning today?", exact: true }).waitFor();
     assert(!await log.getByText("Saved answer: Harbour question", { exact: false }).count(), "Deleted messages remained");
     assert(!await log.getByText("1 result record", { exact: true }).count(), "Deleted results remained");
     assert(!await remove.count(), "Delete offered for an unsaved draft");
@@ -73,8 +73,8 @@ async (page) => {
     await page.goto(`${app}/oracle?conversation=00000000-0000-4000-8000-000000000103`);
     await log.getByText("Saved answer: Archived question", { exact: false }).waitFor();
     await ready();
-    page.once("dialog", dialog => dialog.accept());
     await remove.click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Delete permanently", exact: true }).click();
     await page.waitForURL(url => !url.searchParams.has("conversation"));
     assert(!(await stats()).conversations.some(item => item.id.endsWith("000000000103")), "Archived chat remained");
   });

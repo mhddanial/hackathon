@@ -27,6 +27,7 @@ lib/
 !/frontend/src/lib/oracle-api.ts
 !/frontend/src/lib/oracle-history.ts
 !/frontend/src/lib/oracle-results.ts
+!/frontend/src/lib/oracle-format.ts
 !/frontend/src/lib/road-segments.ts
 !/frontend/src/lib/locations.ts
 lib64/

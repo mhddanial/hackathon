@@ -6,8 +6,13 @@ async (page) => {
   const input = () => page.getByRole("textbox", { name: "Message Oracle" });
   const control = async data => { const r = await page.request.post(`${fixture}/__control`, { data }); if (!r.ok()) throw new Error("Fixture control failed"); };
   const stats = async () => (await page.request.get(`${fixture}/__stats`)).json();
+  const closeHistory = async () => {
+    const drawer = page.getByRole("dialog", { name: "Your conversations" });
+    await drawer.getByRole("button", { name: "Close", exact: true }).click();
+    await drawer.waitFor({ state: "hidden" });
+  };
   const assert = (condition, text) => { if (!condition) throw new Error(text); };
-  const ready = async () => { await input().waitFor(); await page.waitForFunction(() => !document.querySelector('input[aria-label="Message Oracle"]').disabled); };
+  const ready = async () => { await input().waitFor(); await page.waitForFunction(() => !document.querySelector('[aria-label="Message Oracle"]').disabled); };
   const send = async text => { await ready(); await input().fill(text); await page.getByRole("button", { name: "Send message", exact: true }).click(); };
   const answer = async text => { await log().getByText(`Saved answer: ${text}`, { exact: false }).waitFor(); await ready(); };
   const readAll = async () => {
@@ -20,6 +25,13 @@ async (page) => {
     }
   };
   const showConversation = async title => {
+    const drawer = page.getByRole("dialog", { name: "Your conversations" });
+    const trigger = page.getByRole("button", { name: "Open conversation history", includeHidden: true });
+    if (await trigger.getAttribute("aria-expanded") !== "true") {
+      await drawer.waitFor({ state: "hidden" });
+      await trigger.click();
+    }
+    await drawer.waitFor();
     const button = page.getByRole("button", { name: new RegExp(`^${title}`) });
     await page.waitForFunction(() => !document.querySelector('button[aria-label="Reload conversations"]').disabled);
     while (!(await button.count())) {
@@ -58,16 +70,20 @@ async (page) => {
     await page.getByRole("button", { name: "Archive", exact: true }).click(); await page.getByRole("button", { name: "Restore", exact: true }).waitFor();
     assert(await input().isDisabled(), "Archived chat is writable");
     assert(await log().getByText("Saved answer: Sprint 4 follow-up", { exact: false }).count() === 1, "Archive lost history");
+    await page.getByRole("button", { name: "Open conversation history" }).click();
     await page.getByRole("checkbox", { name: "Include archived" }).check();
+    await closeHistory();
     await page.getByRole("button", { name: "Restore", exact: true }).click(); await ready();
   });
   await check("conversation pagination and empty/error/retry states", async () => {
+    await page.getByRole("button", { name: "Open conversation history" }).click();
     await page.getByRole("button", { name: "Load more conversations", exact: true }).waitFor(); await page.getByRole("button", { name: "Load more conversations", exact: true }).click();
     await page.getByRole("button", { name: /^Archived reference/ }).waitFor();
     await control({ listFailure: true }); await page.getByRole("button", { name: "Reload conversations", exact: true }).click(); await page.getByRole("button", { name: "Retry history", exact: true }).waitFor();
     await control({ listFailure: false, emptyList: true }); await page.getByRole("button", { name: "Retry history", exact: true }).click();
     await page.getByText("No saved conversations yet. Start a new conversation.", { exact: true }).waitFor();
     await control({ emptyList: false }); await page.getByRole("button", { name: "Reload conversations", exact: true }).click(); await page.getByRole("button", { name: /^Sprint 4 first question/ }).waitFor();
+    await closeHistory();
   });
   await check("lost terminal acknowledgment retries same ID without duplicate execution", async () => {
     await page.getByRole("button", { name: "New conversation", exact: true }).click(); await control({ mode: "drop" });
@@ -113,8 +129,10 @@ async (page) => {
     await page.getByRole("button", { name: "New conversation", exact: true }).click(); await ready();
   });
   await check("401 refresh failure state recovers through manual reload", async () => {
+    await page.getByRole("button", { name: "Open conversation history" }).click();
     await control({ authFailures: 2 }); await page.getByRole("button", { name: "Reload conversations", exact: true }).click(); await page.getByText("Your session expired. Sign in again.", { exact: false }).waitFor();
     await page.getByRole("button", { name: "Retry history", exact: true }).click(); await showConversation("Road estimates");
+    await closeHistory();
   });
   await check("untrusted saved text renders as text", async () => {
     await send('<img src=x onerror="window.oracleInjected=true">'); await answer('<img src=x onerror="window.oracleInjected=true">');
@@ -143,8 +161,10 @@ async (page) => {
   };
   await check("logout during a pending stream clears state for another account", async () => {
     await control({ mode: "slow" }); await send("Logout pending test"); await log().getByText("Partial old-conversation response", { exact: false }).waitFor();
-    await page.getByRole("button", { name: "Sign Out", exact: true }).click(); await page.waitForURL(`${origin}/`);
-    await login("b@sprint4.example.invalid"); await page.getByRole("button", { name: /^User B notes/ }).waitFor();
+    await page.getByRole("button", { name: "Open account menu", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Sign out", exact: true }).click(); await page.waitForURL(`${origin}/login`);
+    await login("b@sprint4.example.invalid"); await showConversation("User B notes");
+    await closeHistory();
     await page.waitForTimeout(2800);
     assert(!(await log().getByText("Logout pending test", { exact: false }).count()), "Previous account messages leaked");
     assert(!(await page.getByRole("button", { name: "Retry this turn", exact: true }).count()), "Previous account retry survived");
@@ -155,7 +175,8 @@ async (page) => {
     assert(!(await log().getByText("Sprint 4 follow-up", { exact: false }).count()), "Prior account URL exposed data");
   });
   await check("later login restores original saved text and result metadata", async () => {
-    await page.getByRole("button", { name: "Sign Out", exact: true }).click(); await page.waitForURL(`${origin}/`); await login("a@sprint4.example.invalid");
+    await page.getByRole("button", { name: "Open account menu", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Sign out", exact: true }).click(); await page.waitForURL(`${origin}/login`); await login("a@sprint4.example.invalid");
     await page.goto(chatUrl); await log().getByText("Saved answer: Sprint 4 first question", { exact: false }).waitFor(); await readAll(); await answer("Sprint 4 follow-up");
     assert(await log().getByText("1 result record", { exact: true }).count() === 2, "Saved results were not restored after login");
   });
