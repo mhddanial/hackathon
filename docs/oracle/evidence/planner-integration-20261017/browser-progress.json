@@ -1,0 +1,14 @@
+{
+  "checks_passed": 8,
+  "checks": [
+    "tool progress occupies one active indicator and never becomes a chat message",
+    "completed answers clear progress and remain clean after a reload",
+    "a valid saved terminal event unblocks follow-up without waiting for EOF",
+    "an unsaved terminal event stops loading but keeps recovery required",
+    "stopping clears the active indicator while retaining interrupted-turn recovery",
+    "saved failure and a dropped acknowledgment leave no animated progress",
+    "switching conversations clears progress and ignores late updates",
+    "composer and transcript use the same surface on desktop and mobile"
+  ],
+  "scope": "Chromium with synthetic tool-status events and held-open streams; no real accounts or provider calls"
+}

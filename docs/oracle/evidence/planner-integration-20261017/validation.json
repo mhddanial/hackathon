@@ -1,0 +1,57 @@
+{
+  "scope": "Local implementation with isolated PostgreSQL, simulated Auth/SDK tests, synthetic browser transport, and separately recorded live Gemini pilot.",
+  "backend": {
+    "tests": 349,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend_helpers": {
+    "result_contracts": 18,
+    "stream": 14,
+    "api_history": 22,
+    "markdown": 10,
+    "route_integration_groups": 8
+  },
+  "browser_checks": {
+    "planner_handoff": 13,
+    "history": 17,
+    "route_modal": 8,
+    "progress": 8
+  },
+  "browser_total": 46,
+  "typescript": "passed",
+  "targeted_lint": "passed",
+  "production_build": "passed",
+  "product_database_migrations": 0,
+  "provider_or_key_changes": false,
+  "live_pilot": {
+    "baseline_completed": 3,
+    "enhanced_completed": 1,
+    "enhanced_failed_quota": 1,
+    "enhanced_unrun": 1,
+    "model": "gemini-2.5-flash"
+  },
+  "pending": [
+    "Full final-set live semantic evaluation",
+    "Human/domain review",
+    "Genuine signed-in production persistence acceptance",
+    "Participant usability study"
+  ],
+  "source_hashes": {
+    "backend\\agent_config.py": "02b9bd8a4ae79d5ff1d9e480fc16b6b6f962866d7f411c834a72770f5f562a5e",
+    "backend\\routers\\route.py": "1b006b90f07c4361672357e498a304fde437699e9095845b6a103251b682e647",
+    "backend\\services\\oracle_route_context.py": "bef112c12f5f36c234afdb384a4274e3556d99a982830ac8af49ae4ca854e8b8",
+    "frontend\\src\\hooks\\use-route-planner.ts": "1e5a5cc09c537d8f6e0dd32e360a03e0550725d06f5d20ae270987811f594b34",
+    "frontend\\src\\lib\\route-draft.ts": "00c5bc7f8396d3cd1fe707ebeb1d2f810c007988b2f89bd7fc75302c96065569",
+    "backend\\tests\\fixtures\\oracle_integration_cases.json": "a32f247e78611ac3f5fda026e7f9cc48d385c71658a0fadfd95dce270e6b600c"
+  },
+  "final_review_fix": "Selecting No cutoff check clears both cargo and ETD; verified in the final 13-scenario handoff browser run.",
+  "evaluation_cli_supplement": "5 focused evaluation checks passed after CLI metadata/review validation refinements; already included in the unique full-suite test count.",
+  "cleanup": {
+    "owned_browser_closed": true,
+    "temporary_ports_3010_9010_55439_closed": true,
+    "temporary_postgresql_directory_removed": false,
+    "reason": "Automatic command review blocked recursive deletion; isolated test services were stopped and the temporary data folder remains under Windows Temp."
+  }
+}

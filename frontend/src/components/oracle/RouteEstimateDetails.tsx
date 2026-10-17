@@ -1,3 +1,5 @@
+"use client";
+
 import {
   AlertTriangle,
   CheckCircle2,
@@ -9,6 +11,8 @@ import {
   Route,
   Ship,
 } from "lucide-react";
+import { RoutePlannerHandoff } from "./RoutePlannerHandoff";
+import { routeInsights } from "@/lib/route-insights";
 import MapView from "@/components/MapView";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -62,9 +66,13 @@ function Metric({
 export function RouteEstimateDetails({
   data,
   incomplete,
+  allowHandoff = true,
+  saved = true,
 }: {
   data: RouteData;
   incomplete: boolean;
+  allowHandoff?: boolean;
+  saved?: boolean;
 }) {
   const time = (absolute?: string, clock?: string) =>
     absolute
@@ -96,19 +104,13 @@ export function RouteEstimateDetails({
       : data.final_time_min - data.base_time_min;
   const travelDetail =
     delta === undefined
-      ? "Based on the saved routing estimate."
+      ? saved
+        ? "Based on the saved routing estimate."
+        : "Based on the routing estimate."
       : Math.abs(delta) < 0.001
         ? "Matches the base travel estimate."
         : `${format(Math.abs(delta))} min ${delta > 0 ? "above" : "below"} the base travel estimate.`;
-  const late = !incomplete && data.departure_feasible === false;
-  const feasible = !incomplete && data.departure_feasible === true;
-  const status = incomplete
-    ? "Incomplete recommendation"
-    : late
-      ? "Too late for estimated cutoff"
-      : feasible
-        ? "Within estimated cutoff"
-        : "Cutoff check unavailable";
+  const { late, feasible, status, action } = routeInsights(data, incomplete);
   const StatusIcon =
     incomplete || late ? AlertTriangle : feasible ? CheckCircle2 : Info;
   const tone = incomplete
@@ -118,13 +120,6 @@ export function RouteEstimateDetails({
       : feasible
         ? "border-emerald-600/20 bg-emerald-600/5 text-emerald-800"
         : "border-border bg-muted/30 text-muted-foreground";
-  const action = incomplete
-    ? "Review the saved data and complete an estimate before planning dispatch."
-    : late
-      ? "Revise the planned departure or review a later sailing before dispatch."
-      : feasible
-        ? "Confirm current road conditions and terminal requirements before dispatch."
-        : "This result does not include a cutoff comparison. Confirm sailing and gate-in requirements before dispatch.";
   const facts: [string, string | undefined][] = [
     ["Routing source", data.routing_source],
     [
@@ -158,6 +153,22 @@ export function RouteEstimateDetails({
 
   return (
     <div className="space-y-5">
+      {allowHandoff && (
+        <RoutePlannerHandoff data={data} incomplete={incomplete} />
+      )}
+      {data.departure_date_inferred && (
+        <p className="text-xs text-muted-foreground">
+          Departure date inferred from the vessel local date. Review it before
+          dispatch.
+        </p>
+      )}
+      <p className="text-xs text-muted-foreground">
+        Resolved inputs: {data.origin_name || "Origin coordinates"} to{" "}
+        {data.destination_name || "Destination coordinates"}.{" "}
+        {data.departure_date || "No explicit service date"}{" "}
+        {data.departure_time || ""} {data.planning_timezone || ""}. Review
+        inherited values when updating a plan.
+      </p>
       {data.planning_warning && (
         <Alert
           role="note"
@@ -178,7 +189,10 @@ export function RouteEstimateDetails({
 
       <div className="grid min-w-0 gap-5 @4xl/route:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <div className="order-2 min-w-0 space-y-5 @4xl/route:order-1">
-          <section aria-label="Saved route map" className="min-w-0">
+          <section
+            aria-label={saved ? "Saved route map" : "Route map"}
+            className="min-w-0"
+          >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h3 className="flex items-center gap-2 text-sm font-semibold">
                 <MapPin aria-hidden="true" className="size-4 text-primary" />
@@ -227,7 +241,9 @@ export function RouteEstimateDetails({
                 >
                   {approximate
                     ? "Approximate straight-line connection; road routing was unavailable."
-                    : "Simplified saved route preview."}{" "}
+                    : saved
+                      ? "Simplified saved route preview."
+                      : "Simplified route preview."}{" "}
                   Location points may represent an area or access road.
                 </p>
               </>
@@ -238,7 +254,9 @@ export function RouteEstimateDetails({
                   className="size-7 text-muted-foreground"
                 />
                 <p className="text-sm font-medium">
-                  Map unavailable for this saved result.
+                  {saved
+                    ? "Map unavailable for this saved result."
+                    : "Map unavailable for this result."}
                 </p>
                 <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">
                   Saved endpoints and route geometry are needed to display a
@@ -274,6 +292,7 @@ export function RouteEstimateDetails({
               />
               Estimate breakdown
             </h3>
+            <p className="mb-4 text-xs leading-relaxed text-muted-foreground">Congestion uses a reference corridor near the origin. It does not establish traffic on every road along this route.</p>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
               {facts
                 .filter(([, value]) => value !== undefined)
@@ -355,13 +374,27 @@ export function RouteEstimateDetails({
                         {suggested}
                       </span>
                       <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-                        Latest departure suggested by this estimate.
+                        Back-calculated using congestion at the requested
+                        departure time.
                       </span>
                     </dd>
                   </div>
                 )}
                 {[
                   ["Planned departure", planned],
+                  [
+                    "Estimated arrival",
+                    time(
+                      data.estimated_arrival_datetime,
+                      data.estimated_arrival_time,
+                    ),
+                  ],
+                  [
+                    "Cutoff slack",
+                    data.cutoff_slack_min === undefined
+                      ? undefined
+                      : `${format(data.cutoff_slack_min)} min${data.cutoff_slack_min < 0 ? " late" : " remaining"}`,
+                  ],
                   ["Latest gate-in", gateIn],
                   ["Vessel ETD", vessel],
                 ]

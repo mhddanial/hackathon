@@ -3,7 +3,8 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 import requests
 import math
 from typing import Dict, Any, List, Optional, Literal
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from schemas.route import RouteData
 
 from database import get_supabase_client
 from road_segments import segment_name
@@ -128,8 +129,8 @@ def get_ml_congestion(segment_id: str | None, day_type: str, hour: int) -> dict:
     # Fallback default
     return {"level": None, "multiplier": 1.0, "segment_name": name, "status": "default_fallback"}
 
-@router.post("")
-@router.post("/")
+@router.post("", response_model=RouteData)
+@router.post("/", response_model=RouteData)
 def calculate_route(req: RouteRequest) -> Dict[str, Any]:
     plan = planning_context(req.time, req.day_type, req.departure_date, req.vessel_etd)
     hour = int(plan['time'].split(':')[0])
@@ -190,10 +191,15 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
     optimal_departure = None
     gate_in_obj = dep_obj = None
     feasible = None
+    arrival = None
+    slack = None
     warnings = []
     if plan['date_inferred']: warnings.append('Departure date inferred from the vessel departure date; provide your departure date if different.')
     if congestion_data['status'] != 'synthetic_estimate': warnings.append('Corridor congestion unavailable; travel time assumes a 1.0 multiplier.')
     
+    if plan['departure']:
+        arrival = plan['departure'] + timedelta(minutes=final_time_min)
+
     if req.vessel_etd and req.cargo_type:
         try:
             # Parse ETD
@@ -206,8 +212,14 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
             if plan['etd'] is None and dep_obj.date() != etd_obj.date():
                 raise HTTPException(400, 'Provide a departure date and a vessel departure timestamp with a time zone for a cutoff/departure crossing midnight.')
             planned_departure = plan['departure'] or datetime.strptime(req.time, '%H:%M')
-            feasible = planned_departure <= dep_obj
-            if not feasible: warnings.append('Requested departure is later than the latest safe departure for this estimate.')
+            arrival = planned_departure + timedelta(minutes=final_time_min)
+            if plan['etd'] is None and arrival.date() != planned_departure.date():
+                raise HTTPException(400, 'Provide a departure date and a vessel departure timestamp with a time zone for an arrival crossing midnight.')
+            slack = (gate_in_obj - arrival).total_seconds() / 60
+            feasible = slack >= 0
+            if dep_obj.hour != hour or dep_obj.date() != planned_departure.date():
+                warnings.append('Suggested departure uses congestion at the requested departure time; recalculate if you select another traffic period.')
+            if not feasible: warnings.append('Requested departure is later than the latest estimated departure for this estimate.')
             
             latest_gate_in = gate_in_obj.strftime("%H:%M")
             optimal_departure = dep_obj.strftime("%H:%M")
@@ -216,7 +228,7 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
         except (ValueError, OverflowError):
             raise HTTPException(400, 'The vessel/departure planning times cannot be calculated.') from None
 
-    return {
+    return RouteData.model_validate({
         "origin": req.origin.model_dump(),
         "destination": req.destination.model_dump(),
         "origin_name": req.origin_name,
@@ -230,6 +242,11 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
         "departure_datetime": plan['departure'].isoformat() if plan['departure'] else None,
         "latest_gate_in_datetime": gate_in_obj.isoformat() if gate_in_obj and plan['etd'] else None,
         "optimal_departure_datetime": dep_obj.isoformat() if dep_obj and plan['etd'] else None,
+        "estimated_arrival_datetime": arrival.isoformat() if arrival and plan['departure'] else None,
+        "estimated_arrival_time": arrival.strftime('%H:%M') if arrival else None,
+        "cutoff_slack_min": round(slack, 2) if slack is not None else None,
+        "calculation_time": datetime.now(timezone.utc).isoformat(),
+        "departure_date_inferred": plan['date_inferred'],
         "departure_feasible": feasible,
         "planning_warning": ' '.join(warnings) or None,
         "routing_source": routing_source,
@@ -245,4 +262,4 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
         "latest_gate_in": latest_gate_in,
         "optimal_departure": optimal_departure,
         "route_geometry": route_geometry
-    }
+    }).model_dump(mode="json")

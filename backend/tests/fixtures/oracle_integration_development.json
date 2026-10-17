@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "scope": "Development only; excluded from held-out scores.",
+  "cases": [
+    {
+      "id": "dev-1",
+      "prompt": "Plan my dispatch.",
+      "category": "development",
+      "expected_tools": [],
+      "expected_arguments": {},
+      "review_required": true
+    },
+    {
+      "id": "dev-2",
+      "prompt": "Route Batamindo to Batu Ampar at 7 AM weekday.",
+      "category": "development",
+      "expected_tools": [
+        "get_optimal_route"
+      ],
+      "expected_arguments": {
+        "origin": "Batamindo Industrial Park",
+        "destination": "Batu Ampar Port",
+        "time": "07:00",
+        "day_type": "weekday"
+      },
+      "review_required": true
+    },
+    {
+      "id": "dev-3",
+      "prompt": "Show Harbour Bay departures.",
+      "category": "development",
+      "expected_tools": [
+        "get_ferry_schedule"
+      ],
+      "expected_arguments": {
+        "terminal": "harbour_bay"
+      },
+      "review_required": true
+    },
+    {
+      "id": "dev-4",
+      "prompt": "What does cutoff slack mean?",
+      "category": "development",
+      "expected_tools": [],
+      "expected_arguments": {},
+      "review_required": true
+    },
+    {
+      "id": "dev-5",
+      "prompt": "Use a different road departure time.",
+      "category": "development",
+      "expected_tools": [],
+      "expected_arguments": {},
+      "review_required": true
+    },
+    {
+      "id": "dev-6",
+      "prompt": "What is a synthetic congestion estimate?",
+      "category": "development",
+      "expected_tools": [],
+      "expected_arguments": {},
+      "review_required": true
+    }
+  ]
+}

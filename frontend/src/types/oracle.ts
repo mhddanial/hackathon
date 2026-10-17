@@ -1,41 +1,46 @@
+import type { RouteData } from "./route";
+export type { RouteData, LocationPoint, RouteGeometry } from "./route";
 export type TurnStatus = "in_progress" | "completed" | "failed" | "interrupted";
 
-export type DataStatus = "synthetic_estimate" | "database" | "estimated" | "default_fallback" | "unknown";
-export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
+export type DataStatus =
+  | "synthetic_estimate"
+  | "database"
+  | "estimated"
+  | "default_fallback"
+  | "unknown";
+export type JsonValue =
+  null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 export type ResultMetadata = {
-  title: string; source: string; data_status: DataStatus; disclaimer: string;
-  observed_at?: string; calculated_at?: string;
+  title: string;
+  source: string;
+  data_status: DataStatus;
+  disclaimer: string;
+  observed_at?: string;
+  calculated_at?: string;
 };
 export type CongestionData = {
-  segment_id: string; segment_name?: string; day_type: "weekday" | "weekend"; hour: number;
-  congestion_level: "LOW" | "MEDIUM" | "HIGH"; multiplier: number;
+  segment_id: string;
+  segment_name?: string;
+  day_type: "weekday" | "weekend";
+  hour: number;
+  congestion_level: "LOW" | "MEDIUM" | "HIGH";
+  multiplier: number;
 };
 export type ScheduleEntry = {
-  terminal: string; destination: string; departure_time: string;
-  cutoff_time?: string; vessel_type?: string; cargo_capacity_tons?: number;
+  terminal: string;
+  destination: string;
+  departure_time: string;
+  cutoff_time?: string;
+  vessel_type?: string;
+  cargo_capacity_tons?: number;
 };
-export type LocationPoint = { lat: number; lng: number };
-export type RouteGeometry = { type: "LineString"; coordinates: [number, number][] };
-export type RouteData = {
-  distance_km: number; final_time_min: number; routing_source: string;
-  base_time_min?: number; congestion_level?: "LOW" | "MEDIUM" | "HIGH";
-  congestion_multiplier?: number; emission_kg?: number; matched_segment_id?: string;
-  matched_segment_name?: string;
-  latest_gate_in?: string; optimal_departure?: string;
-  origin?: LocationPoint; destination?: LocationPoint; origin_name?: string; destination_name?: string;
-  route_geometry?: RouteGeometry; departure_time?: string; departure_date?: string;
-  planning_timezone?: "Asia/Jakarta"; day_type?: "weekday" | "weekend";
-  cargo_type?: "CONTAINER" | "FAST_FREIGHT"; vessel_etd?: string;
-  departure_datetime?: string; latest_gate_in_datetime?: string; optimal_departure_datetime?: string;
-  departure_feasible?: boolean; planning_warning?: string;
-  congestion_status?: "synthetic_estimate" | "default_fallback" | "unavailable";
-};
-export type OracleResult = ResultMetadata & (
-  { type: "congestion"; data: CongestionData } |
-  { type: "schedule"; data: { schedules: ScheduleEntry[] } } |
-  { type: "route"; data: RouteData } |
-  { type: "generic"; data: { [key: string]: JsonValue } }
-);
+export type OracleResult = ResultMetadata &
+  (
+    | { type: "congestion"; data: CongestionData }
+    | { type: "schedule"; data: { schedules: ScheduleEntry[] } }
+    | { type: "route"; data: RouteData }
+    | { type: "generic"; data: { [key: string]: JsonValue } }
+  );
 
 export type Conversation = {
   id: string;
@@ -56,8 +61,14 @@ export type StoredMessage = {
   unavailable_results?: number;
   created_at: string;
 };
-export type ConversationPage = { conversations: Conversation[]; next_cursor: string | null };
-export type MessagePage = { messages: StoredMessage[]; next_cursor: string | null };
+export type ConversationPage = {
+  conversations: Conversation[];
+  next_cursor: string | null;
+};
+export type MessagePage = {
+  messages: StoredMessage[];
+  next_cursor: string | null;
+};
 export type DisplayMessage = {
   id: string;
   serverId?: string;

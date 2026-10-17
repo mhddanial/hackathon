@@ -1,0 +1,64 @@
+Frontend helper checks: controlled data; no live provider.
+PASS four validated variants and multiple results retain zero values
+PASS saved map endpoints, geometry and dated planning metadata survive without coercion
+PASS road names survive validation and legacy IDs resolve without guessing unknown roads
+PASS one malformed item preserves the answer's other results
+PASS required metadata, object data and known variant/status are enforced
+PASS all actual status labels are accepted without claiming live traffic
+PASS invalid congestion IDs, coerced values, hour/level and multiplier reject
+PASS schedule empty and optional nulls remain valid without fabricated fields
+PASS schedule malformed row/clock/negative capacity and row limit reject
+PASS route missing, negative, nonfinite and clock values reject
+PASS route unknown keys dropped; optional null fields are absent
+PASS valid timezone timestamps and leap day retained; null times omitted
+PASS impossible dates, invalid clock/timezone and date-only timestamps reject
+PASS metadata length and UTF-8 rendering budget are bounded
+PASS generic rejects nested non-JSON, excessive depth/nodes, and circular data
+PASS untrusted generic HTML and special object keys are plain data
+PASS empty collection accepted; invalid outer collection/count rejected
+PASS history and SSE apply identical per-item validation and restore counts
+18 Oracle result contract checks passed.
+14 Oracle stream checks passed: fragmented UTF-8/CRLF, validation and limits, terminal completion without EOF, bounded teardown, caller validation, trailing events, EOF framing.
+PASS current token, bounded list, encoded cursor, allowed response fields
+PASS 401 refresh reuses exact chat request UUID/body
+PASS repeated 401 stops after one refresh
+PASS refresh account mismatch stops before second fetch
+PASS missing/mismatched session never fetches
+PASS aborted token lookup never sends
+PASS network and 503 never automatically retry
+PASS foreign conversation and conflict have controlled errors
+PASS archive mutation and returned ownership ID
+PASS cross-conversation message data is rejected
+PASS malformed/oversized/unordered history is rejected
+PASS invalid IDs and non-SSE chat fail safely
+PASS message pages preserve stored status/results and deduplicate IDs
+PASS URL selection accepts one UUID and rejects duplicates/injection
+PASS uppercase bookmark UUID is canonicalized
+PASS coerced array role/status cannot masquerade as a typed message
+PASS completed server outcome clears uncertain retry without duplicate bubbles
+PASS failed and interrupted server outcomes remain visibly terminal
+PASS active/uncertain retry preserves UUID, provisional text and pairing
+PASS tools are hidden, raw text remains text, active age has a stale boundary
+PASS delete sends the exact authenticated ID, accepts an empty 204, and refreshes once on 401
+PASS delete validates IDs and never retries conflicts, missing chats, outages or transport failures
+22 Oracle API/history checks passed.
+PASS ferry schedules render seven semantic bullets and bold departure values
+PASS headings, ordered starts, emphasis, quotes and strikethrough retain meaning
+PASS tables are contained and preserve numeric alignment
+PASS raw HTML and script payloads remain text with no executable elements
+PASS unsafe and encoded URLs do not become clickable links
+PASS external links preserve labels and use isolated new tabs
+PASS remote Markdown images never create requests or image elements
+PASS literal escapes and code samples stay literal
+PASS task lists remain readable and noninteractive
+PASS streamed partial formatting settles into the same completed output
+10 Oracle Markdown rendering checks passed.
+PASS historical route remains valid and zero slack survives
+PASS dates, clocks, cargo pairs and Batam bounds are validated
+PASS names and aliases resolve without coordinate coercion
+PASS handoff carries only validated inputs without mutating saved results
+PASS draft expiry, cross-account reads and account cleanup are enforced
+PASS draft tampering, unknown IDs, unavailable storage and storage bound are covered
+PASS API uses validated request, preserves fields and rejects errors or malformed responses
+PASS shared insights do not make incomplete results actionable
+{"checks_passed":8,"checks":["historical route remains valid and zero slack survives","dates, clocks, cargo pairs and Batam bounds are validated","names and aliases resolve without coordinate coercion","handoff carries only validated inputs without mutating saved results","draft expiry, cross-account reads and account cleanup are enforced","draft tampering, unknown IDs, unavailable storage and storage bound are covered","API uses validated request, preserves fields and rejects errors or malformed responses","shared insights do not make incomplete results actionable"],"scope":"Pure helper and mocked HTTP checks; no live services"}

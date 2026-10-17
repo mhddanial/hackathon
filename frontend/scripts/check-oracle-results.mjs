@@ -9,7 +9,7 @@ async function compile(path, dependencies = {}) {
   new Function("require", "exports", code)(name => { assert.ok(name in dependencies, `Unexpected dependency ${name}`); return dependencies[name]; }, exports);
   return exports;
 }
-const resultModule = await compile("../src/lib/oracle-results.ts");
+const resultModule = await compile("../src/lib/oracle-results.ts", { "./route-contract": await compile("../src/lib/route-contract.ts") });
 const { parseResults } = resultModule;
 const stream = await compile("../src/lib/oracle-stream.ts", { "./oracle-results": resultModule });
 const { createOracleApi } = await compile("../src/lib/oracle-api.ts", { "./oracle-stream": stream, "./oracle-results": resultModule });

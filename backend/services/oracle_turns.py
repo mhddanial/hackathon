@@ -106,7 +106,8 @@ def paired_context(rows: list[dict], budget: int = 24000) -> list[dict]:
             if validated:
                 model_turn.append({"role":"assistant","content":None,"tool_calls":[
                     {"id":call.id,"type":"function","function":{"name":call.name,"arguments":json.dumps(call.arguments)}} for call in validated]})
-                model_turn.extend({"role":"tool","tool_call_id":call.id,"content":json.dumps(tools[call.id]["tool_result"])} for call in validated)
+                model_turn.extend({"role":"tool","tool_call_id":call.id,"content":json.dumps(tools[call.id]["tool_result"]),
+                    **({"turn_id": str(user["turn_id"])} if call.name == "get_optimal_route" else {})} for call in validated)
             model_turn.append({"role":"assistant","content":assistant["content"]})
             cost = len(json.dumps(model_turn))
             if used + cost > budget:

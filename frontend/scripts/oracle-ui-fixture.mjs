@@ -8,6 +8,7 @@ const origin = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const owners = { a: id(1), b: id(2) };
 const now = () => new Date().toISOString();
+let routeFailure = false, routeDelay = 0;
 const user = owner => ({ id: owner, aud: "authenticated", role: "authenticated", email: `${owner === owners.a ? "a" : "b"}@sprint4.example.invalid`,
   app_metadata: { provider: "email", providers: ["email"] }, user_metadata: { full_name: owner === owners.a ? "Test A" : "Test B" }, created_at: now(), identities: [] });
 const jwt = owner => `${Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url")}.${Buffer.from(JSON.stringify({ sub: owner, aud: "authenticated", role: "authenticated", iss: `${origin}/auth/v1`, exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })).toString("base64url")}.c3ludGhldGlj`;
@@ -54,6 +55,8 @@ const server = createServer(async (req, res) => {
   try { const chunks = []; for await (const chunk of req) chunks.push(chunk); if (chunks.length) body = JSON.parse(Buffer.concat(chunks).toString()); } catch { sendJson(res, {}, 422); return; }
   const owner = ownerOf(req);
   if (url.pathname === "/__control" && req.method === "POST") {
+    if (typeof body.routeFailure === "boolean") routeFailure = body.routeFailure;
+    if (typeof body.routeDelay === "number") routeDelay = Math.min(Math.max(body.routeDelay, 0), 5000);
     if (Array.isArray(body.uiChecks)) uiChecks = body.uiChecks;
     if (body.mode) nextMode = body.mode;
     if (Array.isArray(body.nextResults)) nextResults = body.nextResults;
@@ -80,6 +83,16 @@ const server = createServer(async (req, res) => {
   }
   if (url.pathname === "/__stats") { sendJson(res, { uiChecks, executions, requests, conversations: [...conversations.values()].map(item => ({ id: item.id, owner: item.owner, message_count: item.messages.length })) }); return; }
   if (url.pathname === "/auth/v1/token") { sendJson(res, session(body.email?.startsWith("b@") || body.refresh_token === "synthetic-refresh-b" ? owners.b : owners.a)); return; }
+  if (url.pathname === "/schedules") { sendJson(res, { schedules: [{ id: "fixture-sailing", terminal_name: "Batu Ampar", destination: "Singapore", departure_time: "18:00:00" }] }); return; }
+  if (url.pathname === "/route" && req.method === "POST") {
+    requests.push({ method: req.method, path: url.pathname, body });
+    await new Promise(resolve => setTimeout(resolve, routeDelay));
+    if (routeFailure) { sendJson(res, { detail: "Synthetic failure" }, 503); return; }
+    sendJson(res, { ...body, departure_time: body.time, distance_km: 5, final_time_min: 15, base_time_min: 10,
+      routing_source: "OSRM API", route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] },
+      congestion_status: "synthetic_estimate", calculation_time: "2026-10-17T01:00:00Z", planning_timezone: "Asia/Jakarta",
+      ...(body.vessel_etd ? { cutoff_slack_min: 5, departure_feasible: true, estimated_arrival_time: "10:15", latest_gate_in: "10:20" } : {}) }); return;
+  }
   if (url.pathname === "/auth/v1/user") { sendJson(res, owner ? user(owner) : { message: "Invalid fixture session" }, owner ? 200 : 401); return; }
   if (url.pathname === "/auth/v1/logout") { res.writeHead(204); res.end(); return; }
   if (url.pathname.startsWith("/rest/v1/")) { sendJson(res, []); return; }

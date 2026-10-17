@@ -1,0 +1,52 @@
+export type LocationPoint = { lat: number; lng: number };
+export type RouteGeometry = {
+  type: "LineString";
+  coordinates: [number, number][];
+};
+export type RouteData = {
+  distance_km: number;
+  final_time_min: number;
+  routing_source: string;
+  base_time_min?: number;
+  congestion_level?: "LOW" | "MEDIUM" | "HIGH";
+  congestion_multiplier?: number;
+  emission_kg?: number;
+  matched_segment_id?: string;
+  matched_segment_name?: string;
+  latest_gate_in?: string;
+  optimal_departure?: string;
+  origin?: LocationPoint;
+  destination?: LocationPoint;
+  origin_name?: string;
+  destination_name?: string;
+  route_geometry?: RouteGeometry;
+  departure_time?: string;
+  departure_date?: string;
+  planning_timezone?: "Asia/Jakarta";
+  day_type?: "weekday" | "weekend";
+  cargo_type?: "CONTAINER" | "FAST_FREIGHT";
+  vessel_etd?: string;
+  departure_datetime?: string;
+  latest_gate_in_datetime?: string;
+  optimal_departure_datetime?: string;
+  estimated_arrival_datetime?: string;
+  estimated_arrival_time?: string;
+  cutoff_slack_min?: number;
+  calculation_time?: string;
+  departure_date_inferred?: boolean;
+  departure_feasible?: boolean;
+  planning_warning?: string;
+  congestion_status?: "synthetic_estimate" | "default_fallback" | "unavailable";
+};
+
+export type RouteInput = {
+  origin: LocationPoint;
+  destination: LocationPoint;
+  time: string;
+  day_type: "weekday" | "weekend";
+  departure_date?: string;
+  origin_name?: string;
+  destination_name?: string;
+  vessel_etd?: string;
+  cargo_type?: "CONTAINER" | "FAST_FREIGHT";
+};

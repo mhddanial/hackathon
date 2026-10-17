@@ -1,0 +1,14 @@
+{
+  "checks_passed": 8,
+  "checks": [
+    "desktop route dialog is wide with map and summary side by side",
+    "travel, distance, suggested departure, and base comparison have clear emphasis",
+    "late departure has a distinct warning and an actionable next step",
+    "incomplete outcomes do not promote a positive cutoff recommendation",
+    "missing timing and geometry stay explicit without fabricated values",
+    "zero values and negative base differences keep their actual meaning",
+    "dated sailing milestones retain midnight boundaries and WIB",
+    "small screens prioritize summary and retain bounded scrolling and close controls"
+  ],
+  "scope": "Chromium with synthetic saved route results; no real chats or routing/provider calls"
+}

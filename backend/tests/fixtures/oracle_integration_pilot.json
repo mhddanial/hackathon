@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "scope": "Development pilot only; these three cases were already run and are excluded from the final evaluation set.",
+  "source_catalog_sha256": "ded281dd3b66e8d4ee6480999c101bf7bab14c6e84a07bb8dac497f03096aec4",
+  "cases": [
+    {
+      "id": "complete-01",
+      "category": "complete",
+      "prompt": "Estimate a route from Batamindo to Batu Ampar Port on a weekday at 10 AM.",
+      "expected_tools": [
+        "get_optimal_route"
+      ],
+      "expected_arguments": {
+        "origin": "Batamindo Industrial Park",
+        "destination": "Batu Ampar Port",
+        "time": "10:00",
+        "day_type": "weekday"
+      },
+      "review_required": true,
+      "rubric": "Check clarification, input meaning, factual grounding, estimate limitations and task outcome; do not grade exact prose."
+    },
+    {
+      "id": "missing-01",
+      "category": "missing",
+      "prompt": "Estimate a route to Batu Ampar Port tomorrow.",
+      "expected_tools": [],
+      "expected_arguments": {},
+      "review_required": true,
+      "rubric": "Check clarification, input meaning, factual grounding, estimate limitations and task outcome; do not grade exact prose."
+    },
+    {
+      "id": "followup-01",
+      "category": "followup",
+      "prompt": "Change my road departure to 11 AM.",
+      "expected_tools": [
+        "get_optimal_route"
+      ],
+      "expected_arguments": {
+        "origin": "Batamindo Industrial Park",
+        "destination": "Batu Ampar Port",
+        "time": "11:00",
+        "day_type": "weekday"
+      },
+      "review_required": true,
+      "rubric": "Check clarification, input meaning, factual grounding, estimate limitations and task outcome; do not grade exact prose.",
+      "history_route": {
+        "origin": "Batamindo Industrial Park",
+        "destination": "Batu Ampar Port",
+        "time": "10:00",
+        "day_type": "weekday"
+      }
+    }
+  ]
+}

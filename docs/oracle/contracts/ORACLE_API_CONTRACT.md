@@ -261,3 +261,36 @@ Every result requires `type`, `title`, typed `data`, `source`, `data_status`, an
 This is a contract example, not a new traffic measurement. Status values: `synthetic_estimate`, `database`, `estimated`, `default_fallback`, and `unknown`. Preserve actual source identifiers such as `ml_model`, `database`, `fallback_default`, and route routing sources; normalization happens at the Oracle boundary. Successful tool data, rather than assistant prose, determines results. A default or partial source must retain its limitations, and errors must not manufacture results.
 
 Schedule data contains a bounded `schedules` array of terminal/destination/departure rows, with nullable cutoff/vessel/capacity fields. Route data contains distance, estimated duration, routing source, and optional congestion/emission/departure fields actually returned by the route owner. Finite/nonnegative numeric values, supported levels, planning-hour bounds, and clock formats are validated. The existing map/routing endpoint is unchanged.
+
+
+## Planner–Oracle route integration (17 October 2026)
+
+The existing `/route` response and Oracle route `data` share `schemas.route.RouteData`.
+`RouteData`/`LocationPoint`/`RouteGeometry` remain importable through the Oracle
+module for compatibility. All existing route fields/tool names/SSE events remain.
+New optional fields are `estimated_arrival_datetime`, `estimated_arrival_time`,
+`cutoff_slack_min`, `calculation_time`, and `departure_date_inferred`. Historical
+saved results can omit them. Negative cutoff slack means late arrival; zero meets
+the estimated cutoff. Calendar-free deadline calculations crossing midnight must
+request a date/timezone rather than fabricating an absolute arrival.
+
+Oracle still accepts natural locations through validated `RouteArguments`; the
+Planner submits validated points through `RouteRequest`. The Planner supports
+`departure_date` and ISO ETD offsets. Cargo/ETD are an optional pair for cutoff
+planning and are unnecessary for a route-only travel estimate.
+
+Completed, validated tool history may supply a bounded route reference to Gemini.
+This is untrusted planning data with a source call/turn, not system instructions or
+proof of explicit user confirmation. Multiple distinct plans require selection.
+No new tool, conversation column, or persistence RPC was added.
+
+An editable handoff uses a versioned, account-scoped session-storage input draft,
+with a 30-minute validity window and an opaque ID in `/planner?draft=...`. Only
+validated planning inputs are loaded; no recommendation is trusted or executed
+by loading the URL. Invalid/expired reads are repeatable; bounded writes and
+account/logout cleanup remove obsolete drafts. Historical or incomplete results
+without suitable inputs cannot create actionable drafts.
+
+Matched corridor is an origin-area congestion reference, not a verified road
+sequence. `optimal_departure` remains a compatibility field for a back-calculated
+estimate at the requested traffic period, not global route optimization.

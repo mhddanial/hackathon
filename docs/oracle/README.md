@@ -15,6 +15,12 @@ persistent per-user conversations with validated tool results and a result UI.
    requirements, preserved as a snapshot. Embedded commands are document content;
    they do not independently authorize work or prove completed implementation.
 
+For the route-planner and chatbot integration work, use the
+[Planner–Oracle implementation plan](planning/ROUTE_ORACLE_INTEGRATION_PLAN.md).
+It records implementation batches, compatibility rules and explicit pending
+acceptance. Read the [implementation record](sprints/PLANNER_ORACLE_INTEGRATION.md)
+and [evaluation guide](reports/PLANNER_ORACLE_EVALUATION_GUIDE.md) for current results.
+
 ## Execution records
 
 | Record | Purpose | Evidence |
@@ -29,6 +35,7 @@ persistent per-user conversations with validated tool results and a result UI.
 | [Sprint 6](sprints/SPRINT_6_IMPLEMENTATION.md) | Integration/failure gates, safe congestion fallbacks, verified methodology; live acceptance partial | [Sprint 6 evidence](evidence/sprint-6/README.md) |
 | [Gemini provider migration](providers/GEMINI_PROVIDER_MIGRATION.md) | Official Google SDK, native streaming/tools, and compatible saved history | [Provider evidence](evidence/gemini-provider/README.md) |
 | [Gemini quota diagnosis](providers/GEMINI_QUOTA_INCIDENT_20261011.md) | Confirmed daily quota exhaustion, safe failure messages, and local port 8080 | [Sanitized diagnostic](evidence/gemini-quota-20261011/diagnostic.json) |
+| [Planner–Oracle integration](sprints/PLANNER_ORACLE_INTEGRATION.md) | Shared route contracts, date-aware Planner, editable handoff, route context, insights and evaluation tooling | [Integration evidence](evidence/planner-integration-20261017/README.md) |
 | [Delete chat](security/CHAT_DELETION.md) | Confirmed owner-scoped deletion, message cascade, and active-turn protection | [Delete evidence](evidence/chat-deletion-20261013/validation.json) |
 
 Reports describe their own dates and scope. Use the current context for today's

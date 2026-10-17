@@ -1,0 +1,315 @@
+{
+  "scope": "Live Gemini with deterministic synthetic tools and in-memory persistence; no signed-in HTTP/DB/browser acceptance.",
+  "variant": "baseline",
+  "source_sha": "c2149872a71ba91120c8f13624c28fd1a3104078",
+  "dataset_sha256": "ded281dd3b66e8d4ee6480999c101bf7bab14c6e84a07bb8dac497f03096aec4",
+  "selected_cases": [
+    "complete-01",
+    "missing-01",
+    "followup-01"
+  ],
+  "requested_conversation_runs": 3,
+  "live": true,
+  "records": [
+    {
+      "id": "complete-01",
+      "category": "complete",
+      "variant": "baseline",
+      "condition": null,
+      "controlled_provider_failure": false,
+      "terminal_outcome": "completed",
+      "elapsed_seconds": 17.016,
+      "first_progress_seconds": 15.530378399998881,
+      "first_text_seconds": 16.665694900002563,
+      "provider_requests": 2,
+      "usage": [
+        {
+          "cache_tokens_details": null,
+          "cached_content_token_count": null,
+          "candidates_token_count": 50,
+          "candidates_tokens_details": null,
+          "prompt_token_count": 1719,
+          "prompt_tokens_details": [
+            {
+              "modality": "TEXT",
+              "token_count": 1719
+            }
+          ],
+          "thoughts_token_count": 144,
+          "tool_use_prompt_token_count": null,
+          "tool_use_prompt_tokens_details": null,
+          "total_token_count": 1913,
+          "traffic_type": null
+        },
+        {
+          "cache_tokens_details": null,
+          "cached_content_token_count": null,
+          "candidates_token_count": 75,
+          "candidates_tokens_details": null,
+          "prompt_token_count": 2451,
+          "prompt_tokens_details": [
+            {
+              "modality": "TEXT",
+              "token_count": 2451
+            }
+          ],
+          "thoughts_token_count": null,
+          "tool_use_prompt_token_count": null,
+          "tool_use_prompt_tokens_details": null,
+          "total_token_count": 2526,
+          "traffic_type": null
+        }
+      ],
+      "tools": [
+        {
+          "name": "get_optimal_route",
+          "arguments": {
+            "origin": "batamindo_industrial_park",
+            "destination": "batu_ampar_port",
+            "time": "10:00",
+            "day_type": "weekday"
+          },
+          "error_code": null,
+          "output": {
+            "title": "Route estimate",
+            "source": "OSRM API",
+            "data_status": "estimated",
+            "disclaimer": "Planning time 10:00 (weekday, Asia/Jakarta). Named locations use mapped representative points; exact cargo gates are not verified. Map geometry is a simplified preview. Route, congestion and emissions are estimates. Suggested departure is the latest safe departure for this estimate, not a comparison of alternatives. No measured savings claim.",
+            "observed_at": null,
+            "calculated_at": "2026-10-17T05:01:55.755925Z",
+            "type": "route",
+            "data": {
+              "distance_km": 5.0,
+              "final_time_min": 12.0,
+              "routing_source": "OSRM API",
+              "base_time_min": 10.0,
+              "congestion_level": "MEDIUM",
+              "congestion_multiplier": 1.2,
+              "emission_kg": 1.2,
+              "matched_segment_id": "SEG001",
+              "matched_segment_name": "Yos Sudarso",
+              "latest_gate_in": null,
+              "optimal_departure": null,
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "destination": {
+                "lat": 1.1629505,
+                "lng": 104.0024883
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "destination_name": "Batu Ampar Port",
+              "departure_time": "10:00",
+              "departure_date": null,
+              "planning_timezone": "Asia/Jakarta",
+              "day_type": "weekday",
+              "cargo_type": null,
+              "vessel_etd": null,
+              "departure_datetime": null,
+              "latest_gate_in_datetime": null,
+              "optimal_departure_datetime": null,
+              "estimated_arrival_datetime": null,
+              "estimated_arrival_time": null,
+              "cutoff_slack_min": null,
+              "calculation_time": "2026-10-17T05:01:55.756314Z",
+              "departure_date_inferred": false,
+              "departure_feasible": null,
+              "planning_warning": null,
+              "congestion_status": "synthetic_estimate",
+              "map_available": true
+            }
+          }
+        }
+      ],
+      "answer": "The estimated route from Batamindo Industrial Park to Batu Ampar Port on a weekday at 10:00 (Asia/Jakarta) has a travel time of 12 minutes, covering a distance of 5 km. The congestion level is estimated to be MEDIUM, primarily on Jl. Yos Sudarso. The estimated emissions are 1.2 kg.",
+      "errors": [],
+      "tool_selection_match": true,
+      "normalized_arguments_match": true,
+      "human_task_success": null,
+      "human_grounding_pass": null,
+      "repetition": 1,
+      "grading_eligible": true
+    },
+    {
+      "id": "missing-01",
+      "category": "missing",
+      "variant": "baseline",
+      "condition": null,
+      "controlled_provider_failure": false,
+      "terminal_outcome": "completed",
+      "elapsed_seconds": 3.312,
+      "first_progress_seconds": null,
+      "first_text_seconds": 3.3103813999914564,
+      "provider_requests": 1,
+      "usage": [
+        {
+          "cache_tokens_details": null,
+          "cached_content_token_count": null,
+          "candidates_token_count": 28,
+          "candidates_tokens_details": null,
+          "prompt_token_count": 1708,
+          "prompt_tokens_details": [
+            {
+              "modality": "TEXT",
+              "token_count": 1708
+            }
+          ],
+          "thoughts_token_count": 84,
+          "tool_use_prompt_token_count": null,
+          "tool_use_prompt_tokens_details": null,
+          "total_token_count": 1820,
+          "traffic_type": null
+        }
+      ],
+      "tools": [],
+      "answer": "I can estimate a route to Batu Ampar Port. What is your origin, desired departure time, and is tomorrow a weekday or weekend?",
+      "errors": [],
+      "tool_selection_match": true,
+      "normalized_arguments_match": null,
+      "human_task_success": null,
+      "human_grounding_pass": null,
+      "repetition": 1,
+      "grading_eligible": true
+    },
+    {
+      "id": "followup-01",
+      "category": "followup",
+      "variant": "baseline",
+      "condition": null,
+      "controlled_provider_failure": false,
+      "terminal_outcome": "completed",
+      "elapsed_seconds": 4.972,
+      "first_progress_seconds": 2.798277699999744,
+      "first_text_seconds": 4.59527980000712,
+      "provider_requests": 2,
+      "usage": [
+        {
+          "cache_tokens_details": null,
+          "cached_content_token_count": null,
+          "candidates_token_count": 46,
+          "candidates_tokens_details": null,
+          "prompt_token_count": 2325,
+          "prompt_tokens_details": [
+            {
+              "modality": "TEXT",
+              "token_count": 2325
+            }
+          ],
+          "thoughts_token_count": 91,
+          "tool_use_prompt_token_count": null,
+          "tool_use_prompt_tokens_details": null,
+          "total_token_count": 2462,
+          "traffic_type": null
+        },
+        {
+          "cache_tokens_details": [
+            {
+              "modality": "TEXT",
+              "token_count": 1783
+            }
+          ],
+          "cached_content_token_count": 1783,
+          "candidates_token_count": 94,
+          "candidates_tokens_details": null,
+          "prompt_token_count": 3000,
+          "prompt_tokens_details": [
+            {
+              "modality": "TEXT",
+              "token_count": 3000
+            }
+          ],
+          "thoughts_token_count": 158,
+          "tool_use_prompt_token_count": null,
+          "tool_use_prompt_tokens_details": null,
+          "total_token_count": 3252,
+          "traffic_type": null
+        }
+      ],
+      "tools": [
+        {
+          "name": "get_optimal_route",
+          "arguments": {
+            "origin": "Batamindo Industrial Park",
+            "destination": "Batu Ampar Port",
+            "time": "11:00",
+            "day_type": "weekday"
+          },
+          "error_code": null,
+          "output": {
+            "title": "Route estimate",
+            "source": "OSRM API",
+            "data_status": "estimated",
+            "disclaimer": "Planning time 11:00 (weekday, Asia/Jakarta). Named locations use mapped representative points; exact cargo gates are not verified. Map geometry is a simplified preview. Route, congestion and emissions are estimates. Suggested departure is the latest safe departure for this estimate, not a comparison of alternatives. No measured savings claim.",
+            "observed_at": null,
+            "calculated_at": "2026-10-17T05:02:03.351461Z",
+            "type": "route",
+            "data": {
+              "distance_km": 5.0,
+              "final_time_min": 12.0,
+              "routing_source": "OSRM API",
+              "base_time_min": 10.0,
+              "congestion_level": "MEDIUM",
+              "congestion_multiplier": 1.2,
+              "emission_kg": 1.2,
+              "matched_segment_id": "SEG001",
+              "matched_segment_name": "Yos Sudarso",
+              "latest_gate_in": null,
+              "optimal_departure": null,
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "destination": {
+                "lat": 1.1629505,
+                "lng": 104.0024883
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "destination_name": "Batu Ampar Port",
+              "departure_time": "11:00",
+              "departure_date": null,
+              "planning_timezone": "Asia/Jakarta",
+              "day_type": "weekday",
+              "cargo_type": null,
+              "vessel_etd": null,
+              "departure_datetime": null,
+              "latest_gate_in_datetime": null,
+              "optimal_departure_datetime": null,
+              "estimated_arrival_datetime": null,
+              "estimated_arrival_time": null,
+              "cutoff_slack_min": null,
+              "calculation_time": "2026-10-17T05:02:03.351842Z",
+              "departure_date_inferred": false,
+              "departure_feasible": null,
+              "planning_warning": null,
+              "congestion_status": "synthetic_estimate",
+              "map_available": true
+            }
+          }
+        }
+      ],
+      "answer": "Your updated route from Batamindo Industrial Park to Batu Ampar Port, departing at 11:00 on a weekday, has an estimated travel time of 12 minutes over 5.0 km. The congestion level is MEDIUM, and estimated emissions are 1.2 kg. The route uses Jl. Yos Sudarso. This is a synthetic estimate with a planning time of 11:00 (weekday, Asia/Jakarta).",
+      "errors": [],
+      "tool_selection_match": true,
+      "normalized_arguments_match": true,
+      "human_task_success": null,
+      "human_grounding_pass": null,
+      "repetition": 1,
+      "grading_eligible": true
+    }
+  ],
+  "model": "gemini-2.5-flash",
+  "successful_timing_samples": 3,
+  "median_success_seconds": 4.972,
+  "p95_success_seconds": 17.016,
+  "human_review_status": "pending; no semantic task-success or grounding score claimed",
+  "baseline_definition": "Original c214987 system prompt with explicit route reference disabled; both variants use the integration tool fixtures. Not a full old-release comparison.",
+  "pilot_limitations": [
+    "One run per selected scenario; insufficient for an improvement claim.",
+    "Evidence was captured before the final origin-corridor wording clarification.",
+    "Human and domain review remain pending.",
+    "Used cases were moved to the separate pilot catalog and replaced in the 60-case final set; original catalog retained for hash verification."
+  ],
+  "unrun_conversation_runs": 0,
+  "stop_reason": "pilot_complete"
+}

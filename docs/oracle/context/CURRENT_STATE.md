@@ -1,6 +1,6 @@
 # Oracle current implementation context
 
-Updated: 14 October 2026 (Asia/Jakarta). Working branch: `danial`.
+Updated: 17 October 2026 (Asia/Jakarta). Working branch: `danial`.
 This file is the starting context for continued Oracle implementation. Dated
 reports and evidence retain the detailed history.
 
@@ -63,6 +63,22 @@ import script requires a separate server-only `SUPABASE_SERVICE_ROLE_KEY`; this
 credential is optional for normal application reads and must stay out of the
 frontend. No real import credential was provisioned during the fix.
 
+## Planner–Oracle integration (17 October)
+
+Shared route contracts/parser, a typed date-aware Planner, account-scoped editable
+handoff, bounded prior-route reference, and shared map/arrival/cutoff insights are
+implemented locally. No migration, provider/key change, model retraining, or
+application deployment was needed. See the [implementation record](../sprints/PLANNER_ORACLE_INTEGRATION.md)
+and [evaluation guide](../reports/PLANNER_ORACLE_EVALUATION_GUIDE.md).
+
+The final backend gate passed 349 tests with zero skips on disposable PostgreSQL;
+frontend helper, browser, TypeScript/lint/build results are recorded separately.
+The 17 October controlled-tool live pilot used `gemini-2.5-flash`: three baseline
+conversations completed, then one enhanced conversation completed before an actual
+429 stopped that batch. This does not establish a quality/latency improvement.
+Full live semantic evaluation, human/domain review, real signed-in production
+persistence, and participant usability remain pending.
+
 ## Current AI provider
 
 Oracle now calls the Gemini Developer API directly with `google-genai==2.29.0`.
@@ -74,8 +90,9 @@ history becomes untrusted reference text, so old saved turns do not need
 fabricated Gemini signatures or a database migration. SSE and public contracts
 are unchanged. See the [provider record](../providers/GEMINI_PROVIDER_MIGRATION.md).
 
-The current local `GEMINI_MODEL` override selects `gemini-3.6-flash`; the code
-default above remains unchanged. On 11 October, attempted live turns did not
+The 17 October pilot observed a local `GEMINI_MODEL` override selecting
+`gemini-2.5-flash`; the code default above remains unchanged. Earlier, on
+11 October, attempted live turns with the then-selected model did not
 complete. A follow-up direct SDK diagnostic confirmed HTTP 429
 `RESOURCE_EXHAUSTED`: the selected model's free-tier daily request quota is 20,
 with a reported retry delay of 71,431 seconds at the time of the check. Further
