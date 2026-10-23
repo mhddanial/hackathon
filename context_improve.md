@@ -4,7 +4,7 @@
 
 - **Project:** SmartFlow
 - **Student/report owner:** Ananda Khusnul Hotimah
-- **Student ID:** To be provided by Ananda; do not use another team member’s ID.
+- **Student ID:** 3312401044
 - **Study program:** Teknik Informatika
 - **Institution:** Politeknik Negeri Batam
 - **Team:** I Can Do IT
@@ -16,6 +16,10 @@
 - **Personal focus:** UI/UX and full-stack ownership of Departure Recommendation.
 
 This document adapts the structure of Muhammad Danial’s implementation context to Ananda’s contribution. It is a specification for future implementation work, not evidence that the described feature or tests are complete. Shared project facts are retained; personal responsibilities follow the revised team feature plan.
+
+Implementation planning: [Departure Recommendation sprints](docs/departure/planning/DEPARTURE_IMPLEMENTATION_SPRINTS.md), with a [repository source audit](docs/departure/sprints/SPRINT_0_AUDIT.md) dated 23 October 2026. The audit records source findings; fresh runtime and live-data checks remain pending.
+
+Shared product context from `docs/hackathon/PRD.md`: the primary users are logistics/gudang operators and UMKM exporters planning travel to Batam ports or ferry terminals. The product supports departure decisions around congestion and cutoff uncertainty. Real-time sensor traffic, official live ferry/port APIs, live cross-border dashboards, billing, and multi-tenancy were outside the original hackathon scope. Historical demo targets and original generic team roles are background; the revised named feature ownership governs this contribution.
 
 ## 2. Main implementation objective
 
@@ -147,6 +151,8 @@ Verify contracts against code before changing them. Preserve existing consumers.
 Documented inputs: `segment_id`, `day_type` (`weekday` or `weekend`), and `hour` (0–23).
 
 Documented outputs: `congestion_level`, `multiplier`, and `source`. Preserve the distinction between ML output, database fallback, and default fallback. Synthetic predictions are not real-time traffic observations.
+
+The current shared contract uses source identifiers `ml_model`, `database`, and `fallback_default`; do not rename them to illustrative labels from older contexts. The route service has a separate congestion integration, so inspect its provenance/confidence behavior rather than assuming it matches every public `/congestion` fallback path.
 
 ### `POST /route` — Khairul’s service
 
@@ -375,6 +381,8 @@ The inspected `backend/database/schema.sql` contains destructive table-reset sta
 
 ## 14. Implementation phases
 
+The phases below describe the feature lifecycle. Use [the task-per-sprint plan](docs/departure/planning/DEPARTURE_IMPLEMENTATION_SPRINTS.md) for execution order, task IDs, proposed files, checks, and completion gates. It separates the source audit from pending baseline checks and keeps Oracle/history extensions optional.
+
 ### Phase 1 — Repository audit
 
 - Inspect current feature, authentication, API, schema, and tests.
@@ -579,6 +587,10 @@ Direct sources used to prepare this context:
 - `/Users/macbook-pro/Developer/SEKARANG/rencana_fitur_smartflow_revisi_fix_final_new.docx` — revised feature plan, especially sections 6, 8, 9, and 10.
 - User confirmation: Ananda Khusnul Hotimah, Departure Recommendation owner.
 - Repository `README.md` — shared project overview; historical claims require verification.
+- `docs/hackathon/PRD.md` — target users, product goals, scope exclusions, user stories, and historical demo assumptions, reviewed during sprint planning.
+- `docs/hackathon/TECH.md`, `TASK.md`, and `methodology_notes.md` — historical design/task/data-source context; current code and revised feature scope take precedence where they differ.
+- `docs/oracle/context/CURRENT_STATE.md` and `docs/oracle/contracts/ORACLE_API_CONTRACT.md` — shared current-state/contract context, provenance identifiers, integration boundaries, and documented verification limits.
+- `docs/departure/sprints/SPRINT_0_AUDIT.md` — broader source-review findings and remaining runtime/data checks.
 - `backend/routers/route.py`, `backend/schemas/route.py`, and `backend/route_planning.py` — inspected route contract and overlapping time/cutoff behavior.
 - `backend/routers/schedules.py` — inspected schedule response wrapper.
 - `backend/database/schema.sql` — limited inspection of schedule fields and destructive initialization statements.

@@ -1,10 +1,11 @@
 # SmartFlow documentation
 
-The documentation has two separate collections:
+The documentation has three collections:
 
 | Collection | Purpose | Start here |
 | --- | --- | --- |
 | Oracle implementation | Current authenticated chat/history extension, sprint work, API contracts, security changes, and verification evidence | [Oracle guide](oracle/README.md) |
+| Departure Recommendation | Ananda’s feature context, repository source audit, and task-per-sprint implementation plan | [Departure guide](departure/README.md) |
 | Original hackathon | Original product/technical plans, 16-hour task lists, methodology, pitch materials, and source workbook | [Hackathon archive](hackathon/README.md) |
 
 For continued development, read the [current Oracle context](oracle/context/CURRENT_STATE.md)
@@ -15,6 +16,10 @@ implementation status.
 ```text
 docs/
   README.md
+  departure/
+    README.md
+    planning/      Departure implementation backlog and acceptance gates
+    sprints/       Source audit and subsequent execution reports
   oracle/
     README.md
     context/       Current state and original extension brief
