@@ -13,7 +13,7 @@ from route_planning import PLANNING_ZONE
 from schemas.departure_recommendation import (
     Alternative, CandidateBatch, CalculatedStatus, DecisionReason, DepartureRequest, DepartureResult, Exclusion, JakartaDatetime,
     FiniteMinutes, ReasonCode, RouteEstimate, RouteInput, ScheduleAssessment, ScheduleOccurrence,
-    ScheduleCandidate, ScheduleView, Selection, Sources, Warning, normalized_label,
+    ScheduleCandidate, ScheduleView, Selection, Sources, Warning,
 )
 
 MESSAGES: dict[ReasonCode, str] = {
@@ -250,7 +250,7 @@ def schedule_candidate(row: Mapping[str, object]) -> ScheduleCandidate:
     return ScheduleCandidate(assessment=assessment, fingerprint=fingerprint)
 
 
-def collapse_candidates(candidates: list[ScheduleCandidate]) -> tuple[list[ScheduleCandidate], list[Warning]]:
+def collapse_candidates(candidates: list[ScheduleCandidate], *, preserve_first: bool = False) -> tuple[list[ScheduleCandidate], list[Warning]]:
     """Group only evidenced UUID/date identities; unknown identities remain separate."""
     groups: dict[tuple, list[ScheduleCandidate]] = {}
     for index, candidate in enumerate(candidates):
@@ -260,12 +260,13 @@ def collapse_candidates(candidates: list[ScheduleCandidate]) -> tuple[list[Sched
     result = []
     collapsed = False
     for group in groups.values():
-        first = group[0]
+        first = (group[0] if preserve_first and group[0] is candidates[0] else
+                 min(group, key=lambda candidate: candidate.fingerprint or candidate.assessment.model_dump_json()))
         conflicts = any(candidate.assessment != first.assessment or (
             not isinstance(first.assessment.schedule, ScheduleOccurrence)
             and first.fingerprint is not None and candidate.fingerprint is not None
             and candidate.fingerprint != first.fingerprint
-        ) for candidate in group[1:])
+        ) for candidate in group if candidate is not first)
         if conflicts:
             first = ScheduleCandidate(assessment=ScheduleAssessment(schedule=first.assessment.schedule, reason_code="AMBIGUOUS_SCHEDULE"))
         elif len(group) > 1:
@@ -286,7 +287,11 @@ def recommend_from_candidates(
         raise ValueError("Automatic mode cannot inject a selected target")
     if selected is not None:
         validate_schedule_plan(plan, selected.assessment.schedule)
-    candidates, duplicate_warnings = collapse_candidates(([selected] if selected else []) + batch.candidates)
+    candidates, duplicate_warnings = collapse_candidates(([selected] if selected else []) + batch.candidates, preserve_first=selected is not None)
+    def identity_order(candidate: ScheduleCandidate) -> tuple:
+        schedule = candidate.assessment.schedule
+        return schedule.schedule_id or "", schedule.service_date.isoformat() if schedule.service_date else "", candidate.fingerprint or candidate.assessment.model_dump_json()
+    candidates = ([candidates[0], *sorted(candidates[1:], key=identity_order)] if selected is not None else sorted(candidates, key=identity_order))
     all_warnings = [*(warnings or []), *duplicate_warnings]
     exclusions: list[Exclusion] = []
     results: list[DepartureResult] = []
@@ -340,18 +345,16 @@ def recommend_from_candidates(
         all_warnings.append(Warning(code="ALTERNATIVES_TRUNCATED", message="The candidate limit was reached; the selected target is retained and alternatives are omitted."))
 
     # A matching clock alone does not imply a physical duplicate.
-    natural_keys = set()
+    natural_keys: dict[tuple, str] = {}
     for result in ([main] if main.selected_schedule else []) + results:
         schedule = result.selected_schedule
         if not isinstance(schedule, ScheduleOccurrence):
             continue
         key = (schedule.terminal, schedule.destination.casefold(), schedule.departure_at, schedule.cutoff_at,
                tuple(sorted(set(schedule.allowed_service_kinds))))
-        identity_key = (key, schedule.schedule_id)
-        if key in natural_keys and identity_key not in natural_keys:
+        if key in natural_keys and natural_keys[key] != schedule.schedule_id:
             all_warnings.append(Warning(code="POSSIBLE_DUPLICATE_SAILING", message="Distinct UUIDs share the full sailing time/service tuple; physical duplicates require source review."))
-        natural_keys.add(key)
-        natural_keys.add(identity_key)
+        natural_keys[key] = schedule.schedule_id
 
     alternatives = []
     if main.status != "UNAVAILABLE" and not batch.truncated:

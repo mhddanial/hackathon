@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Asia/Jakarta",
+  "completed_tasks": ["D4-01", "D4-02", "D4-03", "D4-04", "D4-05"],
+  "provenance": "Synthetic fixtures, fixed clocks and injected HTTP responses; no real sailings, observed traffic or live verification.",
+  "behavior": {
+    "schedule_id_optional": true,
+    "explicit_target_preserved": true,
+    "automatic_order": "Earliest SAFE; otherwise earliest RISKY; otherwise latest MISSED cutoff, with departure/UUID tie-breaks.",
+    "alternative_limit": 3,
+    "candidate_rows_evaluated_limit": 100,
+    "candidate_rows_read_with_sentinel": 101,
+    "unique_evaluations_including_selected_limit": 101,
+    "route_calls_per_request_limit": 1,
+    "automatic_overflow": "UNAVAILABLE / CANDIDATE_LIMIT",
+    "selected_overflow": "Keep independent target; omit alternatives; ALTERNATIVES_TRUNCATED",
+    "recurrence_inferred": false
+  },
+  "verification": {
+    "command": "PYTHON_DOTENV_DISABLED=1 .venv/bin/python -c 'import socket,pytest; block=lambda *a,**k: pytest.fail(\"Network blocked in departure tests\"); socket.socket.connect=block; socket.create_connection=block; raise SystemExit(pytest.main([\"backend/tests/test_departure_alternatives.py\",\"backend/tests/test_departure_api.py\",\"backend/tests/test_departure_contracts.py\",\"backend/tests/test_departure_calculation.py\",\"backend/tests/test_departure_dependencies.py\",\"backend/tests/test_route_visualization.py\",\"backend/tests/test_route_oracle_parity.py\",\"backend/tests/test_congestion.py\",\"backend/tests/test_oracle_auth.py\",\"-q\",\"--tb=short\"]))'",
+    "exit_code": 0,
+    "passed": 431,
+    "new_selection_alternative_checks": 55,
+    "existing_checks": 376,
+    "duration_seconds": 6.10,
+    "warning_count": 1,
+    "warning": "Existing FastAPI/Starlette TestClient deprecates httpx in favor of httpx2.",
+    "dotenv_disabled_before_imports": true,
+    "external_connections_blocked": true,
+    "frozen_fixture_definitions_covered": 66,
+    "frozen_http_scenarios": 63,
+    "frozen_configuration_scenarios": 3,
+    "selection_repository_scenarios_also_run_pure": 14,
+    "frozen_success_examples_validated": 3,
+    "intermediate_collection_failure": "Incorrect relative example path, corrected before final acceptance run."
+  },
+  "other_checks": [
+    {"command": ".venv/bin/python -m pip check", "exit_code": 0, "result": "No broken requirements found."},
+    {"command": "git diff --check", "exit_code": 0}
+  ],
+  "frozen_contract_policy_fixtures_examples_changed": false,
+  "shared_auth_main_route_io_changed_in_sprint_4": false,
+  "remaining_release_gate": "D3-06: read-only live verification, verified occurrence metadata and route-context evidence.",
+  "sprint_5_entry_gate": "Fixture-based interface integration may begin; real-data release remains gated by D3-06.",
+  "live_requests_attempted": false,
+  "live_writes_performed": false,
+  "deployment_performed": false,
+  "commit_created_by_this_work": false
+}

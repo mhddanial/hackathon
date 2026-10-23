@@ -12,11 +12,11 @@ from auth import AuthenticatedContext
 from routers import route
 from route_geometry import compact_geometry
 from schemas.departure_recommendation import (
-    DepartureRequest, RouteInput, ScheduleAssessment, ScheduleOccurrence, Warning,
+    CandidateBatch, DepartureRequest, RouteInput, ScheduleAssessment, ScheduleCandidate, ScheduleOccurrence, Warning,
 )
 from schemas.route import RouteData
 from services.departure_io import BoundedClient, IOOverrides, RequestBudget, io_overrides
-from services.departure_recommendation import assess_schedule
+from services.departure_recommendation import schedule_candidate
 
 DB_TIMEOUT_SECONDS = 5
 ROUTE_TIMEOUT_SECONDS = 4
@@ -90,27 +90,18 @@ class DepartureDependencies:
         if not rows:
             raise DepartureError("SCHEDULE_NOT_FOUND", 404, ("schedule_id",))
         assessments = []
-        normalized_rows = []
+        fingerprints = []
         for row in rows:
-            normalized = dict(row)
             identity = row.get("id", row.get("schedule_id"))
             if identity is not None and identity != plan.schedule_id:
                 raise DepartureError("INVALID_DEPENDENCY_RESPONSE")
-            normalized["schedule_id"] = identity
-            normalized["source"] = self.source  # Repository provenance, never a request switch.
-            assessment = assess_schedule(normalized)
-            grouping = row.get("terminal_id")
-            terminal = row.get("terminal")
-            if grouping is not None and (not isinstance(terminal, str) or grouping != TERMINAL_GROUPS.get(terminal)):
-                assessment = ScheduleAssessment(schedule=assessment.schedule, reason_code="INVALID_SCHEDULE")
-            assessments.append(assessment)
-            normalized_rows.append({key: normalized.get(key) for key in (
-                "schedule_id", "terminal", "terminal_id", "destination", "service_date", "allowed_service_kinds",
-                "source_timezone", "source_departure_at", "source_cutoff_at", "verified_at", "source")})
+            candidate = self.normalize_record(row)
+            assessments.append(candidate.assessment)
+            fingerprints.append(candidate.fingerprint)
         first = assessments[0]
         ambiguous = len(rows) == SELECTED_ROW_LIMIT
         for index, candidate in enumerate(assessments[1:], 1):
-            if candidate != first or (not isinstance(first.schedule, ScheduleOccurrence) and normalized_rows[index] != normalized_rows[0]):
+            if candidate != first or (not isinstance(first.schedule, ScheduleOccurrence) and fingerprints[index] != fingerprints[0]):
                 ambiguous = True
         if ambiguous:
             return ScheduleLookup(ScheduleAssessment(schedule=first.schedule, reason_code="AMBIGUOUS_SCHEDULE"))
@@ -118,6 +109,32 @@ class DepartureDependencies:
         if len(rows) > 1:
             warnings.append(Warning(code="DUPLICATE_RECORD_COLLAPSED", message="Identical records for the selected occurrence were collapsed."))
         return ScheduleLookup(first, warnings)
+
+    def normalize_record(self, row: Mapping[str, Any]) -> ScheduleCandidate:
+        self.budget.remaining()
+        normalized = {**row, "schedule_id": row.get("id", row.get("schedule_id")), "source": self.source}
+        candidate = schedule_candidate(normalized)
+        grouping, terminal = row.get("terminal_id"), row.get("terminal")
+        if grouping is not None and (not isinstance(terminal, str) or grouping != TERMINAL_GROUPS.get(terminal)):
+            candidate = ScheduleCandidate(assessment=ScheduleAssessment(schedule=candidate.assessment.schedule,
+                reason_code="INVALID_SCHEDULE"), fingerprint=candidate.fingerprint)
+        return candidate
+
+    def candidate_schedules(self, plan: DepartureRequest) -> CandidateBatch:
+        """Read a stable bounded set, retaining unknown metadata for explicit exclusions.
+
+        Filtering date/destination in SQL would hide unknown dates and assume label
+        normalization. The pure core applies exact normalized constraints instead.
+        """
+        try:
+            query = self.context.database.table("ferry_schedules").select("*").order("id").limit(101)
+            if plan.schedule_id is not None:
+                query = query.neq("id", plan.schedule_id)
+            rows = self.execute(query, limit=101)
+            return CandidateBatch(candidates=[self.normalize_record(row) for row in rows[:100]],
+                truncated=len(rows) > 100, source=self.source)
+        except Exception as error:
+            raise dependency_failure(error) from None
 
     def route_database(self) -> "RouteDatabase":
         return RouteDatabase(self)

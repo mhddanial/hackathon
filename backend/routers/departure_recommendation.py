@@ -1,4 +1,4 @@
-"""Authenticated selected-sailing API; automatic selection remains Sprint 4."""
+"""Authenticated selected/automatic sailing recommendations and alternatives."""
 from contextlib import asynccontextmanager
 from datetime import datetime
 import json
@@ -14,10 +14,10 @@ from pydantic import ValidationError
 from auth import AuthenticatedContext, get_authenticated_context
 from departure_config import DepartureConfig
 from route_planning import PLANNING_ZONE
-from schemas.departure_recommendation import DepartureRequest, DepartureResult, ScheduleAssessment, ScheduleID
+from schemas.departure_recommendation import CandidateBatch, DepartureRequest, DepartureResult, ScheduleAssessment, ScheduleCandidate, ScheduleOccurrence
 from services.departure_dependencies import DepartureDependencies, DepartureError, RouteArithmeticUnavailable
 from services.departure_io import BoundedClient, IOOverrides, RequestBudget, io_overrides
-from services.departure_recommendation import PlanMismatch, calculate_departure
+from services.departure_recommendation import PlanMismatch, recommend_from_candidates, validate_schedule_plan
 
 REQUEST_BYTES = 8192
 RESPONSE_BYTES = 65536
@@ -39,17 +39,11 @@ def transport_error(code: str, status: int = 503, fields: tuple[str, ...] = ()) 
     return HTTPException(status, detail={"code": code, "message": ERROR_MESSAGES[code], "fields": list(fields)})
 
 
-class SelectedDepartureRequest(DepartureRequest):
-    """User-approved staging restriction; the frozen v1 base request is unchanged."""
-    schedule_id: ScheduleID
-
-
 def validation_error(errors: list[dict]) -> HTTPException:
     safe_fields = set(DepartureRequest.model_fields) | {"body", "lat", "lng"}
     return HTTPException(422, detail=[{
         "loc": ["body", *[part if part in safe_fields else "field" for part in error.get("loc", ()) if isinstance(part, str) and part != "body"][:4]],
-        "msg": ("Select a schedule_id; automatic selection is pending Sprint 4."
-                if "schedule_id" in error.get("loc", ()) else "Invalid departure request field."),
+        "msg": "Invalid departure request field.",
         "type": str(error.get("type", "value_error"))[:80],
     } for error in errors[:10]])
 
@@ -88,7 +82,7 @@ class DepartureRoute(APIRoute):
                         body.extend(chunk)
                     try:
                         payload = json.loads(body.decode("utf-8"), object_pairs_hook=object_pairs, parse_constant=invalid_constant)
-                        SelectedDepartureRequest.model_validate(payload)
+                        DepartureRequest.model_validate(payload)
                     except ValidationError as error:
                         raise validation_error(error.errors(include_input=False, include_context=False)) from None
                     except (ValueError, UnicodeError, RecursionError):
@@ -135,18 +129,33 @@ def calculation_clock() -> datetime:
 
 @router.post("", response_model=DepartureResult)
 def recommend_departure(
-    plan: SelectedDepartureRequest, request: Request,
+    plan: DepartureRequest, request: Request,
     dependencies: Annotated[DepartureDependencies, Depends(get_dependencies)],
     clock: Annotated[datetime, Depends(calculation_clock)],
 ) -> DepartureResult:
     config = request.app.state.departure_config
-    lookup = dependencies.selected_schedule(plan)
-    # Known mismatches take precedence and never trigger an unrelated route query.
-    calculate_departure(plan, lookup.assessment, None, config, calculated_at=clock)
+    lookup = dependencies.selected_schedule(plan) if plan.schedule_id is not None else None
+    if lookup is not None:
+        validate_schedule_plan(plan, lookup.assessment.schedule)
+    batch = dependencies.candidate_schedules(plan)
+    selected = ScheduleCandidate(assessment=lookup.assessment) if lookup is not None else None
+    # An incomplete automatic set cannot establish a best sailing or require routing.
+    if plan.schedule_id is None and (batch.truncated or not batch.candidates):
+        return recommend_from_candidates(plan, batch, None, config, calculated_at=clock)
     try:
         estimate = dependencies.route_estimate(plan)
     except RouteArithmeticUnavailable:
-        unavailable = ScheduleAssessment(schedule=lookup.assessment.schedule, reason_code=lookup.assessment.reason_code or "INVALID_SCHEDULE")
-        return calculate_departure(plan, unavailable, None, config, calculated_at=clock)
-    result = calculate_departure(plan, lookup.assessment, estimate, config, calculated_at=clock)
-    return DepartureResult(**{**result.model_dump(), "warnings": [*result.warnings, *lookup.warnings]})
+        # Preserve each row's earlier domain reason; arithmetic overflow comes last.
+        def overflow(candidate: ScheduleCandidate) -> ScheduleCandidate:
+            assessment = candidate.assessment
+            reason = assessment.reason_code
+            if reason is None and isinstance(assessment.schedule, ScheduleOccurrence):
+                age = (clock - assessment.schedule.verified_at).total_seconds() / 60
+                reason = "INVALID_FRESHNESS" if age < 0 else "STALE_SCHEDULE" if age > config.schedule_max_age_min else None
+            return ScheduleCandidate(assessment=ScheduleAssessment(schedule=assessment.schedule,
+                reason_code=reason or "INVALID_SCHEDULE"), fingerprint=candidate.fingerprint)
+        selected = overflow(selected) if selected is not None else None
+        batch = CandidateBatch(candidates=[overflow(item) for item in batch.candidates], truncated=batch.truncated, source=batch.source)
+        estimate = None
+    return recommend_from_candidates(plan, batch, estimate, config, calculated_at=clock,
+        selected=selected, warnings=lookup.warnings if lookup else [])

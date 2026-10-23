@@ -300,6 +300,10 @@ class DepartureResult(Model):
         else:
             if any(v is None for v in values) or not isinstance(self.selected_schedule, ScheduleOccurrence):
                 raise ValueError("Calculated decisions require a valid occurrence and all arithmetic values")
+            occurrence = self.selected_schedule
+            if (occurrence.terminal != self.plan.terminal or occurrence.destination.casefold() != self.plan.ferry_destination.casefold()
+                or occurrence.service_date != self.plan.service_date or self.plan.service_kind not in occurrence.allowed_service_kinds):
+                raise ValueError("Calculated schedule conflicts with request constraints")
             expected = "MISSED" if self.buffer_min < 0 else "RISKY" if self.buffer_min < self.safety_buffer_min else "SAFE"
             reasons = {"SAFE": "BUFFER_SUFFICIENT", "RISKY": "BELOW_SAFETY_BUFFER", "MISSED": "CUTOFF_MISSED"}
             if self.status != expected or self.reason_code != reasons[expected] or self.data_status != "simulation":

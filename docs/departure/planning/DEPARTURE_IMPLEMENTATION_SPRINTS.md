@@ -2,7 +2,7 @@
 
 Owner: **Ananda Khusnul Hotimah — 3312401044**.
 Planning baseline: **23 October 2026, Asia/Jakarta**.
-Status: **Sprint 2 core and Sprint 3 selected-sailing API checks pass; D3-06 live verification remains pending; automatic selection and alternatives remain Sprint 4 work**.
+Status: **Sprint 2 core, Sprint 3 API and Sprint 4 automatic selection/alternatives checks pass offline; D3-06 live verification remains pending; interface work remains Sprint 5**.
 
 ## 1. Context and intended result
 
@@ -163,17 +163,19 @@ The backward departure estimate uses traffic at the submitted road departure tim
 
 **Goal:** help the user choose a relevant sailing without obscuring a missed target.
 
-- [ ] **D4-01 — Implement candidate filtering.** Apply terminal, destination, supported date/recurrence, and known service constraints before ranking. Preserve meaningful distinctions between no records, invalid records, and all missed cutoffs.
-- [ ] **D4-02 — Implement automatic choice.** Apply the Sprint 1 SAFE → RISKY → missed policy, stable tie-breakers, and explicit exclusion reasons for unevaluable data. Do not switch a supplied target implicitly.
-- [ ] **D4-03 — Evaluate and rank alternatives.** Compute candidate-specific cutoff, buffer, and status; cap returned alternatives at three and disclose candidate-set bounds. Reuse one route estimate only when origin/terminal/road departure are identical.
-- [ ] **D4-04 — Define alternative selection behavior.** Choosing another sailing keeps the current road departure unless the user changes it; recalculate through the backend. If suggesting a new road departure, expose the fixed-period assumption and require recalculation.
-- [ ] **D4-05 — Test ranking and edge cases.** Cover missed target with later SAFE alternative, only RISKY candidates, all missed, duplicate departure clocks, mismatched destination/service, no alternatives, invalid candidate metadata, and unsupported next-day recurrence.
+- [x] **D4-01 — Implement candidate filtering.** Apply terminal, destination, supported date/recurrence, and known service constraints before ranking. Preserve meaningful distinctions between no records, invalid records, and all missed cutoffs.
+- [x] **D4-02 — Implement automatic choice.** Apply the Sprint 1 SAFE → RISKY → missed policy, stable tie-breakers, and explicit exclusion reasons for unevaluable data. Do not switch a supplied target implicitly.
+- [x] **D4-03 — Evaluate and rank alternatives.** Compute candidate-specific cutoff, buffer, and status; cap returned alternatives at three and disclose candidate-set bounds. Reuse one route estimate only when origin/terminal/road departure are identical.
+- [x] **D4-04 — Define alternative selection behavior.** Choosing another sailing keeps the current road departure unless the user changes it; recalculate through the backend. If suggesting a new road departure, expose the fixed-period assumption and require recalculation.
+- [x] **D4-05 — Test ranking and edge cases.** Cover missed target with later SAFE alternative, only RISKY candidates, all missed, duplicate departure clocks, mismatched destination/service, no alternatives, invalid candidate metadata, and unsupported next-day recurrence.
 
 **Proposed files:** extend `backend/services/departure_recommendation.py`, `backend/schemas/departure_recommendation.py`, and `backend/tests/test_departure_alternatives.py`; update the API contract/examples.
 
 **Checks:** candidate-specific math, stable repeat results, correct source metadata, and a fixed upper bound on reads/calculations; no route call per candidate when route inputs are identical.
 
 **Done when:** automatic and explicit-target results follow the documented policy; alternative lists contain only evaluated matching sailings and preserve the original target result.
+
+**Recorded result:** [Sprint 4 report](../sprints/SPRINT_4_REPORT.md): 431 checks passed offline, including 55 new selection/alternative checks. The remaining 14 frozen fixtures pass in both pure and HTTP tests; all 66 fixture definitions now have executable coverage (63 HTTP scenarios plus three configuration scenarios), and three frozen successful examples validate unchanged. Omitted/null `schedule_id` now enables automatic selection; explicit targets remain independently resolved and preserved. Reads use a 100-row candidate set plus one unevaluated overflow sentinel, with at most 101 unique evaluations including a selected target and at most one route call per request. D3-06 remains open before real-data release; no Sprint 5 implementation is claimed.
 
 ## 9. Sprint 5 — Complete the departure interface
 

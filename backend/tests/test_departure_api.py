@@ -1,4 +1,4 @@
-"""Selected-sailing HTTP tests with verified-auth and owner-route mocks, no live I/O."""
+"""HTTP regression tests with verified-auth and owner-route mocks, no live I/O."""
 from copy import deepcopy
 from datetime import datetime
 from types import SimpleNamespace as NS
@@ -24,7 +24,8 @@ FEATURES = ["hour", "is_peak", "day_type_weekday", "day_type_weekend", "corridor
 @pytest.fixture
 def harness(monkeypatch):
     state = {"data": deepcopy(FIXTURES["defaults"]), "calls": [], "auth": None, "db": None,
-             "osrm": None, "corridor": "industrial_arterial", "transports": [], "source": "synthetic_fixture"}
+             "osrm": None, "corridor": "industrial_arterial", "transports": [], "source": "synthetic_fixture",
+             "selected_rows": None, "candidate_rows": None}
     monkeypatch.setattr(database, "url", "https://example.supabase.co")
     monkeypatch.setattr(database, "key", "fixture-publishable-key")
     monkeypatch.setattr(route, "rf_model", NS(predict=lambda rows: ["high"]))
@@ -54,7 +55,13 @@ def harness(monkeypatch):
                 return httpx.Response(503, json={"code": "private", "message": "private SQL diagnostic"})
             if state["db"] == "malformed":
                 return httpx.Response(200, json={"private": "not a row list"})
-            rows = [row for row in data["schedules"] if row.get("id", row.get("schedule_id")) == params.get("id", "").removeprefix("eq.")]
+            injected = state["selected_rows"] if params.get("id", "").startswith("eq.") else state["candidate_rows"]
+            rows = data["schedules"] if injected is None else injected
+            if params.get("id", "").startswith("eq."):
+                rows = [row for row in rows if row.get("id", row.get("schedule_id")) == params["id"].removeprefix("eq.")]
+            elif params.get("id", "").startswith("neq."):
+                rows = [row for row in rows if row.get("id", row.get("schedule_id")) != params["id"].removeprefix("neq.")]
+            rows = sorted(rows, key=lambda row: str(row.get("id", row.get("schedule_id", ""))))[:int(params.get("limit", 101))]
             return httpx.Response(200, json=rows)
         if request.url.path == "/rest/v1/road_segments":
             if state["db"] == "corridor_outage" and "segment_id" in params:
@@ -176,7 +183,7 @@ def test_strict_json_validation_does_not_echo_input(harness, body):
 
 
 @pytest.mark.parametrize("target", [None, "omitted"])
-def test_selected_only_staging_restriction(harness, target):
+def test_optional_target_enables_automatic_choice(harness, target):
     client, state, _ = harness
     body = deepcopy(state["data"]["request"])
     if target == "omitted":
@@ -184,7 +191,9 @@ def test_selected_only_staging_restriction(harness, target):
     else:
         body["schedule_id"] = None
     response = client.post(PATH, json=body, headers=AUTH)
-    assert response.status_code == 422 and "Sprint 4" in response.text and not state["calls"]
+    assert response.status_code == 200 and response.json()["selection"]["mode"] == "automatic"
+    assert response.json()["plan"]["schedule_id"] is None
+    assert response.json()["selected_schedule"]["schedule_id"] == state["data"]["request"]["schedule_id"]
 
 
 def test_request_and_response_byte_limits(harness, monkeypatch):

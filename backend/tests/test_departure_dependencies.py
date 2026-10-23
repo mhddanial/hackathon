@@ -42,7 +42,8 @@ def test_target_is_read_independently_and_preserved_when_missed(harness):
     body = response.json()
     assert response.status_code == 200 and body["status"] == "MISSED" and body["buffer_min"] == -5
     assert body["selected_schedule"]["schedule_id"] == state["data"]["request"]["schedule_id"]
-    assert body["selection"]["examined_count"] == 1 and body["alternatives"] == []
+    assert body["selection"]["examined_count"] == 2
+    assert [item["schedule"]["schedule_id"] for item in body["alternatives"]] == [other["schedule_id"]]
     schedule = next(call for call in state["calls"] if call["path"] == "/rest/v1/ferry_schedules")
     assert set(schedule["params"]) == {"select", "id", "order", "limit"}
 
