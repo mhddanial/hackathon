@@ -13,6 +13,7 @@ from supabase_auth.types import User
 from pydantic import ValidationError
 
 from database import get_supabase_client
+from services.departure_io import io_overrides
 
 security = HTTPBearer(auto_error=False)
 
@@ -46,7 +47,8 @@ def get_authenticated_context(
         raise _unauthorized()
 
     # Exception mapping surrounds verification, not the endpoint's execution.
-    with httpx.Client(timeout=httpx.Timeout(10, connect=5)) as transport:
+    factory = io_overrides.get().auth_client
+    with (factory() if factory else httpx.Client(timeout=httpx.Timeout(10, connect=5))) as transport:
         try:
             client = get_supabase_client(http_client=transport)
             response = client.auth.get_user(credentials.credentials)

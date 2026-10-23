@@ -2,7 +2,7 @@
 
 Owner: **Ananda Khusnul Hotimah — 3312401044**.
 Planning baseline: **23 October 2026, Asia/Jakarta**.
-Status: **Sprint 1 design/fixture checks complete; Sprint 2 calculation work may begin; application implementation, regression runtime, and live-data gates remain pending**.
+Status: **Sprint 2 core and Sprint 3 selected-sailing API checks pass; D3-06 live verification remains pending; automatic selection and alternatives remain Sprint 4 work**.
 
 ## 1. Context and intended result
 
@@ -144,11 +144,11 @@ The backward departure estimate uses traffic at the submitted road departure tim
 
 **Goal:** expose one complete backend recommendation for an explicitly selected sailing.
 
-- [ ] **D3-01 — Add a schedule adapter.** Read/filter existing schedule data via a reusable service boundary; normalize records to the frozen contract. Distinguish empty success, absent target, conflicting target, malformed rows, and database outage. Bound reads and avoid leaking raw exceptions.
-- [ ] **D3-02 — Add a route adapter.** Resolve the chosen terminal to a known point and call the route service with origin/date/time/day, without cargo-derived cutoff overrides. Validate `RouteData`, consume `final_time_min`, and propagate route/congestion limitations. Prefer reuse within this FastAPI process over a self-HTTP request.
-- [ ] **D3-03 — Make dependency budgets explicit.** Define timeouts and total request budget. Inspect existing synchronous route/DB behavior; implement bounds where the I/O happens. Merely timing out an outer coroutine is insufficient for blocking work. Add no hidden unlimited retry.
-- [ ] **D3-04 — Implement and register the endpoint.** Add `POST /departure-recommendation`, verified auth, typed request/response, safe transport errors, and calculation metadata; wire it in `backend/main.py`.
-- [ ] **D3-05 — Test the HTTP boundary.** Use FastAPI TestClient with injected dependencies for valid selected-sailing results, missing/invalid tokens, auth outage, validation errors, terminal/schedule mismatch, missing schedule data, route timeout, DB outage, malformed responses, and source labels.
+- [x] **D3-01 — Add a schedule adapter.** Read/filter existing schedule data via a reusable service boundary; normalize records to the frozen contract. Distinguish empty success, absent target, conflicting target, malformed rows, and database outage. Bound reads and avoid leaking raw exceptions.
+- [x] **D3-02 — Add a route adapter.** Resolve the chosen terminal to a known point and call the route service with origin/date/time/day, without cargo-derived cutoff overrides. Validate `RouteData`, consume `final_time_min`, and propagate route/congestion limitations. Prefer reuse within this FastAPI process over a self-HTTP request.
+- [x] **D3-03 — Make dependency budgets explicit.** Define timeouts and total request budget. Inspect existing synchronous route/DB behavior; implement bounds where the I/O happens. Merely timing out an outer coroutine is insufficient for blocking work. Add no hidden unlimited retry.
+- [x] **D3-04 — Implement and register the endpoint.** Add `POST /departure-recommendation`, verified auth, typed request/response, safe transport errors, and calculation metadata; wire it in `backend/main.py`.
+- [x] **D3-05 — Test the HTTP boundary.** Use FastAPI TestClient with injected dependencies for valid selected-sailing results, missing/invalid tokens, auth outage, validation errors, terminal/schedule mismatch, missing schedule data, route timeout, DB outage, malformed responses, and source labels.
 - [ ] **D3-06 — Check real dependencies read-only when available.** Record a selected-sailing request with valid date/zone policy and sanitized source metadata. If production records lack required metadata, demonstrate the explicit unavailable outcome and keep fixture success separate.
 
 **Proposed files:** `backend/services/departure_dependencies.py`, `backend/routers/departure_recommendation.py`, `backend/main.py`, `backend/tests/test_departure_api.py`, `backend/tests/test_departure_dependencies.py`; reuse `backend/auth.py` without changing other endpoints’ auth policies.
@@ -156,6 +156,8 @@ The backward departure estimate uses traffic at the submitted road departure tim
 **Checks:** new endpoint suite plus existing route/Oracle parity, route visualization, and congestion regression tests affected by shared code.
 
 **Done when:** selected-sailing API tests pass; authentication and outages cannot masquerade as a valid recommendation. Any missing real-data acceptance is recorded before release.
+
+**Recorded result:** [Sprint 3 report](../sprints/SPRINT_3_REPORT.md): 112 new API/adapter checks plus 264 calculation/route/congestion/auth checks passed offline. The user approved a temporary 422 for omitted/null `schedule_id`; the frozen base contract is unchanged and full automatic mode remains Sprint 4 work. D3-06 is not complete: no live connection configuration or read-only token was available. Clock-only database-row unavailability is demonstrated with a labeled fixture, not a live response.
 
 ## 8. Sprint 4 — Automatic selection and alternative schedules
 

@@ -188,6 +188,19 @@ class ScheduleAssessment(Model):
         return self
 
 
+class ScheduleCandidate(Model):
+    """Internal normalized candidate; the fingerprint never enters API responses."""
+    assessment: ScheduleAssessment
+    fingerprint: Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")] | None = None
+
+
+class CandidateBatch(Model):
+    # The repository consumes the 101st raw row only as an overflow sentinel.
+    candidates: list[ScheduleCandidate] = Field(max_length=100)
+    truncated: Annotated[bool, Field(strict=True)]
+    source: Literal["database", "synthetic_fixture"]
+
+
 class RouteEstimate(RouteInput):
     estimated_arrival_at: JakartaDatetime
 
@@ -273,6 +286,12 @@ class DepartureResult(Model):
         values = (self.travel_time_min, self.estimated_arrival_at, self.buffer_min, self.latest_departure_estimate_at)
         if self.planned_departure_at != self.plan.planned_departure_at:
             raise ValueError("Road instant conflicts with plan")
+        if self.selection.mode != ("selected" if self.plan.schedule_id else "automatic") or self.selection.service_date != self.plan.service_date:
+            raise ValueError("Selection metadata conflicts with request")
+        if self.selected_schedule is not None and self.plan.schedule_id is not None and self.selected_schedule.schedule_id not in (None, self.plan.schedule_id):
+            raise ValueError("Selected mode must preserve the requested target")
+        if self.selection.excluded_count != len(self.exclusions):
+            raise ValueError("Excluded count conflicts with exclusion records")
         if self.status == "UNAVAILABLE":
             if any(v is not None for v in values) or self.alternatives or self.data_status != "unavailable":
                 raise ValueError("Unavailable decisions must have null decision values and no alternatives")
@@ -319,4 +338,7 @@ class DepartureResult(Model):
                 raise ValueError("Alternative arithmetic exceeds datetime range") from None
             if alternative.latest_departure_estimate_at != latest:
                 raise ValueError("Alternative latest departure conflicts with input arithmetic")
+        ordering = [(item.schedule.departure_at, item.schedule.schedule_id) for item in self.alternatives]
+        if ordering != sorted(ordering) or len({item.schedule.occurrence_id for item in self.alternatives}) != len(self.alternatives):
+            raise ValueError("Alternatives must be unique and sorted by departure/UUID")
         return self

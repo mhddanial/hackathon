@@ -12,6 +12,7 @@ from locations import in_planning_area
 from route_geometry import compact_geometry
 from route_planning import clock_time, vessel_time, planning_date, planning_context
 from routers.congestion import rf_model, feature_columns, level_to_multiplier, is_peak_hour
+from services.departure_io import io_overrides
 
 router = APIRouter()
 
@@ -64,7 +65,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 
 def find_closest_segment(lat: float, lng: float) -> str | None:
     # We fetch the 6 segments to find the closest one to the route origin
-    supabase = get_supabase_client()
+    supabase = (io_overrides.get().route_database or get_supabase_client)()
     try:
         resp = supabase.table("road_segments").select("segment_id, start_lat, start_lng, end_lat, end_lng").execute()
         segments = resp.data
@@ -93,7 +94,7 @@ def get_ml_congestion(segment_id: str | None, day_type: str, hour: int) -> dict:
         return {"level": None, "multiplier": 1.0, "segment_name": None, "status": "unavailable"}
     name = segment_name(segment_id)
     try:
-        supabase = get_supabase_client()
+        supabase = (io_overrides.get().route_database or get_supabase_client)()
         resp = supabase.table("road_segments").select("corridor_type,name").eq("segment_id", segment_id).execute()
         corridor = resp.data[0]['corridor_type'] if resp.data else "urban_arterial"
         if resp.data: name = segment_name(segment_id, resp.data[0].get('name'))
@@ -143,7 +144,7 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
     route_geometry = None
     
     try:
-        resp = requests.get(osrm_url, timeout=4)
+        resp = (io_overrides.get().route_get or requests.get)(osrm_url, timeout=4)
         if resp.status_code == 200:
             data = resp.json()
             if "routes" in data and len(data["routes"]) > 0:

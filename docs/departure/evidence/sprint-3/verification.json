@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Asia/Jakarta",
+  "scope": ["D3-01", "D3-02", "D3-03", "D3-04", "D3-05", "D3-06"],
+  "completed": ["D3-01", "D3-02", "D3-03", "D3-04", "D3-05"],
+  "pending": ["D3-06"],
+  "provenance": "Synthetic fixtures, fixed clocks, injected HTTP responses, local socketpair and resolver-process timeout tests; no live sailing evidence.",
+  "approved_staging_restriction": "Return a clear 422 for omitted/null schedule_id until Sprint 4; frozen base contract unchanged.",
+  "runtime": {"python": "3.12.10", "pytest": "9.1.1", "venv": ".venv", "git_ignored": true, "requirements_changed": false},
+  "budgets": {
+    "request_seconds": 30,
+    "auth_operation_seconds": 10,
+    "database_operation_seconds": 5,
+    "route_operation_seconds": 4,
+    "dns": "Isolated child resolver killed and reaped at I/O deadline; at most 16 resolved addresses attempted under same deadline.",
+    "http_retries": 0,
+    "postgrest_retry_enabled": false,
+    "request_bytes": 8192,
+    "response_bytes": 65536,
+    "upstream_response_bytes": 1048576,
+    "selected_lookup_rows_including_sentinel": 101
+  },
+  "verification": {
+    "command": "PYTHON_DOTENV_DISABLED=1 .venv/bin/python -c 'import socket, pytest; block=lambda *a, **k: pytest.fail(\"Network blocked in departure tests\"); socket.socket.connect=block; socket.create_connection=block; raise SystemExit(pytest.main([\"backend/tests/test_departure_api.py\", \"backend/tests/test_departure_dependencies.py\", \"backend/tests/test_departure_calculation.py\", \"backend/tests/test_departure_contracts.py\", \"backend/tests/test_route_visualization.py\", \"backend/tests/test_route_oracle_parity.py\", \"backend/tests/test_congestion.py\", \"backend/tests/test_oracle_auth.py\", \"-q\", \"--tb=short\"]))'",
+    "exit_code": 0,
+    "passed": 376,
+    "new_api_checks": 78,
+    "new_dependency_checks": 34,
+    "sprint_2_checks": 143,
+    "route_checks": 37,
+    "congestion_checks": 68,
+    "auth_checks": 16,
+    "duration_seconds": 5.26,
+    "warnings": ["Existing FastAPI/Starlette TestClient deprecates httpx in favor of httpx2."],
+    "dotenv_disabled_before_imports": true,
+    "external_connections_blocked": true,
+    "frozen_http_fixture_cases_passed": 49,
+    "frozen_configuration_cases_covered_by_sprint_2": 3,
+    "frozen_selection_repository_cases_deferred": 14
+  },
+  "other_checks": [
+    {"command": ".venv/bin/python -m pip check", "exit_code": 0, "result": "No broken requirements found."},
+    {"command": "git diff --check", "exit_code": 0},
+    {"command": "git check-ignore .venv/pyvenv.cfg", "exit_code": 0, "result": ".venv/pyvenv.cfg"}
+  ],
+  "live_verification": {
+    "connection_configuration_present": false,
+    "read_only_token_present": false,
+    "live_requests_attempted": false,
+    "clock_only_unavailable_example": "Synthetic database-row fixture, not production capture.",
+    "blocker": "No live connection configuration or read-only token available without reading prohibited .env files."
+  },
+  "sprint_4_gate": "Fixture integration may begin; automatic selection, alternatives and full v1 request support remain pending. D3-06 must precede real-data release.",
+  "commit_created": false,
+  "deployment_performed": false,
+  "live_writes_performed": false
+}
