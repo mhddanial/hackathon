@@ -1,0 +1,55 @@
+{
+  "captured_at": "2026-10-23T13:45:43.660811+07:00",
+  "command": "python3 docs/departure/evidence/sprint-1/verify_design.py",
+  "cwd": "repository root",
+  "result": "PASS",
+  "fixture_definitions_reviewed": 66,
+  "categories": {
+    "auth": 2,
+    "configuration": 3,
+    "dependency": 6,
+    "domain": 29,
+    "repository_contract": 2,
+    "request": 7,
+    "selection": 12,
+    "target": 5
+  },
+  "synthetic_api_examples_reviewed": 5,
+  "coverage": {
+    "offline_fixture_cases": [
+      "DEP-01",
+      "DEP-02",
+      "DEP-03",
+      "DEP-04",
+      "DEP-05",
+      "DEP-06",
+      "DEP-07",
+      "DEP-08",
+      "DEP-09",
+      "DEP-10",
+      "DEP-11",
+      "DEP-13"
+    ],
+    "DEP-12": "UX race/cancel/account rules; execution assigned D5-06",
+    "DEP-14": "Usability protocol only; actual observation assigned D6-04"
+  },
+  "checks": [
+    "Strict JSON and unique fixture IDs",
+    "Fixture override merge and request constraints",
+    "Expected ETA, signed buffer, threshold boundaries and latest-departure arithmetic",
+    "Midnight/source-zone conversions and freshness boundary",
+    "Unavailable-data and controlled-error preconditions",
+    "Alternative identities/order/bounds and preserved selected target",
+    "Synthetic API example fields, nulls, request/fixture agreement and arithmetic",
+    "Local documentation links"
+  ],
+  "limitations": [
+    "No departure service, HTTP endpoint, browser or production schema executed",
+    "Automatic ranking traces are manually reviewed in fixture-review.md; this is not a service selection test",
+    "Repository overflow fixtures inject sentinel metadata; no real query/load test",
+    "No live schedule acceptance or participant observations",
+    "Sprint 0 application test startup failures remain unresolved"
+  ],
+  "live_services_used": false,
+  "application_tests_run": false
+}

@@ -1,0 +1,2259 @@
+{
+  "fixture_version": "1.0",
+  "provenance": "Entirely synthetic design fixtures, not source-workbook rows, real UUIDs, live sailings, or executed API results.",
+  "merge_rule": "Deep merge object overrides into defaults; replace arrays/scalars wholesale; explicit null removes known data. No implicit dates/zones/recurrence. Stage repository_contract injects sentinel state, not a claim to contain a full database result.",
+  "defaults": {
+    "request": {
+      "origin": {
+        "lat": 1.0604795,
+        "lng": 104.0303214
+      },
+      "origin_name": "Batamindo Industrial Park",
+      "terminal": "batu_ampar",
+      "ferry_destination": "Fixture Singapore",
+      "departure_date": "2026-10-23",
+      "departure_time": "08:00",
+      "service_date": "2026-10-23",
+      "service_kind": "cargo",
+      "day_type": "weekday",
+      "schedule_id": "00000000-0000-4000-8000-000000000001"
+    },
+    "route": {
+      "final_time_min": 30,
+      "base_time_min": 20,
+      "congestion_multiplier": 1.5,
+      "routing_source": "OSRM API",
+      "congestion_status": "synthetic_estimate",
+      "context_verified": true
+    },
+    "schedules": [
+      {
+        "schedule_id": "00000000-0000-4000-8000-000000000001",
+        "terminal": "batu_ampar",
+        "destination": "Fixture Singapore",
+        "service_date": "2026-10-23",
+        "allowed_service_kinds": [
+          "cargo"
+        ],
+        "source_timezone": "Asia/Jakarta",
+        "source_departure_at": "2026-10-23T09:30:00+07:00",
+        "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+        "verified_at": "2026-10-23T06:00:00+07:00",
+        "source": "synthetic_fixture"
+      }
+    ],
+    "config": {
+      "safety_buffer_min": 15,
+      "schedule_max_age_min": 1440
+    },
+    "clock": "2026-10-23T07:00:00+07:00",
+    "failures": {},
+    "retrieval": {
+      "truncated": false
+    }
+  },
+  "cases": [
+    {
+      "id": "SAFE-30",
+      "stage": "domain",
+      "covers": [
+        "DEP-01"
+      ],
+      "overrides": {},
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "08:00 + 30 min = 08:30; recorded 09:00 cutoff leaves 30 min."
+    },
+    {
+      "id": "RISKY-5",
+      "stage": "domain",
+      "covers": [
+        "DEP-02"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:35:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "RISKY",
+        "reason_code": "BELOW_SAFETY_BUFFER",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 5,
+        "latest_departure_estimate_at": "2026-10-23T07:50:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "08:35 - 08:30 = 5; 0 <= 5 < 15."
+    },
+    {
+      "id": "MISSED-5",
+      "stage": "domain",
+      "covers": [
+        "DEP-03"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:25:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "MISSED",
+        "reason_code": "CUTOFF_MISSED",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": -5,
+        "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "08:25 - 08:30 = -5; selected UUID retained."
+    },
+    {
+      "id": "ZERO-BUFFER",
+      "stage": "domain",
+      "covers": [
+        "DEP-10"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:30:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "RISKY",
+        "reason_code": "BELOW_SAFETY_BUFFER",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 0,
+        "latest_departure_estimate_at": "2026-10-23T07:45:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Exactly cutoff is RISKY, not feasible-as-SAFE."
+    },
+    {
+      "id": "EXACT-THRESHOLD",
+      "stage": "domain",
+      "covers": [
+        "DEP-01",
+        "DEP-10"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:45:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 15,
+        "latest_departure_estimate_at": "2026-10-23T08:00:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Exactly 15 min is SAFE."
+    },
+    {
+      "id": "FRACTION-BELOW",
+      "stage": "domain",
+      "covers": [
+        "DEP-02",
+        "DEP-10"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:44:59.900000+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "RISKY",
+        "reason_code": "BELOW_SAFETY_BUFFER",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 14.998333333333333,
+        "latest_departure_estimate_at": "2026-10-23T07:59:59.900000+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "14 min 59.9 sec stays RISKY even if display rounds to 15.00."
+    },
+    {
+      "id": "FRACTION-NEGATIVE",
+      "stage": "domain",
+      "covers": [
+        "DEP-03",
+        "DEP-10"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:29:59.900000+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "MISSED",
+        "reason_code": "CUTOFF_MISSED",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": -0.0016666666666666668,
+        "latest_departure_estimate_at": "2026-10-23T07:44:59.900000+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "0.1 second late remains MISSED; never erase the negative sign."
+    },
+    {
+      "id": "ZERO-DURATION",
+      "stage": "domain",
+      "covers": [
+        "DEP-01",
+        "DEP-11"
+      ],
+      "overrides": {
+        "route": {
+          "final_time_min": 0,
+          "base_time_min": 0,
+          "congestion_multiplier": 1
+        }
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 0,
+        "estimated_arrival_at": "2026-10-23T08:00:00+07:00",
+        "buffer_min": 60,
+        "latest_departure_estimate_at": "2026-10-23T08:45:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Zero duration is known zero, not absent data."
+    },
+    {
+      "id": "APPLY-CONGESTION-ONCE",
+      "stage": "domain",
+      "covers": [
+        "DEP-11"
+      ],
+      "overrides": {},
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "20 base minutes times 1.5 is already 30 final minutes; using 45 would be wrong."
+    },
+    {
+      "id": "MISSING-CUTOFF",
+      "stage": "domain",
+      "covers": [
+        "DEP-07"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": null,
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "MISSING_CUTOFF",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; MISSING_CUTOFF; decision arithmetic remains null."
+    },
+    {
+      "id": "CUTOFF-AFTER-SAILING",
+      "stage": "domain",
+      "covers": [
+        "DEP-07"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:45:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "INVALID_CUTOFF",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; INVALID_CUTOFF; decision arithmetic remains null."
+    },
+    {
+      "id": "CUTOFF-EQUAL-SAILING",
+      "stage": "domain",
+      "covers": [
+        "DEP-07"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:30:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "INVALID_CUTOFF",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; INVALID_CUTOFF; decision arithmetic remains null."
+    },
+    {
+      "id": "UNKNOWN-SERVICE-DATE",
+      "stage": "domain",
+      "covers": [
+        "DEP-09"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": null,
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "MISSING_SERVICE_DATE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; MISSING_SERVICE_DATE; decision arithmetic remains null."
+    },
+    {
+      "id": "UNKNOWN-SOURCE-ZONE",
+      "stage": "domain",
+      "covers": [
+        "DEP-09"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": null,
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "MISSING_SOURCE_ZONE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; MISSING_SOURCE_ZONE; decision arithmetic remains null."
+    },
+    {
+      "id": "INVALID-SOURCE-ZONE",
+      "stage": "domain",
+      "covers": [
+        "DEP-09"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Invalid/Fixture",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "INVALID_SOURCE_ZONE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; INVALID_SOURCE_ZONE; decision arithmetic remains null."
+    },
+    {
+      "id": "OFFSET-ZONE-CONFLICT",
+      "stage": "domain",
+      "covers": [
+        "DEP-09"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Singapore",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "INVALID_SOURCE_ZONE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; INVALID_SOURCE_ZONE; decision arithmetic remains null."
+    },
+    {
+      "id": "UNKNOWN-SERVICE-KIND",
+      "stage": "domain",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": null,
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "SERVICE_UNKNOWN",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; SERVICE_UNKNOWN; decision arithmetic remains null."
+    },
+    {
+      "id": "UNKNOWN-FRESHNESS",
+      "stage": "domain",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": null,
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "FRESHNESS_UNKNOWN",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; FRESHNESS_UNKNOWN; decision arithmetic remains null."
+    },
+    {
+      "id": "STALE-SCHEDULE",
+      "stage": "domain",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-21T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "STALE_SCHEDULE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; STALE_SCHEDULE; decision arithmetic remains null."
+    },
+    {
+      "id": "FUTURE-VERIFICATION",
+      "stage": "domain",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T07:01:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "INVALID_FRESHNESS",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known target kept; INVALID_FRESHNESS; decision arithmetic remains null."
+    },
+    {
+      "id": "SOURCE-SINGAPORE",
+      "stage": "domain",
+      "covers": [
+        "DEP-09"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Singapore",
+            "source_departure_at": "2026-10-23T10:30:00+08:00",
+            "source_cutoff_at": "2026-10-23T10:00:00+08:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Singapore 10:00 cutoff converts to Jakarta 09:00; buffer 30."
+    },
+    {
+      "id": "MIDNIGHT-ARRIVAL",
+      "stage": "domain",
+      "covers": [
+        "DEP-09"
+      ],
+      "overrides": {
+        "request": {
+          "departure_time": "23:50",
+          "service_date": "2026-10-24"
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-24",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-24T01:00:00+07:00",
+            "source_cutoff_at": "2026-10-24T00:30:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "RISKY",
+        "reason_code": "BELOW_SAFETY_BUFFER",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-24T00:20:00+07:00",
+        "buffer_min": 10,
+        "latest_departure_estimate_at": "2026-10-23T23:45:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "23:50 + 30 = next day 00:20; cutoff 00:30 leaves 10."
+    },
+    {
+      "id": "EXPLICIT-PREVIOUS-DAY-CUTOFF",
+      "stage": "domain",
+      "covers": [
+        "DEP-09",
+        "DEP-10"
+      ],
+      "overrides": {
+        "request": {
+          "departure_time": "23:00",
+          "service_date": "2026-10-24"
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-24",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-24T00:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T23:45:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T23:30:00+07:00",
+        "buffer_min": 15,
+        "latest_departure_estimate_at": "2026-10-23T23:00:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Ferry is next day; recorded absolute cutoff remains on the road date."
+    },
+    {
+      "id": "ZONE-CHANGES-SERVICE-DATE",
+      "stage": "domain",
+      "covers": [
+        "DEP-09"
+      ],
+      "overrides": {
+        "request": {
+          "departure_time": "22:45"
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Singapore",
+            "source_departure_at": "2026-10-24T00:30:00+08:00",
+            "source_cutoff_at": "2026-10-24T00:00:00+08:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "MISSED",
+        "reason_code": "CUTOFF_MISSED",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T23:15:00+07:00",
+        "buffer_min": -15,
+        "latest_departure_estimate_at": "2026-10-23T22:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Source Oct 24 00:30 is Jakarta Oct 23 23:30; service_date stays Oct 23."
+    },
+    {
+      "id": "FRESHNESS-EXACT-LIMIT",
+      "stage": "domain",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-22T07:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Exactly 1440 minutes old is within the inclusive project threshold."
+    },
+    {
+      "id": "HAVERSINE-FALLBACK",
+      "stage": "domain",
+      "covers": [
+        "DEP-06",
+        "DEP-11"
+      ],
+      "overrides": {
+        "route": {
+          "routing_source": "Haversine Fallback"
+        }
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "ROUTE_FALLBACK",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known estimate may be shown separately, never as a calculated decision."
+    },
+    {
+      "id": "DEFAULT-CONGESTION",
+      "stage": "domain",
+      "covers": [
+        "DEP-06",
+        "DEP-11"
+      ],
+      "overrides": {
+        "route": {
+          "congestion_status": "default_fallback"
+        }
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "CONGESTION_UNAVAILABLE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known estimate may be shown separately, never as a calculated decision."
+    },
+    {
+      "id": "MISSING-CONGESTION",
+      "stage": "domain",
+      "covers": [
+        "DEP-06",
+        "DEP-11"
+      ],
+      "overrides": {
+        "route": {
+          "congestion_status": "unavailable"
+        }
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "CONGESTION_UNAVAILABLE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known estimate may be shown separately, never as a calculated decision."
+    },
+    {
+      "id": "UNVERIFIED-CORRIDOR",
+      "stage": "domain",
+      "covers": [
+        "DEP-06",
+        "DEP-11"
+      ],
+      "overrides": {
+        "route": {
+          "context_verified": false
+        }
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "ROUTE_CONTEXT_UNKNOWN",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known estimate may be shown separately, never as a calculated decision."
+    },
+    {
+      "id": "NEGATIVE-DURATION",
+      "stage": "dependency",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "route": {
+          "final_time_min": -1
+        }
+      },
+      "expected": {
+        "http_status": 503,
+        "status": null,
+        "error_code": "INVALID_DEPENDENCY_RESPONSE"
+      },
+      "review_note": "Malformed dependency value; string NaN represents an invalid upstream value without invalid JSON."
+    },
+    {
+      "id": "NONFINITE-DURATION",
+      "stage": "dependency",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "route": {
+          "final_time_min": "NaN"
+        }
+      },
+      "expected": {
+        "http_status": 503,
+        "status": null,
+        "error_code": "INVALID_DEPENDENCY_RESPONSE"
+      },
+      "review_note": "Malformed dependency value; string NaN represents an invalid upstream value without invalid JSON."
+    },
+    {
+      "id": "BOOLEAN-DURATION",
+      "stage": "dependency",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "route": {
+          "final_time_min": true
+        }
+      },
+      "expected": {
+        "http_status": 503,
+        "status": null,
+        "error_code": "INVALID_DEPENDENCY_RESPONSE"
+      },
+      "review_note": "Malformed dependency value; string NaN represents an invalid upstream value without invalid JSON."
+    },
+    {
+      "id": "OVERSIZED-DURATION",
+      "stage": "dependency",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "route": {
+          "final_time_min": 1440.01
+        }
+      },
+      "expected": {
+        "http_status": 503,
+        "status": null,
+        "error_code": "INVALID_DEPENDENCY_RESPONSE"
+      },
+      "review_note": "Malformed dependency value; string NaN represents an invalid upstream value without invalid JSON."
+    },
+    {
+      "id": "SCHEDULE-OUTAGE",
+      "stage": "dependency",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "failures": {
+          "schedule": "outage"
+        }
+      },
+      "expected": {
+        "http_status": 503,
+        "status": null,
+        "error_code": "DEPENDENCY_UNAVAILABLE"
+      },
+      "review_note": "No successful recommendation body on dependency failure."
+    },
+    {
+      "id": "ROUTE-TIMEOUT",
+      "stage": "dependency",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "failures": {
+          "route": "timeout"
+        }
+      },
+      "expected": {
+        "http_status": 503,
+        "status": null,
+        "error_code": "DEPENDENCY_TIMEOUT"
+      },
+      "review_note": "No successful recommendation body on dependency failure."
+    },
+    {
+      "id": "AUTH-EXPIRED",
+      "stage": "auth",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "failures": {
+          "auth": "expired"
+        }
+      },
+      "expected": {
+        "http_status": 401,
+        "status": null,
+        "error_code": null
+      },
+      "review_note": "Reuse existing auth detail string and WWW-Authenticate, no synthetic detail.code."
+    },
+    {
+      "id": "AUTH-OUTAGE",
+      "stage": "auth",
+      "covers": [
+        "DEP-06"
+      ],
+      "overrides": {
+        "failures": {
+          "auth": "outage"
+        }
+      },
+      "expected": {
+        "http_status": 503,
+        "status": null,
+        "error_code": null
+      },
+      "review_note": "Reuse existing auth detail string and Retry-After: 5."
+    },
+    {
+      "id": "INVALID-DAY-TYPE",
+      "stage": "request",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "day_type": "weekend"
+        }
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "VALIDATION_ERROR"
+      },
+      "review_note": "Validate before route/schedule reads; native bounded detail array."
+    },
+    {
+      "id": "OUTSIDE-BATAM",
+      "stage": "request",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "origin": {
+            "lat": -1,
+            "lng": 104
+          }
+        }
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "VALIDATION_ERROR"
+      },
+      "review_note": "Validate before route/schedule reads; native bounded detail array."
+    },
+    {
+      "id": "INVALID-CLOCK",
+      "stage": "request",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "departure_time": "24:00"
+        }
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "VALIDATION_ERROR"
+      },
+      "review_note": "Validate before route/schedule reads; native bounded detail array."
+    },
+    {
+      "id": "INVALID-DATE",
+      "stage": "request",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "departure_date": "2026-02-30"
+        }
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "VALIDATION_ERROR"
+      },
+      "review_note": "Validate before route/schedule reads; native bounded detail array."
+    },
+    {
+      "id": "UNSUPPORTED-HORIZON",
+      "stage": "request",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "service_date": "2026-10-25"
+        }
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "VALIDATION_ERROR"
+      },
+      "review_note": "Validate before route/schedule reads; native bounded detail array."
+    },
+    {
+      "id": "UNSUPPORTED-TERMINAL",
+      "stage": "request",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "terminal": "harbour_bay"
+        }
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "VALIDATION_ERROR"
+      },
+      "review_note": "Validate before route/schedule reads; native bounded detail array."
+    },
+    {
+      "id": "CLIENT-THRESHOLD-OVERRIDE",
+      "stage": "request",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "safety_buffer_min": 1
+        }
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "VALIDATION_ERROR"
+      },
+      "review_note": "Validate before route/schedule reads; native bounded detail array."
+    },
+    {
+      "id": "TARGET-NOT-FOUND",
+      "stage": "target",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": "00000000-0000-4000-8000-000000000099"
+        }
+      },
+      "expected": {
+        "http_status": 404,
+        "status": null,
+        "error_code": "SCHEDULE_NOT_FOUND"
+      },
+      "review_note": "Do not silently select UUID 1."
+    },
+    {
+      "id": "TARGET-TERMINAL-MISMATCH",
+      "stage": "target",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batam_center",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "SCHEDULE_MISMATCH"
+      },
+      "review_note": "Known target constraint conflict is distinct from unknown metadata."
+    },
+    {
+      "id": "TARGET-DESTINATION-MISMATCH",
+      "stage": "target",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Other fixture destination",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "SCHEDULE_MISMATCH"
+      },
+      "review_note": "Known target constraint conflict is distinct from unknown metadata."
+    },
+    {
+      "id": "TARGET-DATE-MISMATCH",
+      "stage": "target",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-24",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "SCHEDULE_MISMATCH"
+      },
+      "review_note": "Known target constraint conflict is distinct from unknown metadata."
+    },
+    {
+      "id": "TARGET-SERVICE-MISMATCH",
+      "stage": "target",
+      "covers": [
+        "DEP-05"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "passenger_hand_carry"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 422,
+        "status": null,
+        "error_code": "SERVICE_MISMATCH"
+      },
+      "review_note": "Cargo permission is not invented from the vessel label."
+    },
+    {
+      "id": "EMPTY-SUCCESS",
+      "stage": "selection",
+      "covers": [
+        "DEP-04"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": []
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "NO_SCHEDULES",
+        "selected_schedule_id": null,
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Successful empty lookup is domain unavailability."
+    },
+    {
+      "id": "ONLY-UNKNOWN-CANDIDATES",
+      "stage": "selection",
+      "covers": [
+        "DEP-07"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": null,
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "NO_EVALUABLE_SCHEDULES",
+        "selected_schedule_id": null,
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Record MISSING_CUTOFF exclusion; not empty success."
+    },
+    {
+      "id": "ONLY-INCOMPATIBLE-CANDIDATES",
+      "stage": "selection",
+      "covers": [
+        "DEP-04"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "passenger_hand_carry"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "NO_RELEVANT_SCHEDULES",
+        "selected_schedule_id": null,
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Known mismatch filters records; no cargo guess."
+    },
+    {
+      "id": "AUTO-EARLIEST-SAFE-TIE",
+      "stage": "selection",
+      "covers": [
+        "DEP-01",
+        "DEP-08"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000002",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [
+          "00000000-0000-4000-8000-000000000002"
+        ],
+        "required_warning_codes": [
+          "POSSIBLE_DUPLICATE_SAILING"
+        ]
+      },
+      "review_note": "Equal departures break by stable UUID, independent of input order."
+    },
+    {
+      "id": "AUTO-RISKY-WHEN-NO-SAFE",
+      "stage": "selection",
+      "covers": [
+        "DEP-02"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:35:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000002",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T10:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:40:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "RISKY",
+        "reason_code": "BELOW_SAFETY_BUFFER",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 5,
+        "latest_departure_estimate_at": "2026-10-23T07:50:00+07:00",
+        "alternative_ids": [
+          "00000000-0000-4000-8000-000000000002"
+        ],
+        "required_warning_codes": []
+      },
+      "review_note": "Earliest RISKY is chosen; each alternative has its own 10-minute buffer."
+    },
+    {
+      "id": "AUTO-ALL-MISSED",
+      "stage": "selection",
+      "covers": [
+        "DEP-13"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:25:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000002",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T10:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:20:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "MISSED",
+        "reason_code": "CUTOFF_MISSED",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": -5,
+        "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Latest missed cutoff is 08:25, despite UUID 2 departing later; alternatives empty."
+    },
+    {
+      "id": "PRESERVE-MISSED-TARGET",
+      "stage": "selection",
+      "covers": [
+        "DEP-03",
+        "DEP-08"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:25:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000002",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T10:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T10:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "MISSED",
+        "reason_code": "CUTOFF_MISSED",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": -5,
+        "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+        "alternative_ids": [
+          "00000000-0000-4000-8000-000000000002"
+        ],
+        "required_warning_codes": []
+      },
+      "review_note": "UUID 1 remains MISSED; UUID 2 is a separate SAFE alternative with 90 minutes."
+    },
+    {
+      "id": "AUTO-SAFE-BEFORE-RISKY",
+      "stage": "selection",
+      "covers": [
+        "DEP-01",
+        "DEP-08"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:35:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000002",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T10:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T10:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000002",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 90,
+        "latest_departure_estimate_at": "2026-10-23T09:15:00+07:00",
+        "alternative_ids": [
+          "00000000-0000-4000-8000-000000000001"
+        ],
+        "required_warning_codes": []
+      },
+      "review_note": "Later SAFE UUID 2 wins over earlier RISKY UUID 1; alternative remains RISKY."
+    },
+    {
+      "id": "ALTERNATIVES-CAP-THREE",
+      "stage": "selection",
+      "covers": [
+        "DEP-08"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000002",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T10:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T10:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000003",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T11:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T11:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000004",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T12:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T12:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000005",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T13:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T13:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [
+          "00000000-0000-4000-8000-000000000002",
+          "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000004"
+        ],
+        "required_warning_codes": []
+      },
+      "review_note": "Four feasible alternatives are ranked; only UUIDs 2, 3, 4 are returned."
+    },
+    {
+      "id": "CONFLICTING-DUPLICATE-ID",
+      "stage": "selection",
+      "covers": [
+        "DEP-07"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T08:35:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "AMBIGUOUS_SCHEDULE",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Same identity with conflicting cutoff cannot be resolved by first row."
+    },
+    {
+      "id": "IDENTICAL-DUPLICATE-ID",
+      "stage": "selection",
+      "covers": [
+        "DEP-08"
+      ],
+      "overrides": {
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": [
+          "DUPLICATE_RECORD_COLLAPSED"
+        ]
+      },
+      "review_note": "Collapse exact duplicate occurrence, not two different sailings."
+    },
+    {
+      "id": "EXCLUDE-UNKNOWN-KEEP-VALID",
+      "stage": "selection",
+      "covers": [
+        "DEP-07",
+        "DEP-08"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": null,
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          },
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000002",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T10:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T10:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000002",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 90,
+        "latest_departure_estimate_at": "2026-10-23T09:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": [
+          "EXCLUDED_CANDIDATES"
+        ]
+      },
+      "review_note": "Choose among evaluable records, disclose UUID 1 missing cutoff."
+    },
+    {
+      "id": "AUTO-CANDIDATE-OVERFLOW",
+      "stage": "repository_contract",
+      "covers": [
+        "DEP-04"
+      ],
+      "overrides": {
+        "request": {
+          "schedule_id": null
+        },
+        "retrieval": {
+          "truncated": true
+        }
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "UNAVAILABLE",
+        "reason_code": "CANDIDATE_LIMIT",
+        "selected_schedule_id": null,
+        "travel_time_min": null,
+        "estimated_arrival_at": null,
+        "buffer_min": null,
+        "latest_departure_estimate_at": null,
+        "alternative_ids": [],
+        "required_warning_codes": []
+      },
+      "review_note": "Injected repository sentinel metadata means more than 100 candidates; no earliest claim. Row list is the bounded example subset, not full query evidence."
+    },
+    {
+      "id": "SELECTED-CANDIDATE-OVERFLOW",
+      "stage": "repository_contract",
+      "covers": [
+        "DEP-08"
+      ],
+      "overrides": {
+        "retrieval": {
+          "truncated": true
+        }
+      },
+      "expected": {
+        "http_status": 200,
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+        "buffer_min": 30,
+        "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+        "alternative_ids": [],
+        "required_warning_codes": [
+          "ALTERNATIVES_TRUNCATED"
+        ]
+      },
+      "review_note": "Selected UUID independently evaluated; alternatives omitted because repository reports overflow."
+    },
+    {
+      "id": "ZERO-SAFETY-CONFIG",
+      "stage": "configuration",
+      "covers": [
+        "DEP-10"
+      ],
+      "overrides": {
+        "config": {
+          "safety_buffer_min": 0
+        }
+      },
+      "expected": {
+        "startup_error": "INVALID_CONFIGURATION",
+        "http_status": null,
+        "status": null
+      },
+      "review_note": "Reject configuration at startup, not a request recommendation."
+    },
+    {
+      "id": "NEGATIVE-SAFETY-CONFIG",
+      "stage": "configuration",
+      "covers": [
+        "DEP-10"
+      ],
+      "overrides": {
+        "config": {
+          "safety_buffer_min": -1
+        }
+      },
+      "expected": {
+        "startup_error": "INVALID_CONFIGURATION",
+        "http_status": null,
+        "status": null
+      },
+      "review_note": "Reject configuration at startup, not a request recommendation."
+    },
+    {
+      "id": "INVALID-FRESHNESS-CONFIG",
+      "stage": "configuration",
+      "covers": [
+        "DEP-10"
+      ],
+      "overrides": {
+        "config": {
+          "schedule_max_age_min": 0
+        }
+      },
+      "expected": {
+        "startup_error": "INVALID_CONFIGURATION",
+        "http_status": null,
+        "status": null
+      },
+      "review_note": "Reject configuration at startup, not a request recommendation."
+    }
+  ]
+}

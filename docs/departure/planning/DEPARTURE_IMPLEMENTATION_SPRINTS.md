@@ -2,11 +2,11 @@
 
 Owner: **Ananda Khusnul Hotimah — 3312401044**.
 Planning baseline: **23 October 2026, Asia/Jakarta**.
-Status: **Sprint 0 handoff recorded; check startup failures and live-data gaps remain open; Sprint 1 design may begin; implementation pending**.
+Status: **Sprint 1 design/fixture checks complete; Sprint 2 calculation work may begin; application implementation, regression runtime, and live-data gates remain pending**.
 
 ## 1. Context and intended result
 
-This plan implements [Ananda’s personal context](../../../context_improve.md). A logistics/gudang operator or UMKM exporter enters an origin, destination terminal, road departure date/time, and optionally a target ferry. The system combines the relevant schedule cutoff with estimated road travel time and returns ETA, signed buffer, SAFE/RISKY/MISSED/UNAVAILABLE, reasons, and alternative sailings.
+This plan implements [Ananda’s personal context](../context/context_improve.md). A logistics/gudang operator or UMKM exporter enters an origin, destination terminal, road departure date/time, and optionally a target ferry. The system combines the relevant schedule cutoff with estimated road travel time and returns ETA, signed buffer, SAFE/RISKY/MISSED/UNAVAILABLE, reasons, and alternative sailings.
 
 The [source audit](../sprints/SPRINT_0_AUDIT.md) distinguishes existing Planner behavior from this feature. The [original PRD](../../hackathon/PRD.md) supplies product context. Its 16-hour limit, older endpoint proposals, generic team roles, and historical demo targets do not constrain this extension or establish completed functionality.
 
@@ -16,7 +16,7 @@ The required release is an authenticated page and API for on-demand recommendati
 
 ## 2. Sprint order and tracking
 
-Sprints are ordered work packages, not calendar commitments. Finish each completion gate before advancing dependent work. The original planning baseline was source inspection only. The Sprint 0 follow-up now records fresh runtime/check attempts and the reuse/risk register; passing regressions and live schedule verification remain open. Unchecked tasks remain unimplemented or unverified.
+Sprints are ordered work packages, not calendar commitments. Finish each completion gate before advancing dependent work. The original planning baseline was source inspection only. Sprint 0 records fresh failed check attempts and the reuse/risk register; Sprint 1 records frozen policies, UX/protocol designs, and offline fixture/example checks. Passing application regressions, live schedule verification, and actual usability observations remain open. Unchecked tasks remain unimplemented or unverified.
 
 | Sprint | Goal | Depends on | Demonstrable result |
 | --- | --- | --- | --- |
@@ -31,9 +31,9 @@ Sprints are ordered work packages, not calendar commitments. Finish each complet
 
 Execution path: `0 → 1 → 2 → 3 → 4 → 5 → 6`. Early wireframes belong in Sprint 1; the full interface consumes a stable tested API in Sprint 5.
 
-## 3. Proposed implementation decisions
+## 3. Original proposed implementation decisions
 
-Record final decisions in Sprint 1. These defaults make the backlog actionable while keeping unknown schedule semantics visible.
+These planning proposals are retained for context. The [Sprint 1 report](../sprints/SPRINT_1_DESIGN.md), [v1 API contract](../contracts/DEPARTURE_API_CONTRACT.md), and [schedule/decision policy](../data/SCHEDULE_POLICY.md) now contain the frozen decisions and take precedence over these proposals. In particular, v1 requires destination/service kind/explicit service date, does not expand recurrence or assign real clock rows to dates, and withholds calculated statuses for Haversine or unverified route context.
 
 ### Interface and request
 
@@ -92,7 +92,7 @@ The backward departure estimate uses traffic at the submitted road departure tim
 - [x] **D0-01 — Identify personal scope.** Read the root context, retain Ananda’s ID, map required flow versus optional work, and reconcile PRD target users/scope. Evidence: this plan and source audit.
 - [x] **D0-02 — Inspect existing integration.** Review router registration, route schema/calculations, schedule endpoint/schema, location catalog, auth, navigation, route protection, Oracle contract, and existing test approach. Evidence: source-audit table.
 - [x] **D0-03 — Record a fresh local baseline.** Confirm runtime/dependencies without printing secrets. Run existing relevant backend route/congestion tests and frontend route helper checks. Record exact commands, failures, and whether fixtures or services were used. Do not reuse historical pass counts. **Recorded:** both commands exited 1 before assertions (missing pytest / TypeScript); this completes the baseline record, not regression verification. See [fresh evidence](../evidence/sprint-0/runtime-baseline.json).
-- [ ] **D0-04 — Audit actual schedule semantics.** Inspect a sanitized read-only sample/schema when accessible; otherwise record the dependency as pending and build explicit fixtures. List terminal keys/IDs, cutoff nulls, service types, dates/recurrence, timezone, source freshness, and duplicate rows. Do not guess missing metadata. **Partial:** repository DDL/source workbook inspected; actual live schema/sample remain pending. The [audit](../sprints/SPRINT_0_AUDIT.md) defines the fixture-only boundary; representative synthetic fixtures belong to D1-05.
+- [ ] **D0-04 — Audit actual schedule semantics.** Inspect a sanitized read-only sample/schema when accessible; otherwise record the dependency as pending and build explicit fixtures. List terminal keys/IDs, cutoff nulls, service types, dates/recurrence, timezone, source freshness, and duplicate rows. Do not guess missing metadata. **Partial:** repository DDL/source workbook inspected; actual live schema/sample remain pending. The [audit](../sprints/SPRINT_0_AUDIT.md) defines the fixture-only boundary; D1-05 now supplies explicit synthetic fixtures without closing live acceptance.
 - [x] **D0-05 — Finalize the reuse map and risk register.** Choose a shared in-process adapter versus HTTP only where needed; list blocking data gaps, proposed resolutions, test harness requirements, and shared files that may need changes. **Recorded:** in-process adapters, blocking gaps, harness requirements, and conditional shared-file changes in the [audit](../sprints/SPRINT_0_AUDIT.md).
 
 **Files:** update `docs/departure/sprints/SPRINT_0_AUDIT.md`; store sanitized baseline outputs under `docs/departure/evidence/sprint-0/`. Application code changes are not required for the audit.
@@ -107,18 +107,20 @@ The backward departure estimate uses traffic at the submitted road departure tim
 
 **Goal:** remove ambiguity before authoring the decision service.
 
-- [ ] **D1-01 — Write the user flow and wireframe.** Cover terminal/destination/target selection, road departure date/time, result review, alternatives, and revision. Include mobile layout, keyboard order, and every empty/error/unavailable state.
-- [ ] **D1-02 — Freeze the departure contract.** Specify required/optional fields, IDs, timezone-aware timestamps, nullable values, reason codes, transport semantics, auth, input bounds, and response limits. Include selected-sailing and automatic-selection examples.
-- [ ] **D1-03 — Freeze normalization and mapping.** Map supported terminal keys to catalog IDs. Define clock-to-occurrence rules, supported service date/horizon, timezone/recurrence assumptions, cutoff validity, service compatibility, and how unknown metadata is represented. Record dependencies requiring Chelsea’s verified data.
-- [ ] **D1-04 — Freeze decision and selection policies.** Confirm safety-buffer config, exact boundary behavior, confidence/fallback policy, preserved target, automatic choice, alternative ranking, and backward-estimate limitations.
-- [ ] **D1-05 — Prepare representative fixtures.** Include all four statuses, zero/threshold boundaries, missing cutoff, unknown zone/date, overnight data, incompatible service, duplicate time/IDs, dependency failure, and already-adjusted route duration.
-- [ ] **D1-06 — Define the usability protocol.** Plan representative participant criteria, tasks, success/error/time measures, a short documented ease/clarity questionnaire, consent/anonymization, and storage of observations. Record target sample size as a plan; confirm any supervisor-required instrument before collection.
+- [x] **D1-01 — Write the user flow and wireframe.** Cover terminal/destination/target selection, road departure date/time, result review, alternatives, and revision. Include mobile layout, keyboard order, and every empty/error/unavailable state. Evidence: [user flow](../design/USER_FLOW.md), [wireframes](../design/WIREFRAME.md).
+- [x] **D1-02 — Freeze the departure contract.** Specify required/optional fields, IDs, timezone-aware timestamps, nullable values, reason codes, transport semantics, auth, input bounds, and response limits. Include selected-sailing and automatic-selection examples. Evidence: [v1 contract](../contracts/DEPARTURE_API_CONTRACT.md), [five synthetic examples](../contracts/DEPARTURE_API_EXAMPLES.json).
+- [x] **D1-03 — Freeze normalization and mapping.** Map supported terminal keys to catalog IDs. Define clock-to-occurrence rules, supported service date/horizon, timezone/recurrence assumptions, cutoff validity, service compatibility, and how unknown metadata is represented. Record dependencies requiring Chelsea’s verified data. Evidence: [schedule policy](../data/SCHEDULE_POLICY.md); unknown live semantics remain unavailable.
+- [x] **D1-04 — Freeze decision and selection policies.** Confirm safety-buffer config, exact boundary behavior, confidence/fallback policy, preserved target, automatic choice, alternative ranking, and backward-estimate limitations. Evidence: [decision policy](../data/SCHEDULE_POLICY.md); finite positive 15-minute simulation default, one-date horizon, bounded selection.
+- [x] **D1-05 — Prepare representative fixtures.** Include all four statuses, zero/threshold boundaries, missing cutoff, unknown zone/date, overnight data, incompatible service, duplicate time/IDs, dependency failure, and already-adjusted route duration. Evidence: [66 synthetic definitions](../../../backend/tests/fixtures/departure_cases.json), [offline consistency results](../evidence/sprint-1/design-validation.json); no service execution claimed.
+- [x] **D1-06 — Define the usability protocol.** Plan representative participant criteria, tasks, success/error/time measures, a short documented ease/clarity questionnaire, consent/anonymization, and storage of observations. Record target sample size as a plan; confirm any supervisor-required instrument before collection. Evidence: [protocol](../reports/USABILITY_PROTOCOL.md); five participants planned, none recruited/tested, institutional confirmation remains a collection prerequisite.
 
 **Proposed files:** `docs/departure/contracts/DEPARTURE_API_CONTRACT.md`, `docs/departure/design/USER_FLOW.md`, `docs/departure/design/WIREFRAME.md`, `docs/departure/data/SCHEDULE_POLICY.md`, `docs/departure/reports/USABILITY_PROTOCOL.md`, `backend/tests/fixtures/departure_cases.json`.
 
 **Checks:** manually work through fixture arithmetic and request/response consistency; verify that every DEP-01–DEP-14 criterion has an assigned sprint/test. No fixture is represented as a real sailing.
 
 **Done when:** the developer can implement without inventing dates, zones, cutoffs, thresholds, selection rules, or auth behavior. Unresolved live data can remain unavailable under an explicit tested policy.
+
+**Recorded result:** [Sprint 1 design report](../sprints/SPRINT_1_DESIGN.md). Offline expectation checks passed for 66 fixture definitions and five examples, with DEP-01–DEP-14 ownership mapped. This is design closure, not application test/live-data/usability acceptance. Sprint 2 may start the typed pure calculation core with injected synthetic inputs; establish a runnable environment before claiming executable results. No Sprint 2 implementation has started.
 
 ## 6. Sprint 2 — Calculation core and typed models
 
@@ -267,5 +269,5 @@ Every sprint report records completed task IDs, resulting behavior, files change
 Suggested next implementation prompt:
 
 ```text
-Use context_improve.md and docs/departure/planning/DEPARTURE_IMPLEMENTATION_SPRINTS.md. Start by completing pending Sprint 0 tasks D0-03 through D0-05, then execute Sprint 1. Reuse the recorded source audit and verify changed facts instead of restarting it. Record fresh baseline results, schedule/date/timezone gaps, and the final departure API/UX/decision policies. Preserve Ananda's ownership boundaries and existing user edits. Do not run destructive schema scripts, expose secrets, deploy, or implement later sprints as part of this scoped step. At completion, report task IDs, files, checks, unresolved dependencies, and the next sprint's entry gate.
+Read docs/departure/README.md, docs/departure/context/context_improve.md sections 11 and 17, and the Sprint 1 report, v1 contract, schedule/decision policy, and synthetic fixtures. Execute Sprint 2 only: D2-01 through D2-05, using typed testable backend calculation/configuration modules with injected normalized inputs. Establish an explicit compatible backend dependency environment and record actual calculation/schema and applicable regression results with dotenv disabled. Do not redo Sprint 0, infer live occurrence metadata, multiply congestion twice, replace recorded cutoffs, or implement Sprint 3 adapters/endpoint, Sprint 4 selection, Sprint 5 UI, or optional Oracle/history. Preserve ownership and user edits; do not read .env, run destructive schema scripts, write live data, deploy, or commit without instruction. Report files, exact commands/results, remaining live/provenance/runtime gates, and Sprint 3 prerequisites.
 ```
