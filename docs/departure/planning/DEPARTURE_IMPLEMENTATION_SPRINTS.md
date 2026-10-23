@@ -2,7 +2,7 @@
 
 Owner: **Ananda Khusnul Hotimah — 3312401044**.
 Planning baseline: **23 October 2026, Asia/Jakarta**.
-Status: **source review recorded; runtime baseline and implementation pending**.
+Status: **Sprint 0 handoff recorded; check startup failures and live-data gaps remain open; Sprint 1 design may begin; implementation pending**.
 
 ## 1. Context and intended result
 
@@ -16,7 +16,7 @@ The required release is an authenticated page and API for on-demand recommendati
 
 ## 2. Sprint order and tracking
 
-Sprints are ordered work packages, not calendar commitments. Finish each completion gate before advancing dependent work. Source inspection is the only completed portion at planning time; unchecked tasks remain unimplemented or unverified.
+Sprints are ordered work packages, not calendar commitments. Finish each completion gate before advancing dependent work. The original planning baseline was source inspection only. The Sprint 0 follow-up now records fresh runtime/check attempts and the reuse/risk register; passing regressions and live schedule verification remain open. Unchecked tasks remain unimplemented or unverified.
 
 | Sprint | Goal | Depends on | Demonstrable result |
 | --- | --- | --- | --- |
@@ -91,15 +91,17 @@ The backward departure estimate uses traffic at the submitted road departure tim
 
 - [x] **D0-01 — Identify personal scope.** Read the root context, retain Ananda’s ID, map required flow versus optional work, and reconcile PRD target users/scope. Evidence: this plan and source audit.
 - [x] **D0-02 — Inspect existing integration.** Review router registration, route schema/calculations, schedule endpoint/schema, location catalog, auth, navigation, route protection, Oracle contract, and existing test approach. Evidence: source-audit table.
-- [ ] **D0-03 — Record a fresh local baseline.** Confirm runtime/dependencies without printing secrets. Run existing relevant backend route/congestion tests and frontend route helper checks. Record exact commands, failures, and whether fixtures or services were used. Do not reuse historical pass counts.
-- [ ] **D0-04 — Audit actual schedule semantics.** Inspect a sanitized read-only sample/schema when accessible; otherwise record the dependency as pending and build explicit fixtures. List terminal keys/IDs, cutoff nulls, service types, dates/recurrence, timezone, source freshness, and duplicate rows. Do not guess missing metadata.
-- [ ] **D0-05 — Finalize the reuse map and risk register.** Choose a shared in-process adapter versus HTTP only where needed; list blocking data gaps, proposed resolutions, test harness requirements, and shared files that may need changes.
+- [x] **D0-03 — Record a fresh local baseline.** Confirm runtime/dependencies without printing secrets. Run existing relevant backend route/congestion tests and frontend route helper checks. Record exact commands, failures, and whether fixtures or services were used. Do not reuse historical pass counts. **Recorded:** both commands exited 1 before assertions (missing pytest / TypeScript); this completes the baseline record, not regression verification. See [fresh evidence](../evidence/sprint-0/runtime-baseline.json).
+- [ ] **D0-04 — Audit actual schedule semantics.** Inspect a sanitized read-only sample/schema when accessible; otherwise record the dependency as pending and build explicit fixtures. List terminal keys/IDs, cutoff nulls, service types, dates/recurrence, timezone, source freshness, and duplicate rows. Do not guess missing metadata. **Partial:** repository DDL/source workbook inspected; actual live schema/sample remain pending. The [audit](../sprints/SPRINT_0_AUDIT.md) defines the fixture-only boundary; representative synthetic fixtures belong to D1-05.
+- [x] **D0-05 — Finalize the reuse map and risk register.** Choose a shared in-process adapter versus HTTP only where needed; list blocking data gaps, proposed resolutions, test harness requirements, and shared files that may need changes. **Recorded:** in-process adapters, blocking gaps, harness requirements, and conditional shared-file changes in the [audit](../sprints/SPRINT_0_AUDIT.md).
 
 **Files:** update `docs/departure/sprints/SPRINT_0_AUDIT.md`; store sanitized baseline outputs under `docs/departure/evidence/sprint-0/`. Application code changes are not required for the audit.
 
 **Checks:** existing route tests retain cargo cutoff behavior, date handling, and route/Oracle parity; current helper scripts run or their runtime blocker is recorded.
 
 **Done when:** baseline results and data unknowns are documented; any missing live access has a concrete fixture-only boundary. Live schedule acceptance remains open where unavailable.
+
+**Current entry decision:** Sprint 1 may begin design and synthetic-fixture work under this documented boundary. D0-04 live acceptance stays open; unknown required metadata must remain unavailable. Restore the runtime and rerun the recorded checks before claiming regression preservation. No Sprint 1 task has been completed by the Sprint 0 audit.
 
 ## 5. Sprint 1 — Contract, data policy, and UX design
 

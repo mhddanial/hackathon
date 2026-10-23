@@ -1,0 +1,283 @@
+{
+  "captured_at": "2026-10-23T11:48:45.276628+07:00",
+  "command": "python3 docs/departure/evidence/sprint-0/inspect_schedule_source.py",
+  "cwd": "repository root",
+  "source": "docs/hackathon/data/Batam SmartFlow Data Master (1).xlsx",
+  "sheet": "ferry_schedules",
+  "range": "A1:H21",
+  "provenance": "Checked-in project source workbook. Not a live DB export or verified operational sailings.",
+  "sanitization": "Only schedule columns retained; no credentials, identities, workbook author metadata, or other sheets exported.",
+  "sha256_before": "1480c2488ee9e80a3243ee04b4936c15a438bb2338baa43fee3c50ad061c7205",
+  "sha256_after": "1480c2488ee9e80a3243ee04b4936c15a438bb2338baa43fee3c50ad061c7205",
+  "source_unchanged": true,
+  "headers": [
+    "terminal_id",
+    "terminal",
+    "terminal_name",
+    "destination",
+    "vessel_type",
+    "departure_time",
+    "cutoff_time",
+    "cargo_capacity_tons"
+  ],
+  "clock_formats": {
+    "164": "hh:mm"
+  },
+  "formula_cells": [],
+  "row_count": 20,
+  "terminals": [
+    {
+      "terminal_id": "TM001",
+      "terminal": "batu_ampar",
+      "terminal_name": "Pelabuhan Batu Ampar"
+    },
+    {
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal"
+    },
+    {
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal"
+    }
+  ],
+  "null_cutoff_count": 0,
+  "null_cutoff_source_rows": [],
+  "service_types": {
+    "Cargo Vessel / Intermodal": 2,
+    "Fast Ferry (Passenger/Hand-Carry)": 18
+  },
+  "exact_duplicate_groups": [],
+  "same_terminal_destination_service_departure_groups": [],
+  "repeated_terminal_ids_are_not_schedule_ids": true,
+  "service_date": null,
+  "recurrence": null,
+  "source_timezone": null,
+  "verified_freshness": null,
+  "missing_metadata": "No date/recurrence/timezone/observed_at/updated_at/source columns on this sheet. File timestamps cannot establish schedule freshness.",
+  "live_schema_status": "PENDING: no inherited SUPABASE_URL/SUPABASE_ANON_KEY; .env files must not be read.",
+  "live_sample_status": "PENDING; no live read attempted and no live counts inferred.",
+  "sample": [
+    {
+      "source_row": 2,
+      "terminal_id": "TM001",
+      "terminal": "batu_ampar",
+      "terminal_name": "Pelabuhan Batu Ampar",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Cargo Vessel / Intermodal",
+      "departure_time": "17:00:00",
+      "cutoff_time": "15:00:00",
+      "cargo_capacity_tons": 5.0
+    },
+    {
+      "source_row": 3,
+      "terminal_id": "TM001",
+      "terminal": "batu_ampar",
+      "terminal_name": "Pelabuhan Batu Ampar",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Cargo Vessel / Intermodal",
+      "departure_time": "21:00:00",
+      "cutoff_time": "19:00:00",
+      "cargo_capacity_tons": 5.0
+    },
+    {
+      "source_row": 4,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "06:00:00",
+      "cutoff_time": "05:30:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 5,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "07:20:00",
+      "cutoff_time": "06:50:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 6,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "08:20:00",
+      "cutoff_time": "07:50:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 7,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "09:50:00",
+      "cutoff_time": "09:20:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 8,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "11:30:00",
+      "cutoff_time": "11:00:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 9,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "12:50:00",
+      "cutoff_time": "12:20:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 10,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "14:10:00",
+      "cutoff_time": "13:40:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 11,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Tanah Merah Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "15:20:00",
+      "cutoff_time": "14:50:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 12,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "16:30:00",
+      "cutoff_time": "16:00:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 13,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "18:30:00",
+      "cutoff_time": "18:00:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 14,
+      "terminal_id": "TM002",
+      "terminal": "batam_center",
+      "terminal_name": "Batam Center Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "20:30:00",
+      "cutoff_time": "20:00:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 15,
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "06:00:00",
+      "cutoff_time": "05:30:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 16,
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "07:00:00",
+      "cutoff_time": "06:30:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 17,
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "08:30:00",
+      "cutoff_time": "08:00:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 18,
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "11:20:00",
+      "cutoff_time": "10:50:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 19,
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "13:10:00",
+      "cutoff_time": "12:40:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 20,
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "15:20:00",
+      "cutoff_time": "14:50:00",
+      "cargo_capacity_tons": 0.5
+    },
+    {
+      "source_row": 21,
+      "terminal_id": "TM003",
+      "terminal": "sekupang",
+      "terminal_name": "Sekupang Ferry Terminal",
+      "destination": "Harbourfront Singapore",
+      "vessel_type": "Fast Ferry (Passenger/Hand-Carry)",
+      "departure_time": "17:40:00",
+      "cutoff_time": "17:10:00",
+      "cargo_capacity_tons": 0.5
+    }
+  ]
+}

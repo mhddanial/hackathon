@@ -1,0 +1,15 @@
+Checked-in DDL excerpt only; NOT live schema; read, never executed.
+Source: backend/database/schema.sql
+
+CREATE TABLE public.ferry_schedules (
+    id                   UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+    terminal_id          TEXT    NOT NULL,          -- e.g. 'TM001'
+    terminal             TEXT    NOT NULL,          -- e.g. 'batu_ampar'
+    terminal_name        TEXT,
+    destination          TEXT    NOT NULL,
+    vessel_type          TEXT,
+    departure_time       TIME    NOT NULL,
+    cutoff_time          TIME,                      -- batas gate-in (untuk filter /route)
+    cargo_capacity_tons  FLOAT8,                    -- opsional filter kargo
+    created_at           TIMESTAMPTZ DEFAULT NOW()
+);

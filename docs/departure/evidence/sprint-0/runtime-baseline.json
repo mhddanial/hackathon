@@ -1,0 +1,184 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Asia/Jakarta",
+  "capture": "Fresh commands in this session; no historical pass counts reused.",
+  "sanitization": "Replaced repository and home absolute paths. Configuration recorded as presence booleans only. No .env files read.",
+  "runtime_checks": [
+    {
+      "command": "python3 docs/departure/evidence/sprint-0/runtime_probe.py",
+      "cwd": ".",
+      "exit_code": 0,
+      "output": {
+        "captured_at": "2026-10-23T11:49:19.518917+07:00",
+        "cwd": ".",
+        "python_version": "3.12.10",
+        "python_executable": "<home>/.pyenv/versions/3.12.10/bin/python3",
+        "platform": "Darwin arm64",
+        "installed_packages": {
+          "pytest": null,
+          "fastapi": "0.138.2",
+          "pydantic": "2.13.4",
+          "numpy": "2.4.6",
+          "pandas": "3.0.3",
+          "scikit-learn": "1.8.0",
+          "joblib": "1.5.3",
+          "supabase": null,
+          "requests": "2.34.2",
+          "httpx": "0.28.1",
+          "python-dotenv": "1.2.2",
+          "google-genai": "2.10.0",
+          "uvicorn": "0.49.0"
+        },
+        "tools": {
+          "node": {
+            "executable": "<home>/.nvm/versions/node/v22.18.0/bin/node",
+            "version": "v22.18.0"
+          },
+          "npm": {
+            "executable": "<home>/.nvm/versions/node/v22.18.0/bin/npm",
+            "version": "10.9.3"
+          }
+        },
+        "inherited_configuration_present": {
+          "SUPABASE_URL": false,
+          "SUPABASE_ANON_KEY": false,
+          "NEXT_PUBLIC_SUPABASE_URL": false,
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY": false,
+          "NEXT_PUBLIC_API_URL": false
+        },
+        "local_dependency_directories_present": {
+          ".venv": false,
+          "backend/.venv": false,
+          "backend/venv": false,
+          "frontend/node_modules": false
+        },
+        "dotenv_files_read": false
+      }
+    },
+    {
+      "command": "python3 ../docs/departure/evidence/sprint-0/runtime_probe.py",
+      "cwd": "./backend",
+      "exit_code": 0,
+      "output": {
+        "captured_at": "2026-10-23T11:49:19.502958+07:00",
+        "cwd": "backend",
+        "python_version": "3.14.4",
+        "python_executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "platform": "Darwin arm64",
+        "installed_packages": {
+          "pytest": null,
+          "fastapi": null,
+          "pydantic": null,
+          "numpy": null,
+          "pandas": null,
+          "scikit-learn": null,
+          "joblib": null,
+          "supabase": null,
+          "requests": null,
+          "httpx": null,
+          "python-dotenv": null,
+          "google-genai": null,
+          "uvicorn": null
+        },
+        "tools": {
+          "node": {
+            "executable": "/opt/homebrew/bin/node",
+            "version": "v26.0.0"
+          },
+          "npm": {
+            "executable": "/opt/homebrew/bin/npm",
+            "version": "11.12.1"
+          }
+        },
+        "inherited_configuration_present": {
+          "SUPABASE_URL": false,
+          "SUPABASE_ANON_KEY": false,
+          "NEXT_PUBLIC_SUPABASE_URL": false,
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY": false,
+          "NEXT_PUBLIC_API_URL": false
+        },
+        "local_dependency_directories_present": {
+          ".venv": false,
+          "backend/.venv": false,
+          "backend/venv": false,
+          "frontend/node_modules": false
+        },
+        "dotenv_files_read": false
+      }
+    },
+    {
+      "command": "python3 ../docs/departure/evidence/sprint-0/runtime_probe.py",
+      "cwd": "./frontend",
+      "exit_code": 0,
+      "output": {
+        "captured_at": "2026-10-23T11:49:19.502978+07:00",
+        "cwd": "frontend",
+        "python_version": "3.14.4",
+        "python_executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "platform": "Darwin arm64",
+        "installed_packages": {
+          "pytest": null,
+          "fastapi": null,
+          "pydantic": null,
+          "numpy": null,
+          "pandas": null,
+          "scikit-learn": null,
+          "joblib": null,
+          "supabase": null,
+          "requests": null,
+          "httpx": null,
+          "python-dotenv": null,
+          "google-genai": null,
+          "uvicorn": null
+        },
+        "tools": {
+          "node": {
+            "executable": "/opt/homebrew/bin/node",
+            "version": "v26.0.0"
+          },
+          "npm": {
+            "executable": "/opt/homebrew/bin/npm",
+            "version": "11.12.1"
+          }
+        },
+        "inherited_configuration_present": {
+          "SUPABASE_URL": false,
+          "SUPABASE_ANON_KEY": false,
+          "NEXT_PUBLIC_SUPABASE_URL": false,
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY": false,
+          "NEXT_PUBLIC_API_URL": false
+        },
+        "local_dependency_directories_present": {
+          ".venv": false,
+          "backend/.venv": false,
+          "backend/venv": false,
+          "frontend/node_modules": false
+        },
+        "dotenv_files_read": false
+      }
+    }
+  ],
+  "test_checks": [
+    {
+      "task": "D0-03",
+      "cwd": "backend",
+      "command": "PYTHON_DOTENV_DISABLED=1 PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q -p no:cacheprovider tests/test_route_visualization.py tests/test_route_oracle_parity.py tests/test_congestion.py tests/test_road_names.py",
+      "exit_code": 1,
+      "scope": "Existing route visualization, route/Oracle parity, congestion and road-name fixture suites. Stopped before pytest startup; no test assertions executed.",
+      "test_counts": null,
+      "output": "/opt/homebrew/opt/python@3.14/bin/python3.14: No module named pytest\n"
+    },
+    {
+      "task": "D0-03",
+      "cwd": "frontend",
+      "command": "node scripts/check-route-integration.mjs",
+      "exit_code": 1,
+      "scope": "Existing pure helper and mocked-fetch checks. Stopped during module resolution; no helper assertions executed.",
+      "test_counts": null,
+      "output": "node:internal/modules/package_json_reader:301\n  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);\n        ^\n\nError [ERR_MODULE_NOT_FOUND]: Cannot find package 'typescript' imported from <repo>/frontend/scripts/check-route-integration.mjs\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)\n    at packageResolve (node:internal/modules/esm/resolve:764:81)\n    at moduleResolve (node:internal/modules/esm/resolve:855:18)\n    at defaultResolve (node:internal/modules/esm/resolve:988:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:700:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:717:38)\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:749:52)\n    at #resolve (node:internal/modules/esm/loader:682:17)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:602:35)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:162:33) {\n  code: 'ERR_MODULE_NOT_FOUND'\n}\n\nNode.js v26.0.0\n"
+    }
+  ],
+  "live_services_used": false,
+  "dependencies_installed": false,
+  "application_imports_for_runtime_probe": false
+}
