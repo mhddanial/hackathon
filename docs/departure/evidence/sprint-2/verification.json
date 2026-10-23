@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Asia/Jakarta",
+  "scope": ["D2-01", "D2-02", "D2-03", "D2-04", "D2-05"],
+  "provenance": "Synthetic offline fixtures and fixed clocks; no live sailings or endpoint results.",
+  "runtime": {
+    "python": "3.12.10",
+    "pytest": "9.1.1",
+    "venv": ".venv",
+    "git_ignored": true,
+    "install_command": ".venv/bin/python -m pip install -r backend/requirements.txt",
+    "attempt_1": {"exit_code": 1, "blocker": "Sandbox package-index DNS resolution failed: [Errno 8] nodename nor servname provided, or not known"},
+    "attempt_2": {"exit_code": 0, "network_approval": true},
+    "pip_check": {"command": ".venv/bin/python -m pip check", "exit_code": 0, "result": "No broken requirements found."}
+  },
+  "verification": {
+    "command": "PYTHON_DOTENV_DISABLED=1 .venv/bin/python -c 'import socket, pytest; block = lambda *a, **k: pytest.fail(\"Network blocked for offline Sprint 2 verification\"); socket.socket.connect = block; socket.create_connection = block; raise SystemExit(pytest.main([\"backend/tests/test_departure_calculation.py\", \"backend/tests/test_departure_contracts.py\", \"backend/tests/test_route_visualization.py\", \"backend/tests/test_route_oracle_parity.py\", \"-q\"]))'",
+    "exit_code": 0,
+    "passed": 180,
+    "new_checks": 143,
+    "existing_route_checks": 37,
+    "duration_seconds": 3.84,
+    "warnings": 1,
+    "warning": "Existing FastAPI/Starlette test client deprecates httpx in favor of httpx2.",
+    "dotenv_disabled": true,
+    "outbound_connections_blocked": true,
+    "fixture_cases": {"domain": 29, "request": 7, "configuration": 3, "invalid_dependency_duration": 4, "total_in_scope": 43, "deferred": 23},
+    "earlier_diagnostics": [
+      "One strict float-equality assertion failed; changed only its assertion to use tolerance. No calculation rounding introduced.",
+      "Initial existing-route run passed but invoked the existing unguarded dotenv loader through imports; final acceptance rerun disabled dotenv before imports. No secret values printed."
+    ]
+  },
+  "sprint_2_blockers": [],
+  "sprint_3_gate": {
+    "fixture_integration_may_begin": true,
+    "pending": ["Configuration startup wiring", "Service adapters, auth, controlled errors and transport bounds", "Verified live occurrence metadata", "Positive route-context provenance evidence"]
+  },
+  "commit_created": false
+}

@@ -126,17 +126,19 @@ The backward departure estimate uses traffic at the submitted road departure tim
 
 **Goal:** calculate a recommendation correctly from normalized inputs, independently of networks and UI.
 
-- [ ] **D2-01 — Add typed models.** Define request, normalized schedule occurrence, route estimate, result, alternatives, provenance, and reason codes. Validate finite numbers, coordinate coverage, date/time/day consistency, supported IDs, and a positive safety buffer.
-- [ ] **D2-02 — Implement ETA and signed buffer.** Use compatible aware datetimes and validated duration; apply the route’s congestion adjustment once. Validate cutoff before sailing departure and retain original timestamp/source metadata.
-- [ ] **D2-03 — Implement the four-state classifier.** Keep missing-input/data reasons explicit; apply boundaries before display rounding; do not use truthiness for zero values.
-- [ ] **D2-04 — Implement latest-departure estimate.** Subtract travel duration and safety buffer from recorded cutoff; include its fixed-duration assumption. Do not claim to have searched future traffic windows.
-- [ ] **D2-05 — Verify arithmetic and confidence rules.** Test SAFE/RISKY/MISSED/UNAVAILABLE, zero and exact threshold, fractional-minute boundaries, negative/nonfinite duration, midnight/date changes, source-zone conversion, invalid cutoff ordering, and default/unavailable congestion.
+- [x] **D2-01 — Add typed models.** Define request, normalized schedule occurrence, route estimate, result, alternatives, provenance, and reason codes. Validate finite numbers, coordinate coverage, date/time/day consistency, supported IDs, and a positive safety buffer.
+- [x] **D2-02 — Implement ETA and signed buffer.** Use compatible aware datetimes and validated duration; apply the route’s congestion adjustment once. Validate cutoff before sailing departure and retain original timestamp/source metadata.
+- [x] **D2-03 — Implement the four-state classifier.** Keep missing-input/data reasons explicit; apply boundaries before display rounding; do not use truthiness for zero values.
+- [x] **D2-04 — Implement latest-departure estimate.** Subtract travel duration and safety buffer from recorded cutoff; include its fixed-duration assumption. Do not claim to have searched future traffic windows.
+- [x] **D2-05 — Verify arithmetic and confidence rules.** Test SAFE/RISKY/MISSED/UNAVAILABLE, zero and exact threshold, fractional-minute boundaries, negative/nonfinite duration, midnight/date changes, source-zone conversion, invalid cutoff ordering, and default/unavailable congestion.
 
 **Proposed files:** `backend/schemas/departure_recommendation.py`, `backend/services/departure_recommendation.py`, `backend/departure_config.py`, `backend/tests/test_departure_calculation.py`, `backend/tests/test_departure_contracts.py`. Reuse `route_planning.py` and `locations.py` where their existing semantics fit.
 
 **Checks:** pure unit/schema tests without real Supabase/OSRM/Gemini. Inject configuration and route/schedule values so test outcomes are deterministic.
 
 **Done when:** all core fixtures pass and each result can be explained from its inputs and rule. No external call is required to validate the classifier.
+
+**Recorded result:** [Sprint 2 report](../sprints/SPRINT_2_REPORT.md): 143 new pure calculation/schema checks and 37 existing route checks passed, with dotenv disabled and outbound connections blocked. All 43 in-scope Sprint 1 fixture cases passed; HTTP/I/O, target lookup, repository, and selection cases remain assigned to later sprints. Configuration startup wiring, service adapters, and verified live-data/provenance gates remain Sprint 3 work.
 
 ## 7. Sprint 3 — Service adapters and selected-sailing API
 
