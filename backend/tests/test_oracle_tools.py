@@ -46,6 +46,7 @@ def test_route_preserves_planning_and_keeps_geometry_out_of_model_output(monkeyp
         seen.append(req)
         return {'distance_km':5,'final_time_min':10,'routing_source':'Haversine Fallback',
             'matched_segment_id':'SEG002','matched_segment_name':'Updated Sudirman corridor',
+            'planning_warning':'Route geometry matching found no segment; the congestion reference falls back to a corridor near the origin and may not represent the route traveled.',
             'route_geometry':{'type':'LineString','coordinates':[[104,1],[104,1.1]]}}
     monkeypatch.setattr(tools,'calculate_route',route)
     args=tools.validate_arguments('get_optimal_route',json.dumps({'origin':'1,104','destination':'1.1,104','time':'17:30','day_type':'weekend'}))
@@ -54,6 +55,9 @@ def test_route_preserves_planning_and_keeps_geometry_out_of_model_output(monkeyp
     assert 'route_geometry' not in output['data'] and output['data_status']=='estimated'
     assert output['data']['map_available'] and result.data.route_geometry.type=='LineString'
     assert '17:30' in output['disclaimer'] and 'measured' in output['disclaimer']
+    assert 'see planning_warning' in output['disclaimer']
+    assert output['data']['planning_warning']==result.data.planning_warning
+    assert 'falls back to a corridor near the origin' in output['data']['planning_warning']
     assert output['data']['matched_segment_id']=='SEG002' and output['data']['matched_segment_name']=='Updated Sudirman corridor'
 
 

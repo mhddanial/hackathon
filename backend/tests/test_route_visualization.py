@@ -122,6 +122,152 @@ def test_missing_or_distant_corridor_does_not_fabricate_id(monkeypatch):
     assert route.get_ml_congestion(None,'weekday',8)['level'] is None
 
 
+def test_route_aware_match_prefers_mid_route_corridor(monkeypatch):
+    segments = [
+        {'segment_id': 'SEG001', 'start_lat': 1.004, 'start_lng': 104.0, 'end_lat': 1.004, 'end_lng': 104.002},
+        {'segment_id': 'SEG002', 'start_lat': 1.06, 'start_lng': 104.06, 'end_lat': 1.1, 'end_lng': 104.1},
+        {'segment_id': 'SEG003', 'start_lat': 1.06, 'start_lng': 104.06, 'end_lat': 1.1, 'end_lng': 104.1},
+    ]
+    class Query:
+        def table(self,*args): return self
+        def select(self,*args): return self
+        def execute(self): return NS(data=segments)
+    monkeypatch.setattr(route,'get_supabase_client',Query)
+    geometry = {'type': 'LineString', 'coordinates': [[104.0, 1.0], [104.05, 1.05], [104.1, 1.1]]}
+    # SEG001 is geographically close to the origin but does not overlap the route;
+    # tied route segments resolve deterministically by their ID.
+    assert route.find_closest_segment(1.0, 104.0, geometry) == 'SEG002'
+
+
+def test_route_aware_match_rejects_no_close_corridor(monkeypatch):
+    segments = [{'segment_id': 'SEG001', 'start_lat': 0, 'start_lng': 100, 'end_lat': 0.01, 'end_lng': 100.01}]
+    class Query:
+        def table(self,*args): return self
+        def select(self,*args): return self
+        def execute(self): return NS(data=segments)
+    monkeypatch.setattr(route,'get_supabase_client',Query)
+    geometry = {'type': 'LineString', 'coordinates': [[104.0, 1.0], [104.1, 1.1]]}
+    assert route.find_closest_segment(1.0, 104.0, geometry) is None
+
+
+@pytest.mark.parametrize('geometry', [
+    None,
+    'not a geometry object',
+    {'type': 'Polygon', 'coordinates': []},
+    {'type': 'LineString', 'coordinates': [[104.0, 1.0]]},
+    {'type': 'LineString', 'coordinates': [[104.0], [104.1, 1.1]]},
+    {'type': 'LineString', 'coordinates': [[104.0, 1.0], [float('nan'), 1.1]]},
+    {'type': 'LineString', 'coordinates': [[True, 1.0], [104.1, 1.1]]},
+])
+def test_invalid_route_geometry_does_not_match_or_raise(monkeypatch, geometry):
+    monkeypatch.setattr(route, 'get_supabase_client', lambda: pytest.fail('invalid geometry must not query road segments'))
+    assert route.match_route_segment(geometry) is None
+
+
+def test_partial_match_warning_is_returned_for_planner_and_oracle(monkeypatch, routing):
+    partial_match = {'segment_id': 'SEG002', 'min_dist_km': 0.1, 'coverage_ratio': 0.25}
+    monkeypatch.setattr(route, 'match_route_segment', lambda geometry: partial_match)
+    monkeypatch.setattr(route, 'get_ml_congestion', lambda *args: {
+        'level': 'HIGH', 'multiplier': 1.5, 'segment_name': 'Mid-route corridor',
+        'status': 'synthetic_estimate',
+    })
+
+    request = route.RouteRequest(
+        origin=route.Point(lat=1.06048, lng=104.030321),
+        destination=route.Point(lat=1.162951, lng=104.002488),
+        time='10:00', day_type='weekday', cargo_type='FAST_FREIGHT',
+        vessel_etd='2024-01-01T19:00:00+07:00',
+    )
+    planner_result = route.calculate_route(request)
+    assert planner_result['final_time_min'] == planner_result['base_time_min'] * 1.5
+    assert planner_result['congestion_status'] == 'synthetic_estimate'
+    assert 'matched to route geometry' in planner_result['planning_warning']
+    assert 'matching was limited' in planner_result['planning_warning']
+    assert 'Departure date inferred' in planner_result['planning_warning']
+
+    app = FastAPI()
+    app.include_router(route.router, prefix='/route')
+    with TestClient(app) as client:
+        planner_response = client.post('/route', json=request.model_dump(mode='json'))
+    assert planner_response.status_code == 200
+    assert planner_response.json()['planning_warning'] == planner_result['planning_warning']
+
+    args = tools.validate_arguments('get_optimal_route', json.dumps(BASE))
+    oracle_output, oracle_result = tools.execute_tool('get_optimal_route', args)
+    assert oracle_result is not None
+    assert oracle_result.data.planning_warning == planner_result['planning_warning']
+    assert oracle_output['data']['planning_warning'] == planner_result['planning_warning']
+
+
+def test_no_route_match_falls_back_to_origin_segment(monkeypatch):
+    segments = [{
+        'segment_id': 'SEG001', 'start_lat': 1.060, 'start_lng': 104.030,
+        'end_lat': 1.061, 'end_lng': 104.031,
+    }]
+    class Query:
+        def table(self,*args): return self
+        def select(self,*args): return self
+        def execute(self): return NS(data=segments)
+    monkeypatch.setattr(route, 'get_supabase_client', lambda: Query())
+    monkeypatch.setattr(route, 'match_route_segment', lambda geometry: None)
+    monkeypatch.setattr(route.requests, 'get', lambda *args, **kwargs: NS(
+        status_code=200,
+        json=lambda: {'routes': [{
+            'distance': 5000, 'duration': 600,
+            'geometry': {'type': 'LineString', 'coordinates': [[104.030321, 1.06048], [104.002488, 1.162951]]},
+        }]},
+    ))
+    monkeypatch.setattr(route, 'get_ml_congestion', lambda *args: {
+        'level': 'MEDIUM', 'multiplier': 1.2, 'segment_name': 'Origin corridor',
+        'status': 'synthetic_estimate',
+    })
+    request = route.RouteRequest(
+        origin=route.Point(lat=1.06048, lng=104.030321),
+        destination=route.Point(lat=1.162951, lng=104.002488),
+        time='10:00', day_type='weekday', cargo_type='FAST_FREIGHT',
+        vessel_etd='2024-01-01T19:00:00+07:00',
+    )
+
+    result = route.calculate_route(request)
+    assert result['matched_segment_id'] == 'SEG001'
+    assert result['congestion_status'] == 'synthetic_estimate'
+    assert result['final_time_min'] == result['base_time_min'] * 1.2
+    assert 'falls back to a corridor near the origin' in result['planning_warning']
+    assert 'Departure date inferred' in result['planning_warning']
+
+    app = FastAPI()
+    app.include_router(route.router, prefix='/route')
+    with TestClient(app) as client:
+        response = client.post('/route', json=request.model_dump(mode='json'))
+    assert response.status_code == 200
+    assert 'falls back to a corridor near the origin' in response.json()['planning_warning']
+
+
+def test_no_available_segment_reports_unavailable_without_inventing_reference(monkeypatch):
+    monkeypatch.setattr(route, 'match_route_segment', lambda geometry: None)
+    monkeypatch.setattr(route, 'find_closest_segment', lambda *args: None)
+    monkeypatch.setattr(route.requests, 'get', lambda *args, **kwargs: NS(
+        status_code=200,
+        json=lambda: {'routes': [{
+            'distance': 5000, 'duration': 600,
+            'geometry': {'type': 'LineString', 'coordinates': [[104.030321, 1.06048], [104.002488, 1.162951]]},
+        }]},
+    ))
+    request = route.RouteRequest(
+        origin=route.Point(lat=1.06048, lng=104.030321),
+        destination=route.Point(lat=1.162951, lng=104.002488),
+        time='10:00', day_type='weekday',
+    )
+
+    result = route.calculate_route(request)
+    assert result['matched_segment_id'] is None
+    assert result['matched_segment_name'] is None
+    assert result['congestion_status'] == 'unavailable'
+    assert result['congestion_multiplier'] == 1.0
+    assert result['final_time_min'] == result['base_time_min']
+    assert 'No congestion reference segment was found' in result['planning_warning']
+
+
 def test_native_tool_loop_saves_map_but_does_not_send_geometry_to_model(monkeypatch,routing):
     from test_oracle_provider import WireProvider, answer, call, run
     args = {**BASE,'time':'10:00','day_type':'weekday','cargo_type':'FAST_FREIGHT'}

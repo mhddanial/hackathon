@@ -231,6 +231,7 @@ function PlannerWorkspace({ account }: { account: string }) {
               incomplete={false}
               allowHandoff={false}
               saved={false}
+              emissionFormulaProvenance="current"
             />
             <p className="mt-4 text-xs text-muted-foreground">
               Calculated:{" "}

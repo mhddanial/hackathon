@@ -89,7 +89,8 @@ const server = createServer(async (req, res) => {
     await new Promise(resolve => setTimeout(resolve, routeDelay));
     if (routeFailure) { sendJson(res, { detail: "Synthetic failure" }, 503); return; }
     sendJson(res, { ...body, departure_time: body.time, distance_km: 5, final_time_min: 15, base_time_min: 10,
-      routing_source: "OSRM API", route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] },
+      routing_source: "OSRM API", emission_kg: 1.5, congestion_multiplier: 1.5,
+      route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] },
       congestion_status: "synthetic_estimate", calculation_time: "2026-10-17T01:00:00Z", planning_timezone: "Asia/Jakarta",
       ...(body.vessel_etd ? { cutoff_slack_min: 5, departure_feasible: true, estimated_arrival_time: "10:15", latest_gate_in: "10:20" } : {}) }); return;
   }

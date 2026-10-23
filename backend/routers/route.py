@@ -62,27 +62,116 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
 
-def find_closest_segment(lat: float, lng: float) -> str | None:
-    # We fetch the 6 segments to find the closest one to the route origin
-    supabase = get_supabase_client()
+
+def _point_to_segment_distance_km(point: tuple[float, float], start: tuple[float, float], end: tuple[float, float]) -> float:
+    lat_p, lng_p = point
+    lat1, lng1 = start
+    lat2, lng2 = end
+    dx = lat2 - lat1
+    dy = lng2 - lng1
+    if dx == 0 and dy == 0:
+        return haversine_distance(lat_p, lng_p, lat1, lng1)
+    proj = ((lat_p - lat1) * dx + (lng_p - lng1) * dy) / (dx * dx + dy * dy)
+    proj = max(0.0, min(1.0, proj))
+    closest_lat = lat1 + proj * dx
+    closest_lng = lng1 + proj * dy
+    return haversine_distance(lat_p, lng_p, closest_lat, closest_lng)
+
+
+ROUTE_SEGMENT_MATCH_DISTANCE_KM = 2.5
+
+
+def match_route_segment(route_geometry: Dict[str, Any] | None) -> Dict[str, Any] | None:
+    if not isinstance(route_geometry, dict) or route_geometry.get("type") != "LineString":
+        return None
+
+    coordinates = route_geometry.get("coordinates") or []
+    if not isinstance(coordinates, list) or len(coordinates) < 2:
+        return None
+
+    points = []
+    for coordinate in coordinates:
+        if not isinstance(coordinate, (list, tuple)) or len(coordinate) != 2:
+            return None
+        lng, lat = coordinate
+        if (
+            isinstance(lng, bool)
+            or isinstance(lat, bool)
+            or not isinstance(lng, (int, float))
+            or not isinstance(lat, (int, float))
+            or not math.isfinite(lng)
+            or not math.isfinite(lat)
+            or not -180 <= lng <= 180
+            or not -90 <= lat <= 90
+        ):
+            return None
+        points.append((float(lat), float(lng)))
+    if len(points) < 2:
+        return None
+
     try:
+        supabase = get_supabase_client()
         resp = supabase.table("road_segments").select("segment_id, start_lat, start_lng, end_lat, end_lng").execute()
         segments = resp.data
         if not segments:
             return None
-        
+    except Exception as e:
+        print(f"Error matching route segment: {e}")
+        return None
+
+    best_match = None
+    best_key = None
+    for seg in segments:
+        start = (float(seg["start_lat"]), float(seg["start_lng"]))
+        end = (float(seg["end_lat"]), float(seg["end_lng"]))
+        min_dist = float('inf')
+        near_points = 0
+        for point in points:
+            dist = _point_to_segment_distance_km(point, start, end)
+            if dist < min_dist:
+                min_dist = dist
+            if dist <= ROUTE_SEGMENT_MATCH_DISTANCE_KM:
+                near_points += 1
+        coverage_ratio = near_points / len(points)
+        if min_dist > ROUTE_SEGMENT_MATCH_DISTANCE_KM:
+            continue
+        candidate = {
+            "segment_id": seg["segment_id"],
+            "min_dist_km": min_dist,
+            "coverage_ratio": coverage_ratio,
+        }
+        candidate_key = (min_dist, -coverage_ratio, seg["segment_id"])
+        if best_match is None or candidate_key < best_key:
+            best_match = candidate
+            best_key = candidate_key
+
+    return best_match
+
+
+def find_closest_segment(lat: float, lng: float, route_geometry: Dict[str, Any] | None = None) -> str | None:
+    route_match = match_route_segment(route_geometry) if route_geometry else None
+    if route_match:
+        return route_match["segment_id"]
+
+    # Fallback for legacy calls and origin-only matching where no route geometry is available.
+    try:
+        supabase = get_supabase_client()
+        resp = supabase.table("road_segments").select("segment_id, start_lat, start_lng, end_lat, end_lng").execute()
+        segments = resp.data
+        if not segments:
+            return None
+
         closest_id = segments[0]["segment_id"]
         min_dist = float('inf')
-        
+
         for seg in segments:
-            # use midpoint of the segment
             mid_lat = (seg["start_lat"] + seg["end_lat"]) / 2
             mid_lng = (seg["start_lng"] + seg["end_lng"]) / 2
             dist = haversine_distance(lat, lng, mid_lat, mid_lng)
             if dist < min_dist:
                 min_dist = dist
                 closest_id = seg["segment_id"]
-                
+
         return closest_id if min_dist <= 10 else None
     except Exception as e:
         print(f"Error finding closest segment: {e}")
@@ -173,9 +262,10 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
             ]
         }
 
-    # 3. Find closest segment to apply congestion model
-    closest_seg = find_closest_segment(req.origin.lat, req.origin.lng)
-    
+    # 3. Match the route geometry against known corridor references before choosing a congestion estimate.
+    route_match = match_route_segment(route_geometry)
+    closest_seg = route_match["segment_id"] if route_match else find_closest_segment(req.origin.lat, req.origin.lng)
+
     # 4. Get ML congestion prediction
     congestion_data = get_ml_congestion(closest_seg, req.day_type.lower(), hour)
     multiplier = congestion_data["multiplier"]
@@ -195,8 +285,16 @@ def calculate_route(req: RouteRequest) -> Dict[str, Any]:
     slack = None
     warnings = []
     if plan['date_inferred']: warnings.append('Departure date inferred from the vessel departure date; provide your departure date if different.')
+    if route_match:
+        warnings.append('Congestion reference matched to route geometry. It represents one corridor only and does not establish traffic across the full route.')
+        if route_match['coverage_ratio'] < 0.35:
+            warnings.append('Route geometry matching was limited; the selected corridor may represent only a small portion of the route.')
+    elif closest_seg is not None:
+        warnings.append('Route geometry matching found no segment; the congestion reference falls back to a corridor near the origin and may not represent the route traveled.')
+    else:
+        warnings.append('No congestion reference segment was found from route geometry or near the origin; the congestion estimate is unavailable.')
     if congestion_data['status'] != 'synthetic_estimate': warnings.append('Corridor congestion unavailable; travel time assumes a 1.0 multiplier.')
-    
+
     if plan['departure']:
         arrival = plan['departure'] + timedelta(minutes=final_time_min)
 
