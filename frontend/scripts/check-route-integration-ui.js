@@ -6,7 +6,7 @@ async (page) => {
   const assert = (value, message) => { if (!value) throw new Error(message); };
   const control = async data => { const r = await page.request.post(`${fixture}/__control`, { data }); assert(r.ok(), "control"); };
   const stats = async () => (await page.request.get(`${fixture}/__stats`)).json();
-  const routes = async () => (await stats()).requests.filter(row => row.path === "/route");
+  const routes = async () => (await stats()).requests.filter(row => row.path === "/route/alternatives");
   const check = async (name, run) => { try { await run(); checks.push(name); } catch (e) { throw new Error(`After ${checks.length} checks, ${name}: ${e.message}`); } };
   const ready = () => page.getByRole("button", { name: "Calculate estimate", exact: true }).waitFor();
   const calculate = async () => { await page.getByRole("button", { name: "Calculate estimate", exact: true }).click(); await page.getByRole("region", { name: "Route planning summary" }).waitFor(); };
@@ -21,6 +21,20 @@ async (page) => {
     await page.getByText(/Simulation only, not a measurement of actual CO₂ emissions\./).waitFor();
     await page.getByText(/Current estimator formula: distance × 0\.2 kg CO₂\/km × congestion multiplier\./).waitFor();
     await page.getByText(/approximate light-truck assumption, not a universal value for all vehicles\./).waitFor();
+    const secondRoute = page.getByRole("radio", { name: "Select Route 2" });
+    await secondRoute.check();
+    assert(await secondRoute.isChecked(), "selected route state did not update");
+    const summary = page.getByRole("region", { name: "Route planning summary" });
+    await summary.getByText("14 min", { exact: true }).waitFor();
+    await summary.getByText("7 km", { exact: true }).waitFor();
+  });
+  await check("single returned option is real and does not fabricate an alternative", async () => {
+    await control({ singleRoute: true });
+    await calculate();
+    assert(await page.getByRole("radio", { name: "Select Route 1" }).count() === 1, "single route option missing");
+    assert(await page.getByRole("radio", { name: "Select Route 2" }).count() === 0, "an alternative was fabricated");
+    await page.getByText("The routing service did not return an alternative.", { exact: false }).waitFor();
+    await control({ singleRoute: false });
   });
   await check("unknown location is actionable and never reaches routing", async () => {
     const count = (await routes()).length; await page.locator("#origin").fill("My unknown warehouse");

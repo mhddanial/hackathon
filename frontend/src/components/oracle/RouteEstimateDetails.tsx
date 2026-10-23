@@ -23,6 +23,7 @@ import {
 } from "@/lib/oracle-format";
 import { roadName } from "@/lib/road-segments";
 import type { RouteData } from "@/types/oracle";
+import type { RouteOption } from "@/types/route";
 
 function Metric({
   label,
@@ -68,12 +69,16 @@ export function RouteEstimateDetails({
   incomplete,
   allowHandoff = true,
   saved = true,
+  selectedRouteId,
+  routeOptions,
   emissionFormulaProvenance = "unknown",
 }: {
   data: RouteData;
   incomplete: boolean;
   allowHandoff?: boolean;
   saved?: boolean;
+  selectedRouteId?: string;
+  routeOptions?: RouteOption[];
   emissionFormulaProvenance?: "current" | "unknown";
 }) {
   const time = (absolute?: string, clock?: string) =>
@@ -91,6 +96,8 @@ export function RouteEstimateDetails({
           destination: data.destination,
         }
       : null;
+  const mapSelectedRouteId =
+    selectedRouteId || routeOptions?.[0]?.route_id;
   const suggested = time(
     data.optimal_departure_datetime,
     data.optimal_departure,
@@ -246,8 +253,16 @@ export function RouteEstimateDetails({
                 <div className="relative h-[300px] overflow-hidden rounded-xl border sm:h-[360px] @4xl/route:h-[420px]">
                   <MapView
                     routeCoordinates={savedMap.geometry.coordinates.map(
-                      ([lng, lat]) => [lat, lng],
+                      ([lng, lat]) => [lat, lng] as [number, number],
                     )}
+                    routeOptions={routeOptions?.map((option) => ({
+                      route_id: option.route_id,
+                      display_label: option.display_label,
+                      coordinates: option.route_geometry.coordinates.map(
+                        ([lng, lat]) => [lat, lng] as [number, number],
+                      ),
+                    }))}
+                    selectedRouteId={mapSelectedRouteId}
                     originCoords={[savedMap.origin.lat, savedMap.origin.lng]}
                     destCoords={[
                       savedMap.destination.lat,

@@ -20,6 +20,32 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Route Feature Tests
+
+From this directory, install frontend dependencies and the Playwright Chromium
+browser once:
+
+```bash
+npm ci
+npm run test:route:install-browser
+```
+
+The route test command runs the backend regression suite, frontend helper
+checks, deterministic Planner/Oracle browser tests, TypeScript validation, and
+focused ESLint checks. Its backend runner automatically uses `backend/.venv`
+when available, or falls back to Python on `PATH`; the selected interpreter
+must have the backend requirements installed.
+
+```bash
+npm run test:route:checks
+```
+
+The browser tests start the Next.js app and a loopback-only synthetic
+authentication/API fixture automatically. They do not call live OSRM, a
+production database, or real credentials. To run just the browser scenarios,
+use `npm run test:route:e2e`; the frontend/backend helper checks are available
+as `npm run test:route:helpers` and `npm run test:route:backend`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

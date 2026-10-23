@@ -1,5 +1,7 @@
 import type {
   RouteData,
+  PlannerRouteData,
+  RouteOption,
   RouteInput,
   RouteGeometry,
   LocationPoint,
@@ -184,6 +186,84 @@ export function parseRoute(value: unknown): RouteData {
   for (const [key, value] of Object.entries(optionalFields))
     if (value !== undefined) Object.assign(route, { [key]: value });
   return route;
+}
+
+function parseRouteOption(value: unknown): RouteOption {
+  const row = object(value);
+  const route_id = text(row.route_id, 20);
+  const display_label = text(row.display_label, 40);
+  if (!/^route-\d+$/.test(route_id)) return invalid();
+  const parsed = parseRoute({
+    ...row,
+    route_options: undefined,
+    default_route_id: undefined,
+  });
+  if (
+    parsed.base_time_min === undefined ||
+    parsed.emission_kg === undefined ||
+    parsed.congestion_status === undefined ||
+    parsed.route_geometry === undefined
+  )
+    return invalid();
+  return {
+    route_id,
+    display_label,
+    routing_source: parsed.routing_source,
+    distance_km: parsed.distance_km,
+    base_time_min: parsed.base_time_min,
+    final_time_min: parsed.final_time_min,
+    congestion_level: parsed.congestion_level,
+    congestion_multiplier: parsed.congestion_multiplier,
+    congestion_status: parsed.congestion_status,
+    emission_kg: parsed.emission_kg,
+    matched_segment_id: parsed.matched_segment_id,
+    matched_segment_name: parsed.matched_segment_name,
+    route_geometry: parsed.route_geometry,
+    latest_gate_in: parsed.latest_gate_in,
+    optimal_departure: parsed.optimal_departure,
+    latest_gate_in_datetime: parsed.latest_gate_in_datetime,
+    optimal_departure_datetime: parsed.optimal_departure_datetime,
+    estimated_arrival_datetime: parsed.estimated_arrival_datetime,
+    estimated_arrival_time: parsed.estimated_arrival_time,
+    cutoff_slack_min: parsed.cutoff_slack_min,
+    departure_feasible: parsed.departure_feasible,
+    planning_warning: parsed.planning_warning,
+  };
+}
+
+export function selectRouteOption(
+  data: PlannerRouteData,
+  routeId?: string,
+): RouteData {
+  const options = data.route_options || [];
+  const selected =
+    options.find((option) => option.route_id === routeId) ||
+    options.find((option) => option.route_id === data.default_route_id);
+  return selected ? { ...data, ...selected } : data;
+}
+
+export function parseRouteAlternatives(value: unknown): PlannerRouteData {
+  const row = object(value);
+  const route = parseRoute(row);
+  const options = optional(row.route_options, (value) => {
+    if (!Array.isArray(value)) return invalid();
+    return value.map(parseRouteOption);
+  }) || [];
+  const defaultRouteId = optional(row.default_route_id, (value) => {
+    const id = text(value, 20);
+    if (!/^route-\d+$/.test(id)) return invalid();
+    return id;
+  });
+  if (
+    options.length &&
+    (!defaultRouteId || !options.some((option) => option.route_id === defaultRouteId))
+  )
+    return invalid();
+  return {
+    ...route,
+    route_options: options,
+    default_route_id: defaultRouteId,
+  };
 }
 
 export function parseRouteInput(value: unknown): RouteInput {

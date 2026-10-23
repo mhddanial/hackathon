@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Loader2, Route, Square } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -15,12 +16,28 @@ import {
 } from "@/components/ui/select";
 import { RouteEstimateDetails } from "@/components/oracle/RouteEstimateDetails";
 import { batamLocations } from "@/lib/locations";
+import { selectRouteOption } from "@/lib/route-contract";
 import { useRoutePlanner } from "@/hooks/use-route-planner";
 import { RecordedSailingPicker } from "./RecordedSailingPicker";
 
 function PlannerWorkspace({ account }: { account: string }) {
   const { form, result, loading, error, notice, update, calculate, cancel } =
     useRoutePlanner(account);
+  const [routeSelection, setRouteSelection] = useState<{
+    result: NonNullable<typeof result>;
+    routeId: string;
+  }>();
+  const routeOptions = result?.route_options || [];
+  const selectedRouteId =
+    routeSelection?.result === result ? routeSelection.routeId : undefined;
+  const selectedRoute =
+    routeOptions.find((option) => option.route_id === selectedRouteId) ||
+    routeOptions.find((option) => option.route_id === result?.default_route_id);
+  const selectedResult = result
+    ? selectRouteOption(result, selectedRoute?.route_id)
+    : null;
+  const metric = (value: number) =>
+    new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(value);
   return (
     <div className="min-w-0 space-y-5">
       <header>
@@ -226,17 +243,116 @@ function PlannerWorkspace({ account }: { account: string }) {
       >
         {result ? (
           <>
+            {routeOptions.length > 0 && (
+              <fieldset
+                className="mb-5 min-w-0 space-y-3 rounded-xl border p-4"
+                aria-describedby="route-comparison-note"
+              >
+                <legend className="px-1 text-sm font-semibold">
+                  Available routes
+                </legend>
+                <p
+                  id="route-comparison-note"
+                  className="text-xs leading-relaxed text-muted-foreground"
+                >
+                  These are the distinct routes returned by the routing
+                  service. Travel time and congestion are estimates, not
+                  verified live traffic.
+                  {routeOptions.length === 1
+                    ? " The routing service did not return an alternative."
+                    : " Select a route to update the map and estimate below."}
+                </p>
+                <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {routeOptions.map((option) => {
+                    const selected = option.route_id === selectedRoute?.route_id;
+                    return (
+                      <label
+                        key={option.route_id}
+                        className={`block cursor-pointer rounded-lg border p-3 transition-colors ${
+                          selected
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:bg-muted/40"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="planner-route-option"
+                          value={option.route_id}
+                          checked={selected}
+                          onChange={() => {
+                            if (result)
+                              setRouteSelection({ result, routeId: option.route_id });
+                          }}
+                          className="peer sr-only"
+                          aria-label={`Select ${option.display_label}`}
+                        />
+                        <span className="mb-3 flex items-center justify-between gap-2 text-sm font-semibold peer-focus-visible:rounded peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-primary">
+                          {option.display_label}
+                          {selected && (
+                            <span className="text-xs font-medium text-primary">
+                              Selected
+                            </span>
+                          )}
+                        </span>
+                        <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                          <div>
+                            <dt className="text-muted-foreground">Distance</dt>
+                            <dd className="font-medium">
+                              {metric(option.distance_km)} km
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">Base time</dt>
+                            <dd className="font-medium">
+                              {metric(option.base_time_min)} min
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Adjusted estimate
+                            </dt>
+                            <dd className="font-medium">
+                              {metric(option.final_time_min)} min
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Congestion estimate
+                            </dt>
+                            <dd className="font-medium">
+                              {option.congestion_level
+                                ? `${option.congestion_level}${option.congestion_multiplier ? ` · ${metric(option.congestion_multiplier)}×` : ""}`
+                                : option.congestion_status.replaceAll("_", " ")}
+                            </dd>
+                          </div>
+                          <div className="col-span-2">
+                            <dt className="text-muted-foreground">
+                              Estimated CO₂
+                            </dt>
+                            <dd className="font-medium">
+                              {metric(option.emission_kg)} kg · simulation
+                            </dd>
+                          </div>
+                        </dl>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            )}
             <RouteEstimateDetails
-              data={result}
+              data={selectedResult || result}
               incomplete={false}
               allowHandoff={false}
               saved={false}
+              selectedRouteId={selectedRoute?.route_id}
+              routeOptions={routeOptions}
               emissionFormulaProvenance="current"
             />
             <p className="mt-4 text-xs text-muted-foreground">
               Calculated:{" "}
-              {result.calculation_time
-                ? new Date(result.calculation_time).toLocaleString("en-GB", {
+              {selectedResult?.calculation_time
+                ? new Date(selectedResult.calculation_time).toLocaleString("en-GB", {
                     timeZone: "Asia/Jakarta",
                   }) + " WIB"
                 : "not supplied"}

@@ -40,7 +40,7 @@ def test_congestion_output_has_source_status_and_no_invented_freshness(monkeypat
     assert output['data']['segment_name']=='Jl. Yos Sudarso (Koridor Utama)'
 
 
-def test_route_preserves_planning_and_keeps_geometry_out_of_model_output(monkeypatch):
+def test_route_preserves_planning_and_legacy_single_route_result(monkeypatch):
     seen=[]
     def route(req):
         seen.append(req)
@@ -53,12 +53,34 @@ def test_route_preserves_planning_and_keeps_geometry_out_of_model_output(monkeyp
     output,result=tools.execute_tool('get_optimal_route',args)
     assert seen[0].day_type=='weekend' and seen[0].time=='17:30'
     assert 'route_geometry' not in output['data'] and output['data_status']=='estimated'
-    assert output['data']['map_available'] and result.data.route_geometry.type=='LineString'
+    assert output['data']['map_available']
+    assert result.data.route_geometry.type=='LineString'
+    assert 'route_options' not in output['data'] and 'default_route_id' not in output['data']
     assert '17:30' in output['disclaimer'] and 'measured' in output['disclaimer']
     assert 'see planning_warning' in output['disclaimer']
     assert output['data']['planning_warning']==result.data.planning_warning
     assert 'falls back to a corridor near the origin' in output['data']['planning_warning']
     assert output['data']['matched_segment_id']=='SEG002' and output['data']['matched_segment_name']=='Updated Sudirman corridor'
+
+
+def test_oracle_route_tool_does_not_expose_planner_alternatives(monkeypatch):
+    coordinates = [[104, 1], [104.1, 1.1]]
+    monkeypatch.setattr(tools, 'calculate_route', lambda req: {
+        'distance_km': 5, 'base_time_min': 10, 'final_time_min': 12,
+        'routing_source': 'OSRM API', 'congestion_status': 'synthetic_estimate',
+        'congestion_multiplier': 1.2, 'emission_kg': 1.2,
+        'default_route_id': 'route-1', 'route_options': [{'route_id': 'route-1'}],
+        'route_geometry': {'type': 'LineString', 'coordinates': coordinates},
+    })
+    args = tools.validate_arguments('get_optimal_route', json.dumps({
+        'origin': '1,104', 'destination': '1.1,104', 'time': '17:30', 'day_type': 'weekday',
+    }))
+
+    output, result = tools.execute_tool('get_optimal_route', args)
+    assert result is not None
+    assert result.data.route_geometry.coordinates == [(104.0, 1.0), (104.1, 1.1)]
+    assert 'route_options' not in output['data'] and 'default_route_id' not in output['data']
+    assert 'route_geometry' not in output['data'] and output['data']['map_available']
 
 
 def test_schedule_filter_empty_data_and_capacity_contract(monkeypatch):

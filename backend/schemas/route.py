@@ -8,6 +8,7 @@ ClockTime = Annotated[str, StringConstraints(pattern=r"^([01]\d|2[0-3]):[0-5]\d(
 NonNegative = Annotated[float, Field(ge=0, allow_inf_nan=False)]
 Positive = Annotated[float, Field(gt=0, allow_inf_nan=False)]
 
+
 class LocationPoint(BaseModel):
     model_config = ConfigDict(extra="forbid")
     lat: Annotated[float, Field(strict=True, ge=-90, le=90, allow_inf_nan=False)]
@@ -19,6 +20,32 @@ class RouteGeometry(BaseModel):
     type: Literal['LineString']
     coordinates: list[tuple[Annotated[float, Field(strict=True, ge=-180, le=180, allow_inf_nan=False)],
         Annotated[float, Field(strict=True, ge=-90, le=90, allow_inf_nan=False)]]] = Field(min_length=2, max_length=160)
+
+
+class RouteOption(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    route_id: Annotated[str, StringConstraints(pattern=r"^route-\d+$")]
+    display_label: Annotated[str, StringConstraints(min_length=1, max_length=40)]
+    routing_source: str
+    distance_km: NonNegative
+    base_time_min: NonNegative
+    final_time_min: NonNegative
+    congestion_level: Literal["LOW", "MEDIUM", "HIGH"] | None = None
+    congestion_multiplier: Positive | None = None
+    congestion_status: Literal['synthetic_estimate', 'default_fallback', 'unavailable']
+    emission_kg: NonNegative
+    matched_segment_id: str | None = None
+    matched_segment_name: RoadName | None = None
+    route_geometry: RouteGeometry
+    latest_gate_in: ClockTime | None = None
+    optimal_departure: ClockTime | None = None
+    latest_gate_in_datetime: AwareDatetime | None = None
+    optimal_departure_datetime: AwareDatetime | None = None
+    estimated_arrival_datetime: AwareDatetime | None = None
+    estimated_arrival_time: ClockTime | None = None
+    cutoff_slack_min: Annotated[float, Field(allow_inf_nan=False)] | None = None
+    departure_feasible: bool | None = None
+    planning_warning: Annotated[str, StringConstraints(max_length=2000)] | None = None
 
 
 class RouteData(BaseModel):
@@ -61,3 +88,6 @@ class RouteData(BaseModel):
     _etd = field_validator('vessel_etd', mode='before')(vessel_time)
 
 
+class RouteAlternativesData(RouteData):
+    route_options: list[RouteOption] = Field(max_length=3)
+    default_route_id: Annotated[str, StringConstraints(pattern=r"^route-\d+$")] | None = None
