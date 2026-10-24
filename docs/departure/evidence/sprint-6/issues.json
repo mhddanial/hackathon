@@ -126,5 +126,12 @@
   ],
   "full_project_lint_errors_remaining": 0,
   "full_project_lint_warnings_remaining": 16,
-  "historical_evidence": "full-lint.log retains initial 7 errors/19 warnings; failed shared browser attempts retained."
+  "historical_evidence": "full-lint.log retains initial 7 errors/19 warnings; failed shared browser attempts retained.",
+  "configuration_follow_up": {
+    "id": "S6-CONFIG-01",
+    "code_handling_status": "FIXED_AND_RETESTED_SYNTHETIC",
+    "actual_configuration_status": "PENDING_USER_CORRECTION_AND_MANUAL_RETEST",
+    "evidence": "supabase-config-fix.json",
+    "backend_or_contract_change": false
+  }
 }

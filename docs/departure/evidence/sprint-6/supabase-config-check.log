@@ -1,0 +1,7 @@
+PASS Malformed/missing configuration returns 503 before creating Auth clients
+PASS Missing public key also fails closed on login and protected routes
+PASS HTTP loopback and HTTPS configuration accept trimmed settings
+PASS Configured signed-out dashboard routes retain login protection
+PASS Configured signed-in users retain auth redirects and page access
+PASS Configured refresh preserves session cookies in the returned response
+{"result":"passed","checks_passed":6,"checks":["Malformed/missing configuration returns 503 before creating Auth clients","Missing public key also fails closed on login and protected routes","HTTP loopback and HTTPS configuration accept trimmed settings","Configured signed-out dashboard routes retain login protection","Configured signed-in users retain auth redirects and page access","Configured refresh preserves session cookies in the returned response"],"scope":"Offline synthetic middleware checks with real NextRequest/NextResponse and stubbed Auth; no .env, network or real login."}
