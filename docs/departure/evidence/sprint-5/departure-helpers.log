@@ -1,0 +1,19 @@
+PASS Frozen synthetic example selected-safe
+PASS Frozen synthetic example automatic-safe
+PASS Frozen synthetic example selected-missing-cutoff
+PASS Strict fields, status, nulls, array bounds and numeric types
+PASS Real dates, aware zones, source-zone conversions and occurrence identity
+PASS Zero, negative and unrounded threshold decisions survive display
+PASS Missing data cannot retain decisions; fallback cannot establish SAFE
+PASS Candidate bounds, exclusions, binding, alternative cap and truncation
+PASS Form validates origins, coordinates, dates, service, UUID and midnight copy
+PASS Catalog keeps UUID/cutoff/terminal and unverified dates; rejects conflicting joins
+PASS Client sends current bearer, validated plan and cancellation signal
+PASS Three error envelopes have safe bounded messages and fields
+PASS Outages, oversized/malformed responses and mismatched plans fail closed
+PASS Logout/account changes and pre-aborted I/O cannot yield a result
+PASS Actual hook discards delayed responses after edits, stop, newer requests and unmount
+PASS Result renders all status wording, signed values, sources and separate unavailable estimate
+PASS Form reading order, labeled controls and linked field errors render
+PASS Shared navigation/protection contain exactly one departure entry each
+{"checks_passed":18,"checks":["Frozen synthetic example selected-safe","Frozen synthetic example automatic-safe","Frozen synthetic example selected-missing-cutoff","Strict fields, status, nulls, array bounds and numeric types","Real dates, aware zones, source-zone conversions and occurrence identity","Zero, negative and unrounded threshold decisions survive display","Missing data cannot retain decisions; fallback cannot establish SAFE","Candidate bounds, exclusions, binding, alternative cap and truncation","Form validates origins, coordinates, dates, service, UUID and midnight copy","Catalog keeps UUID/cutoff/terminal and unverified dates; rejects conflicting joins","Client sends current bearer, validated plan and cancellation signal","Three error envelopes have safe bounded messages and fields","Outages, oversized/malformed responses and mismatched plans fail closed","Logout/account changes and pre-aborted I/O cannot yield a result","Actual hook discards delayed responses after edits, stop, newer requests and unmount","Result renders all status wording, signed values, sources and separate unavailable estimate","Form reading order, labeled controls and linked field errors render","Shared navigation/protection contain exactly one departure entry each"],"scope":"Offline synthetic parser/client/form, actual-hook dispatcher and component SSR with primitive stubs; no browser/live acceptance"}

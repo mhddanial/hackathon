@@ -13,6 +13,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 const routeLabels: Record<string, string> = {
   dashboard: "Dashboard", planner: "Route Planner",
   schedules: "Ferry Schedules", oracle: "Logistics Oracle",
+  departure: "Departure Recommendation",
 };
 
 export default function Topbar() {

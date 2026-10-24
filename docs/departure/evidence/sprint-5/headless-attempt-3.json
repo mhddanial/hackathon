@@ -1,0 +1,37 @@
+{
+  "task": "D5-06",
+  "provenance": "SYNTHETIC SIMULATION; isolated headless browser and loopback fake Auth/API. No real login, backend, sailings or observed traffic.",
+  "browser": "156.0.8078.4",
+  "viewport_mobile": 375,
+  "blocked_external_hosts": [],
+  "page_error_names": [],
+  "cancelled_requests": [],
+  "result": "failed",
+  "checks": [
+    "Unauthenticated departure is protected",
+    "Synthetic sign-in reaches the protected departure page",
+    "Automatic SAFE; simulation source; result heading focused",
+    "Catalog target retains binding and unknown metadata",
+    "RISKY / risky preserves signed buffer and target",
+    "MISSED / missed preserves signed buffer and target",
+    "MISSED / fraction preserves signed buffer and target",
+    "Alternative selection keeps road date/time and recalculates",
+    "UNAVAILABLE unavailable has no alternatives or decision buffer",
+    "UNAVAILABLE empty has no alternatives or decision buffer",
+    "UNAVAILABLE stale has no alternatives or decision buffer",
+    "UNAVAILABLE fallback has no alternatives or decision buffer",
+    "UNAVAILABLE truncated has no alternatives or decision buffer",
+    "outage removes success and offers retry",
+    "malformed removes success and offers retry"
+  ],
+  "failed_check": "422/mismatch/404 link corrective fields",
+  "focus": {
+    "id": "dep-schedule_id",
+    "tag": "SELECT",
+    "invalid": [
+      "dep-terminal",
+      "dep-schedule_id"
+    ]
+  },
+  "error": "server validation focus missing for mismatch: dep-schedule_id"
+}

@@ -181,12 +181,12 @@ The backward departure estimate uses traffic at the submitted road departure tim
 
 **Goal:** let a signed-in user submit, understand, revise, and recalculate the complete flow.
 
-- [ ] **D5-01 — Add page and navigation.** Implement `/departure`, sidebar entry, and route title where required. Extend the explicit protected-route list. Follow `frontend/AGENTS.md` and consult installed Next.js guides before code changes.
-- [ ] **D5-02 — Add typed client and runtime parsing.** Define departure types and validate API values, status variants, nulls, arrays, timestamps, and limits. Send the current session token; reuse existing auth/API patterns without coupling the feature to Oracle chat state.
-- [ ] **D5-03 — Build the form.** Use supported origins/coordinates, terminal/destination, required date and road time, and target sailing selection. Preserve actual schedule ID/cutoff/terminal binding; the existing clock-copy picker alone is insufficient. Derive day type and show WIB explicitly.
-- [ ] **D5-04 — Build the result and alternatives.** Display ferry departure, recorded cutoff, ETA, signed buffer, status/reason, threshold, latest-departure estimate, and source/assumption labels. Present independent alternatives and a clear recalculate action.
-- [ ] **D5-05 — Handle lifecycle and failures.** Provide loading/stop/retry, validation, empty, unavailable, expired-session, and service-error states. Invalidate results on edits; abort/ignore older requests and clear account-scoped state on logout/account change. No stale SAFE card after changed inputs or a failure.
-- [ ] **D5-06 — Verify browser behavior.** Use deterministic Auth/API fixtures to exercise all statuses, alternative selection, malformed responses, delayed requests, invalid input, logout, and mobile/keyboard navigation. Capture desktop/mobile screenshots and inspect the actual layout.
+- [x] **D5-01 — Add page and navigation.** Implement `/departure`, sidebar entry, and route title where required. Extend the explicit protected-route list. Follow `frontend/AGENTS.md` and consult installed Next.js guides before code changes.
+- [x] **D5-02 — Add typed client and runtime parsing.** Define departure types and validate API values, status variants, nulls, arrays, timestamps, and limits. Send the current session token; reuse existing auth/API patterns without coupling the feature to Oracle chat state.
+- [x] **D5-03 — Build the form.** Use supported origins/coordinates, terminal/destination, required date and road time, and target sailing selection. Preserve actual schedule ID/cutoff/terminal binding; the existing clock-copy picker alone is insufficient. Derive day type and show WIB explicitly.
+- [x] **D5-04 — Build the result and alternatives.** Display ferry departure, recorded cutoff, ETA, signed buffer, status/reason, threshold, latest-departure estimate, and source/assumption labels. Present independent alternatives and a clear recalculate action.
+- [x] **D5-05 — Handle lifecycle and failures.** Provide loading/stop/retry, validation, empty, unavailable, expired-session, and service-error states. Invalidate results on edits; abort/ignore older requests and clear account-scoped state on logout/account change. No stale SAFE card after changed inputs or a failure.
+- [x] **D5-06 — Verify browser behavior.** Use deterministic Auth/API fixtures to exercise all statuses, alternative selection, malformed responses, delayed requests, invalid input, logout, and mobile/keyboard navigation. Capture desktop/mobile screenshots and inspect the actual layout.
 
 **Proposed files:**
 

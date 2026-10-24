@@ -85,3 +85,8 @@ yarn-error.log*
 !/frontend/src/lib/route-api.ts
 !/frontend/src/lib/route-draft.ts
 !/frontend/src/lib/route-insights.ts
+
+# Departure Recommendation frontend helpers.
+!/frontend/src/lib/departure-api.ts
+!/frontend/src/lib/departure-contract.ts
+!/frontend/src/lib/departure-form.ts

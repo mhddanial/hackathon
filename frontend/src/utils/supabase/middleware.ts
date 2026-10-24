@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
   
   // Protect specific routes from unauthenticated users
-  const protectedRoutes = ['/dashboard', '/planner', '/schedules', '/oracle']
+  const protectedRoutes = ['/dashboard', '/planner', '/schedules', '/oracle', '/departure']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
   if (isProtectedRoute && !user) {

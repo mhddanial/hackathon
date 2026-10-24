@@ -1,0 +1,6 @@
+
+/Users/macbook-pro/Documents/GitHub/hackathon/frontend/src/utils/supabase/middleware.ts
+  18:48  warning  'options' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (0 errors, 1 warning)
+

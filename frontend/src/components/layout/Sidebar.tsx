@@ -16,6 +16,7 @@ const navigation = [
   { label: "Overview", items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }] },
   { label: "Operations", items: [
     { title: "Route Planner", url: "/planner", icon: Map },
+    { title: "Departure Recommendation", url: "/departure", icon: Ship },
     { title: "Ferry Schedules", url: "/schedules", icon: Ship },
   ] },
   { label: "Intelligence", items: [{ title: "Logistics Oracle", url: "/oracle", icon: MessageSquare }] },
