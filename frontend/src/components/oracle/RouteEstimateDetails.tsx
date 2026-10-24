@@ -23,6 +23,7 @@ import {
 } from "@/lib/oracle-format";
 import { roadName } from "@/lib/road-segments";
 import type { RouteData } from "@/types/oracle";
+import type { RouteOption } from "@/types/route";
 
 function Metric({
   label,
@@ -68,11 +69,17 @@ export function RouteEstimateDetails({
   incomplete,
   allowHandoff = true,
   saved = true,
+  selectedRouteId,
+  routeOptions,
+  emissionFormulaProvenance = "unknown",
 }: {
   data: RouteData;
   incomplete: boolean;
   allowHandoff?: boolean;
   saved?: boolean;
+  selectedRouteId?: string;
+  routeOptions?: RouteOption[];
+  emissionFormulaProvenance?: "current" | "unknown";
 }) {
   const time = (absolute?: string, clock?: string) =>
     absolute
@@ -89,6 +96,8 @@ export function RouteEstimateDetails({
           destination: data.destination,
         }
       : null;
+  const mapSelectedRouteId =
+    selectedRouteId || routeOptions?.[0]?.route_id;
   const suggested = time(
     data.optimal_departure_datetime,
     data.optimal_departure,
@@ -98,10 +107,30 @@ export function RouteEstimateDetails({
   const vessel = data.vessel_etd?.includes("T")
     ? date(data.vessel_etd)
     : time(undefined, data.vessel_etd);
+  const congestionMultiplierAvailable =
+    data.congestion_multiplier !== undefined &&
+    Number.isFinite(data.congestion_multiplier) &&
+    data.congestion_multiplier > 0;
   const delta =
-    data.base_time_min === undefined
+    data.congestion_status === "unavailable" ||
+    !congestionMultiplierAvailable ||
+    data.base_time_min === undefined ||
+    !Number.isFinite(data.base_time_min) ||
+    !Number.isFinite(data.final_time_min)
       ? undefined
       : data.final_time_min - data.base_time_min;
+  const congestionReferenceAvailable =
+    data.congestion_status !== "unavailable" &&
+    Boolean(data.matched_segment_id || data.matched_segment_name);
+  const emissionFormulaAvailable =
+    data.emission_kg !== undefined &&
+    Number.isFinite(data.emission_kg) &&
+    data.emission_kg >= 0 &&
+    Number.isFinite(data.distance_km) &&
+    data.distance_km >= 0 &&
+    data.congestion_multiplier !== undefined &&
+    Number.isFinite(data.congestion_multiplier) &&
+    data.congestion_multiplier > 0;
   const travelDetail =
     delta === undefined
       ? saved
@@ -123,7 +152,7 @@ export function RouteEstimateDetails({
   const facts: [string, string | undefined][] = [
     ["Routing source", data.routing_source],
     [
-      "Matched road corridor",
+      "Congestion reference corridor",
       roadName(data.matched_segment_id, data.matched_segment_name),
     ],
     [
@@ -224,8 +253,16 @@ export function RouteEstimateDetails({
                 <div className="relative h-[300px] overflow-hidden rounded-xl border sm:h-[360px] @4xl/route:h-[420px]">
                   <MapView
                     routeCoordinates={savedMap.geometry.coordinates.map(
-                      ([lng, lat]) => [lat, lng],
+                      ([lng, lat]) => [lat, lng] as [number, number],
                     )}
+                    routeOptions={routeOptions?.map((option) => ({
+                      route_id: option.route_id,
+                      display_label: option.display_label,
+                      coordinates: option.route_geometry.coordinates.map(
+                        ([lng, lat]) => [lat, lng] as [number, number],
+                      ),
+                    }))}
+                    selectedRouteId={mapSelectedRouteId}
                     originCoords={[savedMap.origin.lat, savedMap.origin.lng]}
                     destCoords={[
                       savedMap.destination.lat,
@@ -292,14 +329,18 @@ export function RouteEstimateDetails({
               />
               Estimate breakdown
             </h3>
-            <p className="mb-4 text-xs leading-relaxed text-muted-foreground">Congestion uses a reference corridor near the origin. It does not establish traffic on every road along this route.</p>
+            <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+              {congestionReferenceAvailable
+                ? "Congestion uses one reference corridor and does not establish traffic across the full route. Review the warning above for how the reference was selected."
+                : "No congestion reference is available for this estimate."}
+            </p>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
               {facts
                 .filter(([, value]) => value !== undefined)
                 .map(([label, value]) => (
                   <div
                     key={label}
-                    className={`min-w-0 ${label === "Matched road corridor" ? "col-span-2" : ""}`}
+                    className={`min-w-0 ${label === "Congestion reference corridor" ? "col-span-2" : ""}`}
                   >
                     <dt className="flex items-center gap-1 text-xs text-muted-foreground">
                       {label === "Emission estimate" && (
@@ -312,6 +353,40 @@ export function RouteEstimateDetails({
                     >
                       {value}
                     </dd>
+                    {label === "Emission estimate" && (
+                      <dd className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                        Simulation only, not a measurement of actual CO₂
+                        emissions.{" "}
+                        {emissionFormulaProvenance === "current" ? (
+                          emissionFormulaAvailable ? (
+                            <>
+                              Current estimator formula: distance × 0.2 kg
+                              CO₂/km × congestion multiplier. The 0.2 kg/km
+                              factor is an approximate light-truck assumption,
+                              not a universal value for all vehicles.
+                            </>
+                          ) : (
+                            "Formula details are unavailable because required calculation inputs are missing."
+                          )
+                        ) : (
+                          <>
+                            Formula version for this result is unknown.{" "}
+                            {emissionFormulaAvailable ? (
+                              <>
+                                The current estimator uses distance × 0.2 kg
+                                CO₂/km × congestion multiplier, with an
+                                approximate light-truck factor that is not
+                                universal across vehicles; this is not
+                                confirmed as the formula that produced this
+                                value.
+                              </>
+                            ) : (
+                              "The available saved data is insufficient to identify the calculation."
+                            )}
+                          </>
+                        )}
+                      </dd>
+                    )}
                   </div>
                 ))}
             </dl>

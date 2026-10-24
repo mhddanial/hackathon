@@ -20,8 +20,12 @@ export default function MapView({
   originCoords,
   destCoords,
   approximate = false,
+  routeOptions = [],
+  selectedRouteId,
 }: {
   routeCoordinates?: [number, number][] | null,
+  routeOptions?: { route_id: string; display_label: string; coordinates: [number, number][] }[],
+  selectedRouteId?: string,
   originStr?: string,
   destStr?: string,
   originCoords?: [number, number],
@@ -34,6 +38,8 @@ export default function MapView({
       <div className="relative z-0 order-2 min-h-0 flex-1">
         <MapComponent 
           routeCoordinates={routeCoordinates} 
+          routeOptions={routeOptions}
+          selectedRouteId={selectedRouteId}
           origin={originCoords}
           destination={destCoords}
           originName={originStr}

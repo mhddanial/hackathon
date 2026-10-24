@@ -40,6 +40,8 @@ function BoundsUpdater({ coordinates }: { coordinates: [number, number][] | null
 
 export default function MapComponent({ 
   routeCoordinates = null,
+  routeOptions = [],
+  selectedRouteId,
   origin,
   destination,
   originName = "Origin",
@@ -47,6 +49,8 @@ export default function MapComponent({
   approximate = false,
 }: { 
   routeCoordinates?: [number, number][] | null,
+  routeOptions?: { route_id: string; display_label: string; coordinates: [number, number][] }[],
+  selectedRouteId?: string,
   origin?: [number, number],
   destination?: [number, number],
   originName?: string,
@@ -55,6 +59,18 @@ export default function MapComponent({
 }) {
   const mapId = useId();
   if (!origin || !destination) return <div className="p-4 text-sm">Location coordinates unavailable.</div>;
+  const boundsCoordinates = [
+    origin,
+    destination,
+    ...(routeOptions.length
+      ? routeOptions.flatMap((option) => option.coordinates)
+      : routeCoordinates || []),
+  ];
+  const orderedRouteOptions = [...routeOptions].sort(
+    (first, second) =>
+      Number(first.route_id === selectedRouteId) -
+      Number(second.route_id === selectedRouteId),
+  );
 
   return (
     <MapContainer
@@ -83,15 +99,31 @@ export default function MapComponent({
         </Tooltip>
       </Marker>
 
-      {routeCoordinates && routeCoordinates.length > 0 ? (
-        <>
+      {routeOptions.length ? (
+        orderedRouteOptions.map((option) => {
+          const selected = option.route_id === selectedRouteId;
+          return (
           <Polyline
-            positions={routeCoordinates}
-            pathOptions={{ color: approximate ? "#b45309" : "#0064e0", weight: 5, opacity: 0.9, ...(approximate ? { dashArray: "8, 8" } : {}) }}
-          />
-        </>
+            key={option.route_id}
+            positions={option.coordinates}
+            pathOptions={{
+              color: selected ? "#0064e0" : "#64748b",
+              weight: selected ? 6 : 3,
+              opacity: selected ? 0.95 : 0.45,
+              ...(selected ? { dashArray: approximate ? "8, 8" : undefined } : {}),
+            }}
+          >
+            <Tooltip sticky>{option.display_label}{selected ? " · selected" : ""}</Tooltip>
+          </Polyline>
+          );
+        })
+      ) : routeCoordinates && routeCoordinates.length > 0 ? (
+        <Polyline
+          positions={routeCoordinates}
+          pathOptions={{ color: approximate ? "#b45309" : "#0064e0", weight: 5, opacity: 0.9, ...(approximate ? { dashArray: "8, 8" } : {}) }}
+        />
       ) : null}
-      <BoundsUpdater coordinates={[origin, destination, ...(routeCoordinates || [])]} />
+      <BoundsUpdater coordinates={boundsCoordinates} />
     </MapContainer>
   );
 }

@@ -75,14 +75,59 @@ await check("draft tampering, unknown IDs, unavailable storage and storage bound
 await check("API uses validated request, preserves fields and rejects errors or malformed responses", async () => {
   const original = globalThis.fetch;
   try {
-    let sent;
-    globalThis.fetch = async (_url, options) => { sent = JSON.parse(options.body); return { ok: true, json: async () => route }; };
+    let sent, requestedUrl;
+    globalThis.fetch = async (url, options) => { requestedUrl = url; sent = JSON.parse(options.body); return { ok: true, json: async () => route }; };
     assert.equal((await api.estimateRoute(input, new AbortController().signal)).distance_km, 5); assert.deepEqual(sent, input);
+    assert.match(requestedUrl, /\/route$/);
+    globalThis.fetch = async (url, options) => {
+      requestedUrl = url; sent = JSON.parse(options.body);
+      return { ok: true, json: async () => ({ ...route, route_options: [] }) };
+    };
+    assert.equal((await api.estimateRouteAlternatives(input, new AbortController().signal)).distance_km, 5);
+    assert.match(requestedUrl, /\/route\/alternatives$/); assert.deepEqual(sent, input);
+    const called = [];
+    globalThis.fetch = async url => {
+      called.push(url);
+      return url.endsWith("/route/alternatives")
+        ? { ok: false, status: 404, json: async () => ({}) }
+        : { ok: true, json: async () => route };
+    };
+    const legacy = await api.estimateRouteAlternatives(input, new AbortController().signal);
+    assert.deepEqual(called.map(url => url.slice(url.lastIndexOf("/route"))), ["/route/alternatives", "/route"]);
+    assert.deepEqual(legacy.route_options, []);
     globalThis.fetch = async () => ({ ok: false, status: 503, json: async () => ({ detail: "private diagnostic" }) });
     await assert.rejects(api.estimateRoute(input, new AbortController().signal), /temporarily unavailable/);
     globalThis.fetch = async () => ({ ok: true, json: async () => ({ ...route, final_time_min: -1 }) });
     await assert.rejects(api.estimateRoute(input, new AbortController().signal));
   } finally { globalThis.fetch = original; }
+});
+await check("route alternatives validate independently and selection keeps geometry and metrics together", () => {
+  const first = {
+    route_id: "route-1", display_label: "Route 1", routing_source: "OSRM API",
+    distance_km: 5, base_time_min: 10, final_time_min: 15, emission_kg: 1.5,
+    congestion_status: "synthetic_estimate", congestion_level: "HIGH",
+    congestion_multiplier: 1.5,
+    route_geometry: { type: "LineString", coordinates: [[104, 1], [104.1, 1.1]] },
+  };
+  const second = {
+    ...first, route_id: "route-2", display_label: "Route 2", distance_km: 7,
+    base_time_min: 12, final_time_min: 14, emission_kg: 1.4,
+    congestion_level: "LOW", congestion_multiplier: 1.17,
+    route_geometry: { type: "LineString", coordinates: [[104, 1], [104.05, 1.04], [104.1, 1.1]] },
+  };
+  const parsed = contract.parseRouteAlternatives({
+    ...first, default_route_id: "route-1", route_options: [first, second],
+  });
+  const selected = contract.selectRouteOption(parsed, "route-2");
+  assert.equal(selected.distance_km, second.distance_km);
+  assert.equal(selected.final_time_min, second.final_time_min);
+  assert.deepEqual(selected.route_geometry, second.route_geometry);
+  assert.equal(contract.selectRouteOption(parsed, "unknown").distance_km, first.distance_km);
+  assert.equal(contract.parseRoute(route).route_options, undefined);
+  assert.deepEqual(contract.parseRouteAlternatives(route).route_options, []);
+  assert.throws(() => contract.parseRouteAlternatives({
+    ...first, default_route_id: "route-3", route_options: [first, second],
+  }));
 });
 await check("shared insights do not make incomplete results actionable", () => {
   assert.equal(insights.routeInsights({ ...route, departure_feasible: true }).status, "Within estimated cutoff");

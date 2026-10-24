@@ -3,6 +3,30 @@ export type RouteGeometry = {
   type: "LineString";
   coordinates: [number, number][];
 };
+export type RouteOption = {
+  route_id: string;
+  display_label: string;
+  routing_source: string;
+  distance_km: number;
+  base_time_min: number;
+  final_time_min: number;
+  congestion_level?: "LOW" | "MEDIUM" | "HIGH";
+  congestion_multiplier?: number;
+  congestion_status: "synthetic_estimate" | "default_fallback" | "unavailable";
+  emission_kg: number;
+  matched_segment_id?: string;
+  matched_segment_name?: string;
+  route_geometry: RouteGeometry;
+  latest_gate_in?: string;
+  optimal_departure?: string;
+  latest_gate_in_datetime?: string;
+  optimal_departure_datetime?: string;
+  estimated_arrival_datetime?: string;
+  estimated_arrival_time?: string;
+  cutoff_slack_min?: number;
+  departure_feasible?: boolean;
+  planning_warning?: string;
+};
 export type RouteData = {
   distance_km: number;
   final_time_min: number;
@@ -37,6 +61,10 @@ export type RouteData = {
   departure_feasible?: boolean;
   planning_warning?: string;
   congestion_status?: "synthetic_estimate" | "default_fallback" | "unavailable";
+};
+export type PlannerRouteData = RouteData & {
+  route_options?: RouteOption[];
+  default_route_id?: string;
 };
 
 export type RouteInput = {

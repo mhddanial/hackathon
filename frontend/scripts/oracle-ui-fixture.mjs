@@ -8,7 +8,7 @@ const origin = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const owners = { a: id(1), b: id(2) };
 const now = () => new Date().toISOString();
-let routeFailure = false, routeDelay = 0;
+let routeFailure = false, routeDelay = 0, singleRoute = false, alternativesUnavailable = false;
 const user = owner => ({ id: owner, aud: "authenticated", role: "authenticated", email: `${owner === owners.a ? "a" : "b"}@sprint4.example.invalid`,
   app_metadata: { provider: "email", providers: ["email"] }, user_metadata: { full_name: owner === owners.a ? "Test A" : "Test B" }, created_at: now(), identities: [] });
 const jwt = owner => `${Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url")}.${Buffer.from(JSON.stringify({ sub: owner, aud: "authenticated", role: "authenticated", iss: `${origin}/auth/v1`, exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })).toString("base64url")}.c3ludGhldGlj`;
@@ -57,6 +57,8 @@ const server = createServer(async (req, res) => {
   if (url.pathname === "/__control" && req.method === "POST") {
     if (typeof body.routeFailure === "boolean") routeFailure = body.routeFailure;
     if (typeof body.routeDelay === "number") routeDelay = Math.min(Math.max(body.routeDelay, 0), 5000);
+    if (typeof body.singleRoute === "boolean") singleRoute = body.singleRoute;
+    if (typeof body.alternativesUnavailable === "boolean") alternativesUnavailable = body.alternativesUnavailable;
     if (Array.isArray(body.uiChecks)) uiChecks = body.uiChecks;
     if (body.mode) nextMode = body.mode;
     if (Array.isArray(body.nextResults)) nextResults = body.nextResults;
@@ -84,14 +86,29 @@ const server = createServer(async (req, res) => {
   if (url.pathname === "/__stats") { sendJson(res, { uiChecks, executions, requests, conversations: [...conversations.values()].map(item => ({ id: item.id, owner: item.owner, message_count: item.messages.length })) }); return; }
   if (url.pathname === "/auth/v1/token") { sendJson(res, session(body.email?.startsWith("b@") || body.refresh_token === "synthetic-refresh-b" ? owners.b : owners.a)); return; }
   if (url.pathname === "/schedules") { sendJson(res, { schedules: [{ id: "fixture-sailing", terminal_name: "Batu Ampar", destination: "Singapore", departure_time: "18:00:00" }] }); return; }
-  if (url.pathname === "/route" && req.method === "POST") {
+  if ((url.pathname === "/route/alternatives" || url.pathname === "/route") && req.method === "POST") {
     requests.push({ method: req.method, path: url.pathname, body });
     await new Promise(resolve => setTimeout(resolve, routeDelay));
     if (routeFailure) { sendJson(res, { detail: "Synthetic failure" }, 503); return; }
-    sendJson(res, { ...body, departure_time: body.time, distance_km: 5, final_time_min: 15, base_time_min: 10,
-      routing_source: "OSRM API", route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] },
+    if (url.pathname === "/route/alternatives" && alternativesUnavailable) { sendJson(res, { detail: "Legacy fixture mode" }, 404); return; }
+    const options = [
+      { route_id: "route-1", display_label: "Route 1", routing_source: "OSRM API", distance_km: 5, base_time_min: 10, final_time_min: 15,
+        congestion_level: "HIGH", congestion_multiplier: 1.5, congestion_status: "synthetic_estimate", emission_kg: 1.5,
+        matched_segment_id: "SEG001", route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] } },
+      { route_id: "route-2", display_label: "Route 2", routing_source: "OSRM API", distance_km: 7, base_time_min: 12, final_time_min: 14,
+        congestion_level: "LOW", congestion_multiplier: 1.17, congestion_status: "synthetic_estimate", emission_kg: 1.4,
+        matched_segment_id: "SEG002", route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.origin.lng + 0.01, body.origin.lat + 0.01], [body.destination.lng, body.destination.lat]] } },
+    ];
+    const response = { ...body, departure_time: body.time, distance_km: 5, final_time_min: 15, base_time_min: 10,
+      routing_source: "OSRM API", emission_kg: 1.5, congestion_multiplier: 1.5,
+      route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] },
       congestion_status: "synthetic_estimate", calculation_time: "2026-10-17T01:00:00Z", planning_timezone: "Asia/Jakarta",
-      ...(body.vessel_etd ? { cutoff_slack_min: 5, departure_feasible: true, estimated_arrival_time: "10:15", latest_gate_in: "10:20" } : {}) }); return;
+      ...(body.vessel_etd ? { cutoff_slack_min: 5, departure_feasible: true, estimated_arrival_time: "10:15", latest_gate_in: "10:20" } : {}) };
+    if (url.pathname === "/route/alternatives") {
+      response.default_route_id = "route-1";
+      response.route_options = singleRoute ? [options[0]] : options;
+    }
+    sendJson(res, response); return;
   }
   if (url.pathname === "/auth/v1/user") { sendJson(res, owner ? user(owner) : { message: "Invalid fixture session" }, owner ? 200 : 401); return; }
   if (url.pathname === "/auth/v1/logout") { res.writeHead(204); res.end(); return; }

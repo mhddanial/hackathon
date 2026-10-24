@@ -151,7 +151,7 @@ def execute_tool(name: str, args: dict) -> tuple[dict, object | None]:
             data = RouteData(**{k:raw[k] for k in RouteData.model_fields if k in raw})
             result = RouteResult(type="route", title="Route estimate", data=data,
                 source=raw.get("routing_source", "unknown"), data_status="estimated",
-                disclaimer=f"Planning time {args['time']} ({args['day_type']}, Asia/Jakarta). Named locations use mapped representative points; exact cargo gates are not verified. Map geometry is a simplified preview. Congestion uses a corridor near the origin, not segment-by-segment traffic along the route. Route, congestion and emissions are estimates. Suggested departure is back-calculated using congestion at the requested departure time, not a comparison of alternatives or a safety guarantee. No measured savings claim.",
+                disclaimer=f"Planning time {args['time']} ({args['day_type']}, Asia/Jakarta). Named locations use mapped representative points; exact cargo gates are not verified. Map geometry is a simplified preview. Congestion uses one corridor reference; see planning_warning for its matching source and limitations. Route, congestion and emissions are estimates. Suggested departure is back-calculated using congestion at the requested departure time, not a comparison of alternatives or a safety guarantee. No measured savings claim.",
                 calculated_at=calculated_at)
         else:
             return {"error": "Unsupported tool", "code": "unknown_tool"}, None

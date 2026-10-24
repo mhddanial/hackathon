@@ -130,7 +130,13 @@ function ResultDetails({
   if (result.type === "schedule")
     return <ScheduleDetails schedules={result.data.schedules} />;
   if (result.type === "route")
-    return <RouteEstimateDetails data={result.data} incomplete={incomplete} />;
+    return (
+      <RouteEstimateDetails
+        data={result.data}
+        incomplete={incomplete}
+        emissionFormulaProvenance="unknown"
+      />
+    );
   return (
     <pre className="max-w-full overflow-auto whitespace-pre-wrap break-words rounded-lg bg-muted p-3 text-xs">
       {JSON.stringify(result.data, null, 2)}

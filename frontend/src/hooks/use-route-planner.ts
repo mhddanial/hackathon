@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { batamLocations } from "@/lib/locations";
 import { parseRouteInput } from "@/lib/route-contract";
-import { estimateRoute } from "@/lib/route-api";
+import { estimateRouteAlternatives } from "@/lib/route-api";
 import { loadRouteDraft } from "@/lib/route-draft";
-import type { RouteData, RouteInput } from "@/types/route";
+import type { PlannerRouteData, RouteInput } from "@/types/route";
 
 export type PlannerForm = {
   origin: string;
@@ -90,7 +90,7 @@ function formFromInput(input: RouteInput): PlannerForm {
 
 export function useRoutePlanner(account: string | null) {
   const [form, setForm] = useState<PlannerForm>(defaults);
-  const [result, setResult] = useState<RouteData | null>(null);
+  const [result, setResult] = useState<PlannerRouteData | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
@@ -170,7 +170,7 @@ export function useRoutePlanner(account: string | null) {
     try {
       const input = plannerInput(form);
       setLoading(true);
-      const data = await estimateRoute(input, controller.signal);
+      const data = await estimateRouteAlternatives(input, controller.signal);
       if (own === generation.current) setResult(data);
     } catch (error) {
       if (

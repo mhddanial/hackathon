@@ -66,6 +66,9 @@ async (page) => {
     assert(await suggested.evaluate(element => parseFloat(getComputedStyle(element).fontSize) >= 20), "Suggested departure lacks emphasis");
     await summary.getByText("Within estimated cutoff", { exact: true }).waitFor();
     await dialog.getByText(result.data.planning_warning, { exact: true }).waitFor();
+    await dialog.getByText(/Simulation only, not a measurement of actual CO₂ emissions\./).waitFor();
+    await dialog.getByText(/Formula version for this result is unknown\./).waitFor();
+    await dialog.getByText(/this is not confirmed as the formula that produced this value\./).waitFor();
     await dialog.getByRole("region", { name: "Source and limitations" }).getByText(result.disclaimer, { exact: false }).waitFor();
     await close();
   });
@@ -95,6 +98,15 @@ async (page) => {
     await dialog.getByText("0 min", { exact: true }).waitFor();
     assert(await dialog.getByText("Suggested departure", { exact: true }).count() === 0, "Missing suggestion was invented");
     assert(await dialog.getByText("Emission estimate", { exact: true }).count() === 0, "Missing emission was invented");
+    assert(await dialog.getByText(/Simulation only, not a measurement of actual CO₂ emissions\./).count() === 0, "Missing emission details were invented");
+    assert(await dialog.getByText(/Formula: distance × 0\.2 kg CO₂\/km × congestion multiplier\./).count() === 0, "Formula shown without emission inputs");
+    await close();
+    await open({ ...result.data, congestion_multiplier: undefined });
+    await dialog.getByText("8.4 kg", { exact: true }).waitFor();
+    await dialog.getByText(/Simulation only, not a measurement of actual CO₂ emissions\./).waitFor();
+    await dialog.getByText(/Formula version for this result is unknown\./).waitFor();
+    await dialog.getByText(/available saved data is insufficient to identify the calculation\./).waitFor();
+    assert(await dialog.getByText(/The current estimator uses distance × 0\.2 kg CO₂\/km × congestion multiplier/).count() === 0, "Formula shown without required historical fields");
     await close();
   });
 
