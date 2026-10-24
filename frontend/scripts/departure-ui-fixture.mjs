@@ -10,15 +10,27 @@ const session = owner => ({ access_token: `${Buffer.from(JSON.stringify({ alg: "
 const ownerOf = req => { try { return JSON.parse(Buffer.from(req.headers.authorization.replace("Bearer ", "").split(".")[1], "base64url")).sub; } catch { return null; } };
 let mode = "safe", delay = 0, requests = [], catalog = "normal";
 const stamp = ms => new Date(ms + 7 * 3600000).toISOString().replace("Z", "+07:00");
+// Explicit dated simulation occurrences; independent of the submitted road time.
+const u4Cases = {
+  overnight: { roadDate: "2026-10-23", serviceDate: "2026-10-24", cutoff: "2026-10-24T00:40:00+07:00", sourceZone: "Asia/Jakarta" },
+  "source-zone": { roadDate: "2026-10-23", serviceDate: "2026-10-23", cutoff: "2026-10-23T23:00:00+07:00", sourceZone: "Asia/Singapore" },
+};
 const send = (res, data, status = 200) => { res.writeHead(status, { "Content-Type": "application/json" }); res.end(JSON.stringify(data)); };
 function result(plan, selectedMode) {
   const r = structuredClone(sample), road = Date.parse(`${plan.departure_date}T${plan.departure_time}:00+07:00`), eta = road + 30 * 60000;
-  const buffer = plan.schedule_id === id(2) ? 60 : selectedMode === "missed" ? -5 : selectedMode === "risky" ? 0 : selectedMode === "fraction" ? -.001 : 30;
-  const occurrence = (uuid, cutoff) => ({ ...r.selected_schedule, schedule_id: uuid, occurrence_id: `${uuid}@${plan.service_date}`, terminal: plan.terminal, destination: plan.ferry_destination, service_date: plan.service_date, allowed_service_kinds: [plan.service_kind], departure_at: stamp(cutoff + 30 * 60000), cutoff_at: stamp(cutoff), source_departure_at: stamp(cutoff + 30 * 60000), source_cutoff_at: stamp(cutoff), verified_at: stamp(road - 60 * 60000) });
+  const u4 = u4Cases[selectedMode];
+  const fixedCutoff = u4 ? Date.parse(u4.cutoff) + (plan.schedule_id === id(2) ? 20 * 60000 : 0) : null;
+  const buffer = u4 ? (fixedCutoff - eta) / 60000 : plan.schedule_id === id(2) ? 60 : selectedMode === "missed" ? -5 : selectedMode === "risky" ? 0 : selectedMode === "fraction" ? -.001 : 30;
+  const sourceStamp = ms => u4?.sourceZone === "Asia/Singapore" ? new Date(ms + 8 * 3600000).toISOString().replace("Z", "+08:00") : stamp(ms);
+  const occurrence = (uuid, cutoff) => ({ ...r.selected_schedule, schedule_id: uuid, occurrence_id: `${uuid}@${plan.service_date}`, terminal: plan.terminal, destination: plan.ferry_destination, service_date: plan.service_date, allowed_service_kinds: [plan.service_kind], source_timezone: u4?.sourceZone || "Asia/Jakarta", departure_at: stamp(cutoff + 30 * 60000), cutoff_at: stamp(cutoff), source_departure_at: sourceStamp(cutoff + 30 * 60000), source_cutoff_at: sourceStamp(cutoff), verified_at: stamp(u4 ? Date.parse(u4.cutoff) - 3 * 3600000 : road - 60 * 60000) });
   Object.assign(r, { plan, planned_departure_at: stamp(road).replace(".000", ""), selected_schedule: occurrence(plan.schedule_id || id(1), eta + buffer * 60000), travel_time_min: 30, estimated_arrival_at: stamp(eta), buffer_min: buffer, latest_departure_estimate_at: stamp(road + (buffer - 15) * 60000), status: buffer < 0 ? "MISSED" : buffer < 15 ? "RISKY" : "SAFE", calculated_at: stamp(road), disclaimer: "Synthetic UI simulation only; these are not real sailings or observed traffic." });
   r.reason_code = { SAFE: "BUFFER_SUFFICIENT", RISKY: "BELOW_SAFETY_BUFFER", MISSED: "CUTOFF_MISSED" }[r.status]; r.reason = `Synthetic scenario: signed buffer ${buffer} min, simulation threshold 15 min.`;
   Object.assign(r.route_estimate, { estimated_arrival_at: r.estimated_arrival_at }); Object.assign(r.selection, { mode: plan.schedule_id ? "selected" : "automatic", service_date: plan.service_date, examined_count: 2 });
-  r.alternatives = [{ schedule: occurrence(plan.schedule_id === id(2) ? id(3) : id(2), eta + 60 * 60000), status: "SAFE", reason_code: "BUFFER_SUFFICIENT", reason: "Synthetic alternative: 60-minute buffer.", estimated_arrival_at: stamp(eta), travel_time_min: 30, buffer_min: 60, latest_departure_estimate_at: stamp(road + 45 * 60000) }];
+  r.alternatives = u4 ? [] : [{ schedule: occurrence(plan.schedule_id === id(2) ? id(3) : id(2), eta + 60 * 60000), status: "SAFE", reason_code: "BUFFER_SUFFICIENT", reason: "Synthetic alternative: 60-minute buffer.", estimated_arrival_at: stamp(eta), travel_time_min: 30, buffer_min: 60, latest_departure_estimate_at: stamp(road + 45 * 60000) }];
+  if (u4) {
+    r.selection.examined_count = 1;
+    r.assumptions = ["Synthetic U4 occurrence: fixed recorded cutoff; changing road time does not move the sailing. Not real sailing or traffic evidence."];
+  }
   if (["unavailable", "empty", "stale", "fallback", "truncated"].includes(selectedMode)) {
     Object.assign(r, { status: "UNAVAILABLE", reason_code: { unavailable: "MISSING_CUTOFF", empty: "NO_SCHEDULES", stale: "STALE_SCHEDULE", fallback: "ROUTE_FALLBACK", truncated: "CANDIDATE_LIMIT" }[selectedMode], reason: { unavailable: "Recorded cutoff is not verified.", empty: "No recorded schedules match this lookup.", stale: "Schedule verification is older than the allowed age.", fallback: "Only a fallback route estimate is available.", truncated: "Candidate limit reached; comparison is incomplete." }[selectedMode], data_status: "unavailable", travel_time_min: null, estimated_arrival_at: null, buffer_min: null, latest_departure_estimate_at: null, alternatives: [] });
     if (selectedMode === "unavailable") { r.selected_schedule.cutoff_at = null; r.selected_schedule.source_cutoff_at = null; }
@@ -53,7 +65,8 @@ const server = createServer(async (req, res) => {
     if (captured === "validation") { send(res, { detail: [{ loc: ["body", "service_date"], msg: "Synthetic invalid date", type: "value_error" }] }, 422); return; }
     if (captured === "mismatch") { send(res, { detail: { code: "SCHEDULE_MISMATCH", message: "Synthetic mismatch", fields: ["schedule_id", "terminal"] } }, 422); return; }
     if (captured === "missing") { send(res, { detail: { code: "SCHEDULE_NOT_FOUND", message: "Synthetic absent target", fields: ["schedule_id"] } }, 404); return; }
-    if (body.service_date !== body.departure_date || body.departure_time > "21:00") { send(res, { detail: { code: "SCHEDULE_MISMATCH", message: "Fixture supports same-date daytime only", fields: ["service_date"] } }, 422); return; }
+    const u4 = u4Cases[captured];
+    if (u4 ? ![u4.roadDate, u4.serviceDate].includes(body.departure_date) || body.service_date !== u4.serviceDate : body.service_date !== body.departure_date || body.departure_time > "21:00") { send(res, { detail: { code: "SCHEDULE_MISMATCH", message: "Plan does not match this explicitly dated synthetic fixture", fields: ["service_date"] } }, 422); return; }
     send(res, result(body, captured)); return;
   }
   send(res, {}, 404);

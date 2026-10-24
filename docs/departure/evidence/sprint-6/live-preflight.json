@@ -1,0 +1,31 @@
+{
+  "task": "D6-02",
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "result": "PENDING_USER_MANUAL_RESULTS",
+  "user_confirmation": "No access yet \u2014 keep live acceptance pending",
+  "live_requests_attempted": false,
+  "real_login_tested": false,
+  "env_files_read": false,
+  "exported_presence_only": {
+    "SUPABASE_URL": false,
+    "SUPABASE_ANON_KEY": false,
+    "NEXT_PUBLIC_SUPABASE_URL": false,
+    "NEXT_PUBLIC_API_URL": false,
+    "DEPARTURE_TEST_API_URL": false,
+    "DEPARTURE_READ_ONLY_TOKEN": false
+  },
+  "resume_requires": [
+    "User-pasted sanitized manual results",
+    "Review actual required coverage before changing the D6-02 checkbox"
+  ],
+  "credentials_stored": false,
+  "latest_user_direction": "Keep .env rule; user will start backend/frontend and run signed-in D6-02 manually; await sanitized results.",
+  "local_startup_evidence": "local-startup.json",
+  "current_result": "LOCAL_STARTUP_OBSERVED_ONLY; USER_MANUAL_SIGNED_IN_RESULTS_PENDING",
+  "manual_checklist": "docs/departure/reports/D6_02_MANUAL_CHECKLIST.md",
+  "env_read_exception_requested": true,
+  "env_read_exception_granted": false,
+  "assistant_will_read_or_load_env_files": false,
+  "assistant_started_backend_stopped": true
+}

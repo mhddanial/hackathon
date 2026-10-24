@@ -1,0 +1,6 @@
+PASS Overnight: explicit next-day service, ETA and fixed cutoff render in WIB
+PASS Overnight road revision changes SAFE to RISKY without moving the sailing
+PASS Singapore source date converts to previous Jakarta service date
+PASS U4 delayed source-zone response is discarded after editing; recalculation uses new road time
+PASS U4 source details fit at 375px and remain keyboard accessible
+{"task":"D6-04_FIXTURE_PREPARATION","result":"passed","checks_passed":5,"cancelled":1,"page_errors":0}

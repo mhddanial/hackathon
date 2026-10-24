@@ -1,0 +1,27 @@
+PASS Unauthenticated departure is protected
+PASS Synthetic sign-in reaches the protected departure page
+PASS Automatic SAFE; simulation source; result heading focused
+PASS Catalog target retains binding and unknown metadata
+PASS RISKY / risky preserves signed buffer and target
+PASS MISSED / missed preserves signed buffer and target
+PASS MISSED / fraction preserves signed buffer and target
+PASS Alternative selection keeps road date/time and recalculates
+PASS UNAVAILABLE unavailable has no alternatives or decision buffer
+PASS UNAVAILABLE empty has no alternatives or decision buffer
+PASS UNAVAILABLE stale has no alternatives or decision buffer
+PASS UNAVAILABLE fallback has no alternatives or decision buffer
+PASS UNAVAILABLE truncated has no alternatives or decision buffer
+PASS outage removes success and offers retry
+PASS malformed removes success and offers retry
+PASS 422/mismatch/404 link corrective fields
+PASS Invalid form does not call API and focuses linked field
+PASS Edit and Stop discard delayed completions
+PASS Fixed-duration road-time action clears result and waits for Calculate
+PASS No alternatives and selected-target truncation remain explicit
+PASS Desktop/mobile screenshots and no horizontal overflow
+PASS Real Tab/Shift-Tab traversal, source toggle and touch targets at 375 px
+PASS Keyboard Stop cancels the pending request
+PASS A slower old SAFE request cannot replace a newer RISKY result
+PASS 401 clears results and requires sign-in
+PASS Logout and another account clear all departure state
+{"task":"D6-01","result":"passed","checks_passed":26,"cancelled":4,"page_errors":0}

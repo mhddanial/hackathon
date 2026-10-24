@@ -1,0 +1,28 @@
+{
+  "task": "D6-04",
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "result": "DEFERRED_BY_USER",
+  "user_confirmation": "Not yet \u2014 keep participant testing pending",
+  "recorded_session_count": 0,
+  "planned_sample_size": 5,
+  "institutional_confirmation": "NOT_CONFIRMED",
+  "participant_observations": [],
+  "questionnaire_answers": [],
+  "scores_calculated": false,
+  "protocol": "docs/departure/reports/USABILITY_PROTOCOL.md",
+  "template_file": "observation-template.json",
+  "moderator_guide": "docs/departure/reports/USABILITY_SESSION_GUIDE.md",
+  "fixture_readiness": {
+    "review_method": "Source review plus actual isolated headless UI against synthetic fixtures; no participant execution",
+    "complete_U1_to_U5_setup_verified": true,
+    "scope": "Existing 26 departure groups support U1-U3/U5 core scenarios; five new U4 groups verify overnight, source-zone conversion, edits/cancellation and mobile keyboard access. No missing-source-zone UNAVAILABLE variant claimed.",
+    "U4": "VERIFIED_SYNTHETIC: modes overnight and source-zone, explicitly fixed occurrences; u4-browser-acceptance.json",
+    "missing_source_zone_UI_variant": "NOT_PROVIDED; U5 uses missing cutoff, empty schedules and outage variants",
+    "study_collection_ready": false,
+    "external_prerequisites": "Institutional/supervisor requirements, actual participants and affirmative consent remain pending."
+  },
+  "latest_user_direction": "Postpone supervisor/institution confirmation and participant testing; prioritize finishing the core feature first.",
+  "blocks_feature_implementation": false,
+  "collection_attempted": false
+}

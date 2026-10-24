@@ -1,0 +1,1630 @@
+{
+  "task": "D6-01",
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "provenance": "SYNTHETIC SIMULATION ONLY; existing actual backend/Next code with mocked dependencies, no live integration or usability evidence.",
+  "criteria_passed_synthetic": 13,
+  "criteria_failed": 0,
+  "criteria_pending": 1,
+  "full_task_complete": false,
+  "reason_not_complete": "DEP-14 requires actual participant evidence; no participants/approval confirmed yet.",
+  "rows": [
+    {
+      "criterion": "DEP-01",
+      "scenario": "Buffer meets configured threshold \u2192 SAFE",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "AUTO-EARLIEST-SAFE-TIE",
+        "AUTO-SAFE-BEFORE-RISKY",
+        "SAFE-30",
+        "EXACT-THRESHOLD",
+        "ZERO-DURATION"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "SAFE-30",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 30,
+            "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 30.0,
+            "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +30 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "actual": "HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +30.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-02",
+      "scenario": "Nonnegative buffer below threshold \u2192 RISKY",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "AUTO-RISKY-WHEN-NO-SAFE",
+        "RISKY-5",
+        "FRACTION-BELOW"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "RISKY-5",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T08:35:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "RISKY",
+            "reason_code": "BELOW_SAFETY_BUFFER",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 5,
+            "latest_departure_estimate_at": "2026-10-23T07:50:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "RISKY",
+            "reason_code": "BELOW_SAFETY_BUFFER",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 5.0,
+            "latest_departure_estimate_at": "2026-10-23T07:50:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; RISKY; BELOW_SAFETY_BUFFER; buffer +5 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "actual": "HTTP 200; RISKY; BELOW_SAFETY_BUFFER; buffer +5.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-03",
+      "scenario": "ETA after cutoff \u2192 MISSED",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "PRESERVE-MISSED-TARGET",
+        "MISSED-5",
+        "FRACTION-NEGATIVE"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "MISSED-5",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T08:25:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "MISSED",
+            "reason_code": "CUTOFF_MISSED",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": -5,
+            "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "MISSED",
+            "reason_code": "CUTOFF_MISSED",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": -5.0,
+            "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; MISSED; CUTOFF_MISSED; buffer -5 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "actual": "HTTP 200; MISSED; CUTOFF_MISSED; buffer -5.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-04",
+      "scenario": "Empty/relevant lookup distinctions \u2192 UNAVAILABLE",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "EMPTY-SUCCESS",
+        "ONLY-INCOMPATIBLE-CANDIDATES",
+        "AUTO-CANDIDATE-OVERFLOW"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "EMPTY-SUCCESS",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": null
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "UNAVAILABLE",
+            "reason_code": "NO_SCHEDULES",
+            "selected_schedule_id": null,
+            "travel_time_min": null,
+            "estimated_arrival_at": null,
+            "buffer_min": null,
+            "latest_departure_estimate_at": null,
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "UNAVAILABLE",
+            "reason_code": "NO_SCHEDULES",
+            "travel_time_min": null,
+            "estimated_arrival_at": null,
+            "buffer_min": null,
+            "latest_departure_estimate_at": null,
+            "selection": {
+              "mode": "automatic",
+              "service_date": "2026-10-23",
+              "examined_count": 0,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": null,
+              "congestion": null,
+              "cutoff": null
+            },
+            "data_status": "unavailable",
+            "selected_schedule_id": null,
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": []
+          }
+        }
+      ],
+      "expected": "HTTP 200; UNAVAILABLE; NO_SCHEDULES; 0 alternatives",
+      "actual": "HTTP 200; UNAVAILABLE; NO_SCHEDULES; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-05",
+      "scenario": "Invalid fields \u2192 controlled validation error",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "INVALID-DAY-TYPE",
+        "OUTSIDE-BATAM",
+        "INVALID-CLOCK",
+        "INVALID-DATE",
+        "UNSUPPORTED-HORIZON",
+        "UNSUPPORTED-TERMINAL",
+        "CLIENT-THRESHOLD-OVERRIDE",
+        "TARGET-NOT-FOUND",
+        "TARGET-TERMINAL-MISMATCH",
+        "TARGET-DESTINATION-MISMATCH",
+        "TARGET-DATE-MISMATCH",
+        "TARGET-SERVICE-MISMATCH"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "OUTSIDE-BATAM",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": -1,
+                "lng": 104
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 422,
+            "status": null,
+            "error_code": "VALIDATION_ERROR"
+          },
+          "actual": {
+            "http_status": 422,
+            "error_code": null,
+            "envelope_kind": "validation_array"
+          }
+        }
+      ],
+      "expected": "HTTP 422; VALIDATION_ERROR",
+      "actual": "HTTP 422; validation_array",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-06",
+      "scenario": "Failed/untrusted dependencies \u2192 transport error or explicit unavailable estimate",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "UNKNOWN-SERVICE-KIND",
+        "UNKNOWN-FRESHNESS",
+        "STALE-SCHEDULE",
+        "FUTURE-VERIFICATION",
+        "FRESHNESS-EXACT-LIMIT",
+        "HAVERSINE-FALLBACK",
+        "DEFAULT-CONGESTION",
+        "MISSING-CONGESTION",
+        "UNVERIFIED-CORRIDOR",
+        "NEGATIVE-DURATION",
+        "NONFINITE-DURATION",
+        "BOOLEAN-DURATION",
+        "OVERSIZED-DURATION",
+        "SCHEDULE-OUTAGE",
+        "ROUTE-TIMEOUT",
+        "AUTH-EXPIRED",
+        "AUTH-OUTAGE"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "SCHEDULE-OUTAGE",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {
+              "schedule": "outage"
+            },
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 503,
+            "status": null,
+            "error_code": "DEPENDENCY_UNAVAILABLE"
+          },
+          "actual": {
+            "http_status": 503,
+            "error_code": "DEPENDENCY_UNAVAILABLE",
+            "envelope_kind": "departure_detail_object"
+          }
+        }
+      ],
+      "expected": "HTTP 503; DEPENDENCY_UNAVAILABLE",
+      "actual": "HTTP 503; DEPENDENCY_UNAVAILABLE; departure_detail_object",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-07",
+      "scenario": "Absent/invalid cutoff \u2192 no fabricated decision",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "ONLY-UNKNOWN-CANDIDATES",
+        "CONFLICTING-DUPLICATE-ID",
+        "EXCLUDE-UNKNOWN-KEEP-VALID",
+        "MISSING-CUTOFF",
+        "CUTOFF-AFTER-SAILING",
+        "CUTOFF-EQUAL-SAILING"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "MISSING-CUTOFF",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": null,
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "UNAVAILABLE",
+            "reason_code": "MISSING_CUTOFF",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": null,
+            "estimated_arrival_at": null,
+            "buffer_min": null,
+            "latest_departure_estimate_at": null,
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "UNAVAILABLE",
+            "reason_code": "MISSING_CUTOFF",
+            "travel_time_min": null,
+            "estimated_arrival_at": null,
+            "buffer_min": null,
+            "latest_departure_estimate_at": null,
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": null
+            },
+            "data_status": "unavailable",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": []
+          }
+        }
+      ],
+      "expected": "HTTP 200; UNAVAILABLE; MISSING_CUTOFF; 0 alternatives",
+      "actual": "HTTP 200; UNAVAILABLE; MISSING_CUTOFF; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-08",
+      "scenario": "Preserve target and evaluate relevant alternatives independently",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "AUTO-EARLIEST-SAFE-TIE",
+        "PRESERVE-MISSED-TARGET",
+        "AUTO-SAFE-BEFORE-RISKY",
+        "ALTERNATIVES-CAP-THREE",
+        "IDENTICAL-DUPLICATE-ID",
+        "EXCLUDE-UNKNOWN-KEEP-VALID",
+        "SELECTED-CANDIDATE-OVERFLOW"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "PRESERVE-MISSED-TARGET",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T08:25:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              },
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000002",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T10:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T10:00:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "MISSED",
+            "reason_code": "CUTOFF_MISSED",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": -5,
+            "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+            "alternative_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "MISSED",
+            "reason_code": "CUTOFF_MISSED",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": -5.0,
+            "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 2,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "alternatives": [
+              {
+                "schedule": {
+                  "schedule_id": "00000000-0000-4000-8000-000000000002",
+                  "occurrence_id": "00000000-0000-4000-8000-000000000002@2026-10-23",
+                  "terminal": "batu_ampar",
+                  "destination": "Fixture Singapore",
+                  "service_date": "2026-10-23",
+                  "allowed_service_kinds": [
+                    "cargo"
+                  ],
+                  "source_timezone": "Asia/Jakarta",
+                  "source_departure_at": "2026-10-23T10:30:00+07:00",
+                  "source_cutoff_at": "2026-10-23T10:00:00+07:00",
+                  "departure_at": "2026-10-23T10:30:00+07:00",
+                  "cutoff_at": "2026-10-23T10:00:00+07:00",
+                  "verified_at": "2026-10-23T06:00:00+07:00",
+                  "source": "synthetic_fixture"
+                },
+                "status": "SAFE",
+                "reason_code": "BUFFER_SUFFICIENT",
+                "reason": "The recorded cutoff buffer meets the configured simulation threshold.",
+                "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+                "travel_time_min": 30.0,
+                "buffer_min": 90.0,
+                "latest_departure_estimate_at": "2026-10-23T09:15:00+07:00"
+              }
+            ],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; MISSED; CUTOFF_MISSED; buffer -5 min; ETA 2026-10-23T08:30:00+07:00; 1 alternatives",
+      "actual": "HTTP 200; MISSED; CUTOFF_MISSED; buffer -5.0 min; ETA 2026-10-23T08:30:00+07:00; 1 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-09",
+      "scenario": "Absolute datetimes across midnight/source zones",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "UNKNOWN-SERVICE-DATE",
+        "UNKNOWN-SOURCE-ZONE",
+        "INVALID-SOURCE-ZONE",
+        "OFFSET-ZONE-CONFLICT",
+        "SOURCE-SINGAPORE",
+        "MIDNIGHT-ARRIVAL",
+        "EXPLICIT-PREVIOUS-DAY-CUTOFF",
+        "ZONE-CHANGES-SERVICE-DATE"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "MIDNIGHT-ARRIVAL",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "23:50",
+              "service_date": "2026-10-24",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-24",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-24T01:00:00+07:00",
+                "source_cutoff_at": "2026-10-24T00:30:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "RISKY",
+            "reason_code": "BELOW_SAFETY_BUFFER",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-24T00:20:00+07:00",
+            "buffer_min": 10,
+            "latest_departure_estimate_at": "2026-10-23T23:45:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "RISKY",
+            "reason_code": "BELOW_SAFETY_BUFFER",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-24T00:20:00+07:00",
+            "buffer_min": 10.0,
+            "latest_departure_estimate_at": "2026-10-23T23:45:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-24",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        },
+        {
+          "fixture_id": "SOURCE-SINGAPORE",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Singapore",
+                "source_departure_at": "2026-10-23T10:30:00+08:00",
+                "source_cutoff_at": "2026-10-23T10:00:00+08:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 30,
+            "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 30.0,
+            "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; RISKY; BELOW_SAFETY_BUFFER; buffer +10 min; ETA 2026-10-24T00:20:00+07:00; 0 alternatives / HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +30 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "actual": "HTTP 200; RISKY; BELOW_SAFETY_BUFFER; buffer +10.0 min; ETA 2026-10-24T00:20:00+07:00; 0 alternatives / HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +30.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-10",
+      "scenario": "Zero RISKY / exact threshold SAFE before rounding",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "ZERO-BUFFER",
+        "EXACT-THRESHOLD",
+        "FRACTION-BELOW",
+        "FRACTION-NEGATIVE",
+        "EXPLICIT-PREVIOUS-DAY-CUTOFF",
+        "ZERO-SAFETY-CONFIG",
+        "NEGATIVE-SAFETY-CONFIG",
+        "INVALID-FRESHNESS-CONFIG"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "ZERO-BUFFER",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T08:30:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "RISKY",
+            "reason_code": "BELOW_SAFETY_BUFFER",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 0,
+            "latest_departure_estimate_at": "2026-10-23T07:45:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "RISKY",
+            "reason_code": "BELOW_SAFETY_BUFFER",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 0.0,
+            "latest_departure_estimate_at": "2026-10-23T07:45:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        },
+        {
+          "fixture_id": "EXACT-THRESHOLD",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T08:45:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 15,
+            "latest_departure_estimate_at": "2026-10-23T08:00:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 15.0,
+            "latest_departure_estimate_at": "2026-10-23T08:00:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; RISKY; BELOW_SAFETY_BUFFER; buffer +0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives / HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +15 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "actual": "HTTP 200; RISKY; BELOW_SAFETY_BUFFER; buffer +0.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives / HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +15.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-11",
+      "scenario": "Consume final_time_min once",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "ZERO-DURATION",
+        "APPLY-CONGESTION-ONCE",
+        "HAVERSINE-FALLBACK",
+        "DEFAULT-CONGESTION",
+        "MISSING-CONGESTION",
+        "UNVERIFIED-CORRIDOR"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "APPLY-CONGESTION-ONCE",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": "00000000-0000-4000-8000-000000000001"
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 30,
+            "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "SAFE",
+            "reason_code": "BUFFER_SUFFICIENT",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": 30.0,
+            "latest_departure_estimate_at": "2026-10-23T08:15:00+07:00",
+            "selection": {
+              "mode": "selected",
+              "service_date": "2026-10-23",
+              "examined_count": 1,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +30 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "actual": "HTTP 200; SAFE; BUFFER_SUFFICIENT; buffer +30.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-12",
+      "scenario": "Changed inputs cannot retain/restore stale result",
+      "result": "PASS_SYNTHETIC",
+      "input": {
+        "road_time_old": "08:00",
+        "road_time_new": "09:00",
+        "old_safe_delay_ms": 1200,
+        "new_risky_delay_ms": 0,
+        "actions": [
+          "edit",
+          "Stop",
+          "keyboard Stop",
+          "logout/account change"
+        ]
+      },
+      "expected": "Clear old result immediately; reject older completion; retain new RISKY result; clear account-scoped state.",
+      "actual": "4 aborted requests; all specified race/account checks passed; zero uncaught page errors.",
+      "fixture_ids": [],
+      "evidence": [
+        "browser-acceptance.json"
+      ],
+      "checks": [
+        "Edit and Stop discard delayed completions",
+        "A slower old SAFE request cannot replace a newer RISKY result",
+        "Logout and another account clear all departure state"
+      ]
+    },
+    {
+      "criterion": "DEP-13",
+      "scenario": "All relevant cutoffs missed \u2192 MISSED, no feasible alternatives",
+      "result": "PASS_SYNTHETIC",
+      "fixture_ids": [
+        "AUTO-ALL-MISSED"
+      ],
+      "representatives": [
+        {
+          "fixture_id": "AUTO-ALL-MISSED",
+          "input": {
+            "request": {
+              "origin": {
+                "lat": 1.0604795,
+                "lng": 104.0303214
+              },
+              "origin_name": "Batamindo Industrial Park",
+              "terminal": "batu_ampar",
+              "ferry_destination": "Fixture Singapore",
+              "departure_date": "2026-10-23",
+              "departure_time": "08:00",
+              "service_date": "2026-10-23",
+              "service_kind": "cargo",
+              "day_type": "weekday",
+              "schedule_id": null
+            },
+            "route": {
+              "final_time_min": 30,
+              "base_time_min": 20,
+              "congestion_multiplier": 1.5,
+              "routing_source": "OSRM API",
+              "congestion_status": "synthetic_estimate",
+              "context_verified": true
+            },
+            "schedules": [
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000001",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T09:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T08:25:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              },
+              {
+                "schedule_id": "00000000-0000-4000-8000-000000000002",
+                "terminal": "batu_ampar",
+                "destination": "Fixture Singapore",
+                "service_date": "2026-10-23",
+                "allowed_service_kinds": [
+                  "cargo"
+                ],
+                "source_timezone": "Asia/Jakarta",
+                "source_departure_at": "2026-10-23T10:30:00+07:00",
+                "source_cutoff_at": "2026-10-23T08:20:00+07:00",
+                "verified_at": "2026-10-23T06:00:00+07:00",
+                "source": "synthetic_fixture"
+              }
+            ],
+            "config": {
+              "safety_buffer_min": 15,
+              "schedule_max_age_min": 1440
+            },
+            "clock": "2026-10-23T07:00:00+07:00",
+            "failures": {},
+            "retrieval": {
+              "truncated": false
+            }
+          },
+          "expected": {
+            "http_status": 200,
+            "status": "MISSED",
+            "reason_code": "CUTOFF_MISSED",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "travel_time_min": 30,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": -5,
+            "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+            "alternative_ids": [],
+            "required_warning_codes": []
+          },
+          "actual": {
+            "http_status": 200,
+            "status": "MISSED",
+            "reason_code": "CUTOFF_MISSED",
+            "travel_time_min": 30.0,
+            "estimated_arrival_at": "2026-10-23T08:30:00+07:00",
+            "buffer_min": -5.0,
+            "latest_departure_estimate_at": "2026-10-23T07:40:00+07:00",
+            "selection": {
+              "mode": "automatic",
+              "service_date": "2026-10-23",
+              "examined_count": 2,
+              "excluded_count": 0,
+              "candidate_limit": 100,
+              "truncated": false
+            },
+            "sources": {
+              "schedule": "synthetic_fixture",
+              "route": "OSRM API",
+              "congestion": "synthetic_estimate",
+              "cutoff": "synthetic_fixture"
+            },
+            "data_status": "simulation",
+            "selected_schedule_id": "00000000-0000-4000-8000-000000000001",
+            "alternative_ids": [],
+            "alternatives": [],
+            "warning_codes": [
+              "BACKWARD_ESTIMATE_FIXED_DURATION"
+            ]
+          }
+        }
+      ],
+      "expected": "HTTP 200; MISSED; CUTOFF_MISSED; buffer -5 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "actual": "HTTP 200; MISSED; CUTOFF_MISSED; buffer -5.0 min; ETA 2026-10-23T08:30:00+07:00; 0 alternatives",
+      "evidence": [
+        "backend-acceptance.json",
+        "backend-tests.xml"
+      ]
+    },
+    {
+      "criterion": "DEP-14",
+      "scenario": "Actual U1\u2013U5 observations recorded",
+      "result": "PENDING",
+      "input": {
+        "protocol": "USABILITY_PROTOCOL.md",
+        "tasks": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "planned_sample": 5
+      },
+      "expected": "Genuine consented participant observations and custom questionnaire results",
+      "actual": "No genuine sessions recorded; institutional confirmation and participants are pending per user confirmation.",
+      "fixture_ids": [],
+      "evidence": [
+        "usability-readiness.json"
+      ]
+    }
+  ]
+}

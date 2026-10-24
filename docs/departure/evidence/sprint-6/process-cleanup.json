@@ -1,0 +1,16 @@
+{
+  "provenance": "Synthetic simulation process cleanup only",
+  "ports": [
+    {
+      "port": 3011,
+      "exit_code": 1,
+      "no_listener": true
+    },
+    {
+      "port": 9011,
+      "exit_code": 1,
+      "no_listener": true
+    }
+  ],
+  "stopped": true
+}

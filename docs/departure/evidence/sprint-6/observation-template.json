@@ -1,0 +1,39 @@
+{
+  "template_only": true,
+  "not_a_participant_record": true,
+  "instructions": "Copy only after protocol requirements/affirmative consent are met. Use anonymous participant IDs; keep identity/consent materials out of this repository. Missing answers stay null, not zero. No scores or observations are supplied here. Record Q1 after each task; record Q2\u2013Q5 once after all tasks in the separate session questionnaire. Preserve the protocol wording and anchors.",
+  "observation": {
+    "participant_id": null,
+    "task_id": null,
+    "fixture_id": null,
+    "synthetic_scenario_label_visible": null,
+    "app_revision": null,
+    "device": null,
+    "viewport": null,
+    "task_order": null,
+    "started_at": null,
+    "elapsed_seconds": null,
+    "outcome": null,
+    "error_count": null,
+    "interventions": null,
+    "critical_misunderstanding": null,
+    "questionnaire_answers": {
+      "Q1_task_ease": null
+    },
+    "notes": null
+  },
+  "allowed_outcomes": [
+    "unassisted_success",
+    "assisted_success",
+    "failed",
+    "stopped"
+  ],
+  "scale_note": "Use the exact custom formative questions/anchors in the protocol. This is not SUS/UEQ or a validated aggregate scale.",
+  "session_questionnaire": {
+    "participant_id": null,
+    "Q2_status_clarity": null,
+    "Q3_time_meanings": null,
+    "Q4_limitations": null,
+    "Q5_improvement_notes": null
+  }
+}

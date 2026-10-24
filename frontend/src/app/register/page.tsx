@@ -41,7 +41,7 @@ export default function RegisterPage() {
     setError(null);
     
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -58,8 +58,8 @@ export default function RegisterPage() {
         router.push("/login");
       }, 3000);
       
-    } catch (err: any) {
-      setError(err.message || "An error occurred during registration.");
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : "An error occurred during registration.");
     } finally {
       setLoading(false);
     }
@@ -74,8 +74,8 @@ export default function RegisterPage() {
         }
       });
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || "An error occurred with Google Sign-Up.");
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : "An error occurred with Google Sign-Up.");
     }
   };
 
@@ -258,7 +258,7 @@ export default function RegisterPage() {
               </svg>
             </div>
             <label htmlFor="terms" className="text-xs text-slate-500 cursor-pointer select-none leading-relaxed">
-              I agree to SmartFlow's{" "}
+              I agree to SmartFlow&apos;s{" "}
               <Link href="#" className="text-blue-700 hover:underline font-medium">Terms of Service</Link>
               {" "}and{" "}
               <Link href="#" className="text-blue-700 hover:underline font-medium">Privacy Policy</Link>

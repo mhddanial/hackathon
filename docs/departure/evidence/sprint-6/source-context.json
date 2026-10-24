@@ -1,0 +1,7 @@
+{
+  "date": "2026-10-24",
+  "base_head_commit": "702bd4af0a421c50c61d1aa2cf93fa26fb67a5a0",
+  "verification_scope": "Current application worktree at capture time. Sprint 5 files were staged at task entry; this run did not stage, unstage, reset or commit them. Sprint 6 evidence remains uncommitted.",
+  "app_unstaged_changes": [],
+  "head_at_final_check": "702bd4af0a421c50c61d1aa2cf93fa26fb67a5a0"
+}

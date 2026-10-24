@@ -1,0 +1,6 @@
+PASS Password sign-in surfaces synthetic provider error and can recover
+PASS Schedules initial read and manual refresh settle loading state
+PASS Schedules date hydrates consistently and updates across Jakarta midnight
+PASS Shared mobile breakpoint changes at 768px and sidebar works after resize
+PASS Registration surfaces synthetic provider error and restores submit control
+{"task":"D6-05_SHARED_LINT_REGRESSIONS","result":"passed","checks_passed":5,"cancelled":0,"page_errors":0}

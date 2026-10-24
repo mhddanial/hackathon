@@ -1,0 +1,140 @@
+{
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "scope": "D6-04 fixture preparation, D6-05 evidenced fixes and affected regressions; D6-06/D6-07 documentation. SYNTHETIC SIMULATION ONLY.",
+  "ordered_steps": {
+    "1_U4_fixture": "PASSED_SYNTHETIC",
+    "2_affected_headless_checks": "PASSED_SYNTHETIC",
+    "3_existing_lint_errors": "FIXED_AND_RETESTED",
+    "4_live_acceptance": "PENDING_USER_CONFIRMED_NO_ACCESS",
+    "5_participant_study": "PENDING_USER_CONFIRMED_NOT_READY",
+    "6_final_sprint_closure": "PENDING_REAL_EVIDENCE"
+  },
+  "browser_results": {
+    "browser-acceptance.json": {
+      "result": "passed",
+      "groups": 26,
+      "uncaught_page_errors": 0
+    },
+    "u4-browser-acceptance.json": {
+      "result": "passed",
+      "groups": 5,
+      "uncaught_page_errors": 0
+    },
+    "shared-browser-acceptance.json": {
+      "result": "passed",
+      "groups": 5,
+      "uncaught_page_errors": 0
+    },
+    "route-browser-acceptance.json": {
+      "result": "passed",
+      "groups": 13,
+      "uncaught_page_errors": 0
+    }
+  },
+  "commands": [
+    {
+      "command": "node --check frontend/scripts/departure-ui-fixture.mjs",
+      "exit_code": 0
+    },
+    {
+      "command": "node scripts/check-departure.mjs",
+      "cwd": "frontend",
+      "exit_code": 0,
+      "groups": 18,
+      "log": "departure-helpers-after-fixes.log"
+    },
+    {
+      "command": "node scripts/check-route-integration.mjs",
+      "cwd": "frontend",
+      "exit_code": 0,
+      "groups": 8,
+      "log": "route-helpers-after-fixes.log"
+    },
+    {
+      "command": "npx --no-install tsc --noEmit --incremental false",
+      "cwd": "frontend",
+      "exit_code": 0,
+      "log": "typecheck-after-fixes.log"
+    },
+    {
+      "command": "npm run lint",
+      "cwd": "frontend",
+      "exit_code": 0,
+      "errors": 0,
+      "warnings": 16,
+      "log": "full-lint-final.log"
+    },
+    {
+      "command": "npx --no-install eslint src/components/departure src/hooks/use-departure-recommendation.ts src/hooks/use-mobile.ts src/lib/departure-*.ts src/types/departure.ts 'src/app/(dashboard)/departure/page.tsx' 'src/app/(dashboard)/schedules/page.tsx' scripts/departure-ui-fixture.mjs scripts/check-departure*.js scripts/check-departure.mjs scripts/run-departure-headless.mjs",
+      "cwd": "frontend",
+      "exit_code": 0,
+      "errors": 0,
+      "warnings": 0,
+      "log": "scoped-lint-after-fixes.log"
+    },
+    {
+      "command": "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:9011 NEXT_PUBLIC_SUPABASE_ANON_KEY=synthetic-local-key NEXT_PUBLIC_API_URL=http://127.0.0.1:9011 NEXT_TELEMETRY_DISABLED=1 npm run build -- --webpack",
+      "cwd": "/private/tmp/departure-sprint5-kW8D9G/frontend",
+      "exit_code": 0,
+      "log": "build-after-hydration-fix.log"
+    },
+    {
+      "command": ".venv/bin/python docs/departure/evidence/sprint-6/build_matrix.py",
+      "exit_code": 0,
+      "synthetic_pass": 13,
+      "failed": 0,
+      "pending": 1
+    },
+    {
+      "command": "lsof -nP -iTCP:3011 -iTCP:9011 -sTCP:LISTEN",
+      "exit_code": 1,
+      "output_empty": true,
+      "meaning": "No listeners after explicit SIGINT cleanup"
+    }
+  ],
+  "failed_attempts_preserved": [
+    "build-after-fixes.log",
+    "full-lint-after-fixes.log",
+    "shared-browser-attempt-1.json",
+    "shared-browser-attempt-2.json"
+  ],
+  "build_network_note": "First isolated build failed DNS for Google Fonts; retry with approved network succeeded. No npm install, dependency change or .env read.",
+  "source_comparison": {
+    "all_frontend_src_files_match_tested_copy": true,
+    "files_compared": 79,
+    "tested_copy": "/private/tmp/departure-sprint5-kW8D9G/frontend"
+  },
+  "changed_source_sha256": {
+    "frontend/scripts/departure-ui-fixture.mjs": "e422b92ab2c098f7e5b53f7a11a207c41e33142bc75c31b0280d9a2e2e2b33ee",
+    "frontend/scripts/check-departure-u4-ui.js": "57762bd99bd3db8c9c0ac0aedf36dfd02952ce88ddec1b6c18502d8e64afb9fc",
+    "frontend/scripts/check-departure-shared-ui.js": "755837960880f74e4efbe89e4fa557cb5fcd727208a614ac7a872ef25d80b387",
+    "frontend/src/hooks/use-mobile.ts": "556cc4fbd1bb44ab9c379ea5c518edda758385019f99e31962aa0fccb5588f91",
+    "frontend/src/app/(dashboard)/schedules/page.tsx": "d79dca610f8660447e9149868e6e9dce8cbfe9c00446eab86acd010416b72f99",
+    "frontend/src/app/login/page.tsx": "62bde137646679c349e720d0f6eb360aff2f8aada4f6c0331132991263a8a9df",
+    "frontend/src/app/register/page.tsx": "5a34344d5ba373c4edd8fa69e9b284c0ab9147efe1fcbea52e2e56b65d693b84"
+  },
+  "backend_tests": "431 passes retained from the earlier recorded offline run; backend unchanged, not rerun in this follow-up.",
+  "backend_changed": false,
+  "contract_or_policy_changed": false,
+  "real_login_or_live_backend_tested": false,
+  "participant_sessions": 0,
+  "servers_stopped": true,
+  "commit_created": false,
+  "completed_full_task_ids": [
+    "D6-05"
+  ],
+  "overall_sprint_complete": false,
+  "final_documentation_audit": {
+    "result": "passed",
+    "json_files_parsed": 18,
+    "relative_links_checked": 88,
+    "checked_D6_tasks": [
+      "D6-05"
+    ],
+    "pending_D6_tasks": 6,
+    "git_diff_check_exit_code": 0,
+    "node_syntax_checks_exit_code": 0,
+    "scope": "Evidence and document consistency only; not additional application or participant tests"
+  }
+}

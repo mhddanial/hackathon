@@ -1,0 +1,3 @@
+PASS Password sign-in surfaces synthetic provider error and can recover
+PASS Schedules initial read and manual refresh settle loading state
+{"task":"D6-05_SHARED_LINT_REGRESSIONS","result":"failed","failed_check":"Shared mobile breakpoint changes at 768px and sidebar works after resize","cancelled":0,"page_errors":1}

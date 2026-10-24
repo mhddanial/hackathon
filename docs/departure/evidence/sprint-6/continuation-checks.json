@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "tasks": ["D6-04", "D6-06", "D6-07"],
+  "scope": "Documentation preparation and consistency review of existing synthetic simulation evidence only. No new application/browser tests, live integration or participant collection.",
+  "checks": [
+    {
+      "command": "python3 -",
+      "description": "Inline read-only evidence audit: parse existing JSON/XML, cross-check recorded results, relative document links, zero sessions and unchecked Sprint 6 tasks.",
+      "exit_code": 0,
+      "json_files_parsed_at_run": 11,
+      "recorded_passing_xml_testcases": 431,
+      "recorded_browser_groups": 26,
+      "recorded_matrix_counts": {"synthetic_pass": 13, "failed": 0, "pending": 1},
+      "relative_links_checked": 63,
+      "D6_checkboxes_unchecked": 7,
+      "participant_sessions": 0
+    },
+    {
+      "command": "python3 -m json.tool docs/departure/evidence/sprint-6/usability-readiness.json > /dev/null",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -m json.tool docs/departure/evidence/sprint-6/issues.json > /dev/null",
+      "exit_code": 0
+    },
+    {"command": "git diff --check", "exit_code": 0},
+    {
+      "command": "lsof -nP -iTCP:3011 -iTCP:9011 -sTCP:LISTEN",
+      "exit_code": 1,
+      "output_empty": true,
+      "meaning": "No listeners on ports 3011/9011; no servers started during continuation."
+    }
+  ],
+  "new_preparation_gap": "S6-FIXTURE-01: complete overnight/source-zone U4 UI fixture not available",
+  "application_code_changed": false,
+  "protocol_changed": false,
+  "study_started": false,
+  "completed_full_task_ids": [],
+  "commit_created": false
+}

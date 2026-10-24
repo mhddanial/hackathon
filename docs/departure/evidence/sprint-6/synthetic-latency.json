@@ -1,0 +1,783 @@
+{
+  "task": "D6-03",
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "result": "passed_synthetic_measurements_only",
+  "provenance": "SYNTHETIC SIMULATION. Actual elapsed wall time of in-process TestClient POST /departure-recommendation; fake auth/database/OSRM/model. NOT network endpoint, live dependency, cold process/model startup, production latency, observed traffic or participant evidence.",
+  "environment": {
+    "python": "3.12.10",
+    "os": "Darwin",
+    "machine": "arm64",
+    "timer": "mach_absolute_time()",
+    "concurrency": 1,
+    "warm_success_samples_per_scenario": 20,
+    "first_request_samples_per_scenario": 1,
+    "failed_samples_per_scenario": 3,
+    "imports_and_testclient_setup_timed": false
+  },
+  "scenarios": [
+    {
+      "scenario": "batamindo_industrial_park_to_batu_ampar",
+      "provenance": "SYNTHETIC SIMULATION: catalog coordinates; invented fixture occurrence/applicability; fixed mock duration and model output; no real sailing/route/traffic claim.",
+      "input": {
+        "request": {
+          "origin": {
+            "lat": 1.0604795,
+            "lng": 104.0303214
+          },
+          "origin_name": "Batamindo Industrial Park",
+          "terminal": "batu_ampar",
+          "ferry_destination": "Fixture Singapore",
+          "departure_date": "2026-10-23",
+          "departure_time": "08:00",
+          "service_date": "2026-10-23",
+          "service_kind": "cargo",
+          "day_type": "weekday",
+          "schedule_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "route": {
+          "final_time_min": 30,
+          "base_time_min": 20,
+          "congestion_multiplier": 1.5,
+          "routing_source": "OSRM API",
+          "congestion_status": "synthetic_estimate",
+          "context_verified": true
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batu_ampar",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ],
+        "config": {
+          "safety_buffer_min": 15,
+          "schedule_max_age_min": 1440
+        },
+        "clock": "2026-10-23T07:00:00+07:00",
+        "failures": {},
+        "retrieval": {
+          "truncated": false
+        }
+      },
+      "samples": [
+        {
+          "sample": 0,
+          "condition": "first_request_after_fresh_testclient",
+          "elapsed_ms": 35.454375,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 1,
+          "condition": "warm_sequential",
+          "elapsed_ms": 17.507208,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 2,
+          "condition": "warm_sequential",
+          "elapsed_ms": 9.901916,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 3,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.3405,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 4,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.992417,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 5,
+          "condition": "warm_sequential",
+          "elapsed_ms": 7.905125,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 6,
+          "condition": "warm_sequential",
+          "elapsed_ms": 9.369,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 7,
+          "condition": "warm_sequential",
+          "elapsed_ms": 7.429958,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 8,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.888333,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 9,
+          "condition": "warm_sequential",
+          "elapsed_ms": 8.140542,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 10,
+          "condition": "warm_sequential",
+          "elapsed_ms": 7.983292,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 11,
+          "condition": "warm_sequential",
+          "elapsed_ms": 9.58075,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 12,
+          "condition": "warm_sequential",
+          "elapsed_ms": 8.980666,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 13,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.090625,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 14,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.284375,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 15,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.141083,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 16,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.162417,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 17,
+          "condition": "warm_sequential",
+          "elapsed_ms": 8.367417,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 18,
+          "condition": "warm_sequential",
+          "elapsed_ms": 7.375458,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 19,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.420208,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        },
+        {
+          "sample": 20,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.369416,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 30.0
+        }
+      ],
+      "summary": {
+        "first_request_ms": 35.454375,
+        "warm_n": 20,
+        "warm_min_ms": 5.369416,
+        "warm_median_ms": 7.4027080000000005,
+        "warm_p95_nearest_rank_ms": 9.901916,
+        "warm_max_ms": 17.507208
+      },
+      "failures_separate_from_success_samples": [
+        {
+          "injected_failure": "outage",
+          "elapsed_ms": 1.954125,
+          "http_status": 503,
+          "error_code": "DEPENDENCY_UNAVAILABLE"
+        },
+        {
+          "injected_failure": "timeout",
+          "elapsed_ms": 1.622208,
+          "http_status": 503,
+          "error_code": "DEPENDENCY_TIMEOUT"
+        },
+        {
+          "injected_failure": "malformed",
+          "elapsed_ms": 1.971166,
+          "http_status": 503,
+          "error_code": "INVALID_DEPENDENCY_RESPONSE"
+        }
+      ],
+      "outbound_operations_mocked_get_only": true
+    },
+    {
+      "scenario": "kabil_industrial_estate_to_batam_center",
+      "provenance": "SYNTHETIC SIMULATION: catalog coordinates; invented fixture occurrence/applicability; fixed mock duration and model output; no real sailing/route/traffic claim.",
+      "input": {
+        "request": {
+          "origin": {
+            "lat": 1.11737,
+            "lng": 104.13739
+          },
+          "origin_name": "Kabil Industrial Estate",
+          "terminal": "batam_center",
+          "ferry_destination": "Fixture Singapore",
+          "departure_date": "2026-10-23",
+          "departure_time": "08:00",
+          "service_date": "2026-10-23",
+          "service_kind": "cargo",
+          "day_type": "weekday",
+          "schedule_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "route": {
+          "final_time_min": 45,
+          "base_time_min": 20,
+          "congestion_multiplier": 1.5,
+          "routing_source": "OSRM API",
+          "congestion_status": "synthetic_estimate",
+          "context_verified": true
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "batam_center",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ],
+        "config": {
+          "safety_buffer_min": 15,
+          "schedule_max_age_min": 1440
+        },
+        "clock": "2026-10-23T07:00:00+07:00",
+        "failures": {},
+        "retrieval": {
+          "truncated": false
+        }
+      },
+      "samples": [
+        {
+          "sample": 0,
+          "condition": "first_request_after_fresh_testclient",
+          "elapsed_ms": 7.341917,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 1,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.335791,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 2,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.78875,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 3,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.123084,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 4,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.22025,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 5,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.658792,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 6,
+          "condition": "warm_sequential",
+          "elapsed_ms": 4.835458,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 7,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.004084,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 8,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.573792,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 9,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.574417,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 10,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.052334,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 11,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.075375,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 12,
+          "condition": "warm_sequential",
+          "elapsed_ms": 4.977375,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 13,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.073458,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 14,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.344542,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 15,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.477167,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 16,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.604334,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 17,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.233375,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 18,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.445292,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 19,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.4705,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        },
+        {
+          "sample": 20,
+          "condition": "warm_sequential",
+          "elapsed_ms": 7.91475,
+          "http_status": 200,
+          "status": "SAFE",
+          "buffer_min": 15.0
+        }
+      ],
+      "summary": {
+        "first_request_ms": 7.341917,
+        "warm_n": 20,
+        "warm_min_ms": 4.835458,
+        "warm_median_ms": 5.457896,
+        "warm_p95_nearest_rank_ms": 6.658792,
+        "warm_max_ms": 7.91475
+      },
+      "failures_separate_from_success_samples": [
+        {
+          "injected_failure": "outage",
+          "elapsed_ms": 2.647792,
+          "http_status": 503,
+          "error_code": "DEPENDENCY_UNAVAILABLE"
+        },
+        {
+          "injected_failure": "timeout",
+          "elapsed_ms": 2.223958,
+          "http_status": 503,
+          "error_code": "DEPENDENCY_TIMEOUT"
+        },
+        {
+          "injected_failure": "malformed",
+          "elapsed_ms": 2.504959,
+          "http_status": 503,
+          "error_code": "INVALID_DEPENDENCY_RESPONSE"
+        }
+      ],
+      "outbound_operations_mocked_get_only": true
+    },
+    {
+      "scenario": "hang_nadim_airport_to_sekupang",
+      "provenance": "SYNTHETIC SIMULATION: catalog coordinates; invented fixture occurrence/applicability; fixed mock duration and model output; no real sailing/route/traffic claim.",
+      "input": {
+        "request": {
+          "origin": {
+            "lat": 1.1236677,
+            "lng": 104.1153622
+          },
+          "origin_name": "Hang Nadim Airport",
+          "terminal": "sekupang",
+          "ferry_destination": "Fixture Singapore",
+          "departure_date": "2026-10-23",
+          "departure_time": "08:00",
+          "service_date": "2026-10-23",
+          "service_kind": "cargo",
+          "day_type": "weekday",
+          "schedule_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "route": {
+          "final_time_min": 60,
+          "base_time_min": 20,
+          "congestion_multiplier": 1.5,
+          "routing_source": "OSRM API",
+          "congestion_status": "synthetic_estimate",
+          "context_verified": true
+        },
+        "schedules": [
+          {
+            "schedule_id": "00000000-0000-4000-8000-000000000001",
+            "terminal": "sekupang",
+            "destination": "Fixture Singapore",
+            "service_date": "2026-10-23",
+            "allowed_service_kinds": [
+              "cargo"
+            ],
+            "source_timezone": "Asia/Jakarta",
+            "source_departure_at": "2026-10-23T09:30:00+07:00",
+            "source_cutoff_at": "2026-10-23T09:00:00+07:00",
+            "verified_at": "2026-10-23T06:00:00+07:00",
+            "source": "synthetic_fixture"
+          }
+        ],
+        "config": {
+          "safety_buffer_min": 15,
+          "schedule_max_age_min": 1440
+        },
+        "clock": "2026-10-23T07:00:00+07:00",
+        "failures": {},
+        "retrieval": {
+          "truncated": false
+        }
+      },
+      "samples": [
+        {
+          "sample": 0,
+          "condition": "first_request_after_fresh_testclient",
+          "elapsed_ms": 9.15175,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 1,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.020625,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 2,
+          "condition": "warm_sequential",
+          "elapsed_ms": 7.493792,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 3,
+          "condition": "warm_sequential",
+          "elapsed_ms": 9.409208,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 4,
+          "condition": "warm_sequential",
+          "elapsed_ms": 9.454,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 5,
+          "condition": "warm_sequential",
+          "elapsed_ms": 8.492208,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 6,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.459208,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 7,
+          "condition": "warm_sequential",
+          "elapsed_ms": 4.807791,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 8,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.674875,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 9,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.020292,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 10,
+          "condition": "warm_sequential",
+          "elapsed_ms": 4.931584,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 11,
+          "condition": "warm_sequential",
+          "elapsed_ms": 4.748083,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 12,
+          "condition": "warm_sequential",
+          "elapsed_ms": 4.931958,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 13,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.209417,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 14,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.053125,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 15,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.6015,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 16,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.202916,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 17,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.325209,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 18,
+          "condition": "warm_sequential",
+          "elapsed_ms": 7.074125,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 19,
+          "condition": "warm_sequential",
+          "elapsed_ms": 5.32925,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        },
+        {
+          "sample": 20,
+          "condition": "warm_sequential",
+          "elapsed_ms": 6.037375,
+          "http_status": 200,
+          "status": "RISKY",
+          "buffer_min": 0.0
+        }
+      ],
+      "summary": {
+        "first_request_ms": 9.15175,
+        "warm_n": 20,
+        "warm_min_ms": 4.748083,
+        "warm_median_ms": 5.530354,
+        "warm_p95_nearest_rank_ms": 9.409208,
+        "warm_max_ms": 9.454
+      },
+      "failures_separate_from_success_samples": [
+        {
+          "injected_failure": "outage",
+          "elapsed_ms": 1.931541,
+          "http_status": 503,
+          "error_code": "DEPENDENCY_UNAVAILABLE"
+        },
+        {
+          "injected_failure": "timeout",
+          "elapsed_ms": 1.729584,
+          "http_status": 503,
+          "error_code": "DEPENDENCY_TIMEOUT"
+        },
+        {
+          "injected_failure": "malformed",
+          "elapsed_ms": 2.026167,
+          "http_status": 503,
+          "error_code": "INVALID_DEPENDENCY_RESPONSE"
+        }
+      ],
+      "outbound_operations_mocked_get_only": true
+    }
+  ],
+  "live_latency": {
+    "result": "PENDING",
+    "reason": "User confirmed no approved non-production/live read-only access yet."
+  }
+}

@@ -1,0 +1,431 @@
+{
+  "task": "D6-04_FIXTURE_PREPARATION",
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "provenance": "SYNTHETIC SIMULATION ONLY: real headless Next UI with loopback fake Auth/API. No live backend, real login/sailing/traffic or participant evidence.",
+  "browser": "156.0.8078.4",
+  "checks_passed": 5,
+  "checks": [
+    "Overnight: explicit next-day service, ETA and fixed cutoff render in WIB",
+    "Overnight road revision changes SAFE to RISKY without moving the sailing",
+    "Singapore source date converts to previous Jakarta service date",
+    "U4 delayed source-zone response is discarded after editing; recalculation uses new road time",
+    "U4 source details fit at 375px and remain keyboard accessible"
+  ],
+  "participant_sessions": 0,
+  "scope": "Synthetic U4 fixture readiness only; no participant or live evidence.",
+  "result": "passed",
+  "blocked_external_hosts": [],
+  "page_error_names": [],
+  "page_error_details": [],
+  "cancelled_requests": [
+    {
+      "input": {
+        "origin": {
+          "lat": 1.0604795,
+          "lng": 104.0303214
+        },
+        "origin_name": "Batamindo",
+        "terminal": "batu_ampar",
+        "ferry_destination": "Fixture Singapore",
+        "departure_date": "2026-10-23",
+        "departure_time": "22:00",
+        "service_date": "2026-10-23",
+        "service_kind": "cargo",
+        "day_type": "weekday",
+        "schedule_id": "00000000-0000-4000-8000-000000000001"
+      },
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "responses": [
+    {
+      "input": {
+        "origin": {
+          "lat": 1.0604795,
+          "lng": 104.0303214
+        },
+        "origin_name": "Batamindo",
+        "terminal": "batu_ampar",
+        "ferry_destination": "Fixture Singapore",
+        "departure_date": "2026-10-23",
+        "departure_time": "23:50",
+        "service_date": "2026-10-24",
+        "service_kind": "cargo",
+        "day_type": "weekday",
+        "schedule_id": "00000000-0000-4000-8000-000000000001"
+      },
+      "http_status": 200,
+      "actual": {
+        "contract_version": "1.0",
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "reason": "Synthetic scenario: signed buffer 20 min, simulation threshold 15 min.",
+        "plan": {
+          "origin": {
+            "lat": 1.0604795,
+            "lng": 104.0303214
+          },
+          "origin_name": "Batamindo",
+          "terminal": "batu_ampar",
+          "ferry_destination": "Fixture Singapore",
+          "departure_date": "2026-10-23",
+          "departure_time": "23:50",
+          "service_date": "2026-10-24",
+          "service_kind": "cargo",
+          "day_type": "weekday",
+          "schedule_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "planned_departure_at": "2026-10-23T23:50:00+07:00",
+        "selected_schedule": {
+          "schedule_id": "00000000-0000-4000-8000-000000000001",
+          "terminal": "batu_ampar",
+          "destination": "Fixture Singapore",
+          "service_date": "2026-10-24",
+          "allowed_service_kinds": [
+            "cargo"
+          ],
+          "source_timezone": "Asia/Jakarta",
+          "source_departure_at": "2026-10-24T01:10:00.000+07:00",
+          "source_cutoff_at": "2026-10-24T00:40:00.000+07:00",
+          "verified_at": "2026-10-23T21:40:00.000+07:00",
+          "source": "synthetic_fixture",
+          "occurrence_id": "00000000-0000-4000-8000-000000000001@2026-10-24",
+          "departure_at": "2026-10-24T01:10:00.000+07:00",
+          "cutoff_at": "2026-10-24T00:40:00.000+07:00"
+        },
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-24T00:20:00.000+07:00",
+        "buffer_min": 20,
+        "safety_buffer_min": 15,
+        "latest_departure_estimate_at": "2026-10-23T23:55:00.000+07:00",
+        "route_estimate": {
+          "final_time_min": 30,
+          "routing_source": "OSRM API",
+          "congestion_status": "synthetic_estimate",
+          "context_verified": true,
+          "estimated_arrival_at": "2026-10-24T00:20:00.000+07:00"
+        },
+        "alternatives": [],
+        "selection": {
+          "mode": "selected",
+          "service_date": "2026-10-24",
+          "examined_count": 1,
+          "excluded_count": 0,
+          "candidate_limit": 100,
+          "truncated": false
+        },
+        "exclusions": [],
+        "sources": {
+          "schedule": "synthetic_fixture",
+          "route": "OSRM API",
+          "congestion": "synthetic_estimate",
+          "cutoff": "synthetic_fixture"
+        },
+        "data_status": "simulation",
+        "assumptions": [
+          "Synthetic U4 occurrence: fixed recorded cutoff; changing road time does not move the sailing. Not real sailing or traffic evidence."
+        ],
+        "warnings": [
+          {
+            "code": "BACKWARD_ESTIMATE_FIXED_DURATION",
+            "message": "Recalculate if you use the latest-departure estimate in a different traffic period."
+          }
+        ],
+        "calculated_at": "2026-10-23T23:50:00.000+07:00",
+        "disclaimer": "Synthetic UI simulation only; these are not real sailings or observed traffic."
+      }
+    },
+    {
+      "input": {
+        "origin": {
+          "lat": 1.0604795,
+          "lng": 104.0303214
+        },
+        "origin_name": "Batamindo",
+        "terminal": "batu_ampar",
+        "ferry_destination": "Fixture Singapore",
+        "departure_date": "2026-10-24",
+        "departure_time": "00:00",
+        "service_date": "2026-10-24",
+        "service_kind": "cargo",
+        "day_type": "weekend",
+        "schedule_id": "00000000-0000-4000-8000-000000000001"
+      },
+      "http_status": 200,
+      "actual": {
+        "contract_version": "1.0",
+        "status": "RISKY",
+        "reason_code": "BELOW_SAFETY_BUFFER",
+        "reason": "Synthetic scenario: signed buffer 10 min, simulation threshold 15 min.",
+        "plan": {
+          "origin": {
+            "lat": 1.0604795,
+            "lng": 104.0303214
+          },
+          "origin_name": "Batamindo",
+          "terminal": "batu_ampar",
+          "ferry_destination": "Fixture Singapore",
+          "departure_date": "2026-10-24",
+          "departure_time": "00:00",
+          "service_date": "2026-10-24",
+          "service_kind": "cargo",
+          "day_type": "weekend",
+          "schedule_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "planned_departure_at": "2026-10-24T00:00:00+07:00",
+        "selected_schedule": {
+          "schedule_id": "00000000-0000-4000-8000-000000000001",
+          "terminal": "batu_ampar",
+          "destination": "Fixture Singapore",
+          "service_date": "2026-10-24",
+          "allowed_service_kinds": [
+            "cargo"
+          ],
+          "source_timezone": "Asia/Jakarta",
+          "source_departure_at": "2026-10-24T01:10:00.000+07:00",
+          "source_cutoff_at": "2026-10-24T00:40:00.000+07:00",
+          "verified_at": "2026-10-23T21:40:00.000+07:00",
+          "source": "synthetic_fixture",
+          "occurrence_id": "00000000-0000-4000-8000-000000000001@2026-10-24",
+          "departure_at": "2026-10-24T01:10:00.000+07:00",
+          "cutoff_at": "2026-10-24T00:40:00.000+07:00"
+        },
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-24T00:30:00.000+07:00",
+        "buffer_min": 10,
+        "safety_buffer_min": 15,
+        "latest_departure_estimate_at": "2026-10-23T23:55:00.000+07:00",
+        "route_estimate": {
+          "final_time_min": 30,
+          "routing_source": "OSRM API",
+          "congestion_status": "synthetic_estimate",
+          "context_verified": true,
+          "estimated_arrival_at": "2026-10-24T00:30:00.000+07:00"
+        },
+        "alternatives": [],
+        "selection": {
+          "mode": "selected",
+          "service_date": "2026-10-24",
+          "examined_count": 1,
+          "excluded_count": 0,
+          "candidate_limit": 100,
+          "truncated": false
+        },
+        "exclusions": [],
+        "sources": {
+          "schedule": "synthetic_fixture",
+          "route": "OSRM API",
+          "congestion": "synthetic_estimate",
+          "cutoff": "synthetic_fixture"
+        },
+        "data_status": "simulation",
+        "assumptions": [
+          "Synthetic U4 occurrence: fixed recorded cutoff; changing road time does not move the sailing. Not real sailing or traffic evidence."
+        ],
+        "warnings": [
+          {
+            "code": "BACKWARD_ESTIMATE_FIXED_DURATION",
+            "message": "Recalculate if you use the latest-departure estimate in a different traffic period."
+          }
+        ],
+        "calculated_at": "2026-10-24T00:00:00.000+07:00",
+        "disclaimer": "Synthetic UI simulation only; these are not real sailings or observed traffic."
+      }
+    },
+    {
+      "input": {
+        "origin": {
+          "lat": 1.0604795,
+          "lng": 104.0303214
+        },
+        "origin_name": "Batamindo",
+        "terminal": "batu_ampar",
+        "ferry_destination": "Fixture Singapore",
+        "departure_date": "2026-10-23",
+        "departure_time": "22:00",
+        "service_date": "2026-10-23",
+        "service_kind": "cargo",
+        "day_type": "weekday",
+        "schedule_id": "00000000-0000-4000-8000-000000000001"
+      },
+      "http_status": 200,
+      "actual": {
+        "contract_version": "1.0",
+        "status": "SAFE",
+        "reason_code": "BUFFER_SUFFICIENT",
+        "reason": "Synthetic scenario: signed buffer 30 min, simulation threshold 15 min.",
+        "plan": {
+          "origin": {
+            "lat": 1.0604795,
+            "lng": 104.0303214
+          },
+          "origin_name": "Batamindo",
+          "terminal": "batu_ampar",
+          "ferry_destination": "Fixture Singapore",
+          "departure_date": "2026-10-23",
+          "departure_time": "22:00",
+          "service_date": "2026-10-23",
+          "service_kind": "cargo",
+          "day_type": "weekday",
+          "schedule_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "planned_departure_at": "2026-10-23T22:00:00+07:00",
+        "selected_schedule": {
+          "schedule_id": "00000000-0000-4000-8000-000000000001",
+          "terminal": "batu_ampar",
+          "destination": "Fixture Singapore",
+          "service_date": "2026-10-23",
+          "allowed_service_kinds": [
+            "cargo"
+          ],
+          "source_timezone": "Asia/Singapore",
+          "source_departure_at": "2026-10-24T00:30:00.000+08:00",
+          "source_cutoff_at": "2026-10-24T00:00:00.000+08:00",
+          "verified_at": "2026-10-23T20:00:00.000+07:00",
+          "source": "synthetic_fixture",
+          "occurrence_id": "00000000-0000-4000-8000-000000000001@2026-10-23",
+          "departure_at": "2026-10-23T23:30:00.000+07:00",
+          "cutoff_at": "2026-10-23T23:00:00.000+07:00"
+        },
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T22:30:00.000+07:00",
+        "buffer_min": 30,
+        "safety_buffer_min": 15,
+        "latest_departure_estimate_at": "2026-10-23T22:15:00.000+07:00",
+        "route_estimate": {
+          "final_time_min": 30,
+          "routing_source": "OSRM API",
+          "congestion_status": "synthetic_estimate",
+          "context_verified": true,
+          "estimated_arrival_at": "2026-10-23T22:30:00.000+07:00"
+        },
+        "alternatives": [],
+        "selection": {
+          "mode": "selected",
+          "service_date": "2026-10-23",
+          "examined_count": 1,
+          "excluded_count": 0,
+          "candidate_limit": 100,
+          "truncated": false
+        },
+        "exclusions": [],
+        "sources": {
+          "schedule": "synthetic_fixture",
+          "route": "OSRM API",
+          "congestion": "synthetic_estimate",
+          "cutoff": "synthetic_fixture"
+        },
+        "data_status": "simulation",
+        "assumptions": [
+          "Synthetic U4 occurrence: fixed recorded cutoff; changing road time does not move the sailing. Not real sailing or traffic evidence."
+        ],
+        "warnings": [
+          {
+            "code": "BACKWARD_ESTIMATE_FIXED_DURATION",
+            "message": "Recalculate if you use the latest-departure estimate in a different traffic period."
+          }
+        ],
+        "calculated_at": "2026-10-23T22:00:00.000+07:00",
+        "disclaimer": "Synthetic UI simulation only; these are not real sailings or observed traffic."
+      }
+    },
+    {
+      "input": {
+        "origin": {
+          "lat": 1.0604795,
+          "lng": 104.0303214
+        },
+        "origin_name": "Batamindo",
+        "terminal": "batu_ampar",
+        "ferry_destination": "Fixture Singapore",
+        "departure_date": "2026-10-23",
+        "departure_time": "22:20",
+        "service_date": "2026-10-23",
+        "service_kind": "cargo",
+        "day_type": "weekday",
+        "schedule_id": "00000000-0000-4000-8000-000000000001"
+      },
+      "http_status": 200,
+      "actual": {
+        "contract_version": "1.0",
+        "status": "RISKY",
+        "reason_code": "BELOW_SAFETY_BUFFER",
+        "reason": "Synthetic scenario: signed buffer 10 min, simulation threshold 15 min.",
+        "plan": {
+          "origin": {
+            "lat": 1.0604795,
+            "lng": 104.0303214
+          },
+          "origin_name": "Batamindo",
+          "terminal": "batu_ampar",
+          "ferry_destination": "Fixture Singapore",
+          "departure_date": "2026-10-23",
+          "departure_time": "22:20",
+          "service_date": "2026-10-23",
+          "service_kind": "cargo",
+          "day_type": "weekday",
+          "schedule_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "planned_departure_at": "2026-10-23T22:20:00+07:00",
+        "selected_schedule": {
+          "schedule_id": "00000000-0000-4000-8000-000000000001",
+          "terminal": "batu_ampar",
+          "destination": "Fixture Singapore",
+          "service_date": "2026-10-23",
+          "allowed_service_kinds": [
+            "cargo"
+          ],
+          "source_timezone": "Asia/Singapore",
+          "source_departure_at": "2026-10-24T00:30:00.000+08:00",
+          "source_cutoff_at": "2026-10-24T00:00:00.000+08:00",
+          "verified_at": "2026-10-23T20:00:00.000+07:00",
+          "source": "synthetic_fixture",
+          "occurrence_id": "00000000-0000-4000-8000-000000000001@2026-10-23",
+          "departure_at": "2026-10-23T23:30:00.000+07:00",
+          "cutoff_at": "2026-10-23T23:00:00.000+07:00"
+        },
+        "travel_time_min": 30,
+        "estimated_arrival_at": "2026-10-23T22:50:00.000+07:00",
+        "buffer_min": 10,
+        "safety_buffer_min": 15,
+        "latest_departure_estimate_at": "2026-10-23T22:15:00.000+07:00",
+        "route_estimate": {
+          "final_time_min": 30,
+          "routing_source": "OSRM API",
+          "congestion_status": "synthetic_estimate",
+          "context_verified": true,
+          "estimated_arrival_at": "2026-10-23T22:50:00.000+07:00"
+        },
+        "alternatives": [],
+        "selection": {
+          "mode": "selected",
+          "service_date": "2026-10-23",
+          "examined_count": 1,
+          "excluded_count": 0,
+          "candidate_limit": 100,
+          "truncated": false
+        },
+        "exclusions": [],
+        "sources": {
+          "schedule": "synthetic_fixture",
+          "route": "OSRM API",
+          "congestion": "synthetic_estimate",
+          "cutoff": "synthetic_fixture"
+        },
+        "data_status": "simulation",
+        "assumptions": [
+          "Synthetic U4 occurrence: fixed recorded cutoff; changing road time does not move the sailing. Not real sailing or traffic evidence."
+        ],
+        "warnings": [
+          {
+            "code": "BACKWARD_ESTIMATE_FIXED_DURATION",
+            "message": "Recalculate if you use the latest-departure estimate in a different traffic period."
+          }
+        ],
+        "calculated_at": "2026-10-23T22:20:00.000+07:00",
+        "disclaimer": "Synthetic UI simulation only; these are not real sailings or observed traffic."
+      }
+    }
+  ]
+}

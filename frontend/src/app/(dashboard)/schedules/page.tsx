@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, MapPin, Calendar, Ship, CheckCircle2, RefreshCw, Anchor } from "lucide-react";
@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -29,17 +29,29 @@ interface Schedule {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
 
+async function readSchedules(): Promise<Schedule[]> {
+  const res = await fetch(`${API_URL}/schedules`);
+  const data = await res.json();
+  return data.schedules || [];
+}
+
+function subscribeDate(onChange: () => void) {
+  const timer = window.setInterval(onChange, 60000);
+  return () => window.clearInterval(timer);
+}
+const todayWib = () => new Date().toLocaleDateString("en-GB", { timeZone: "Asia/Jakarta" });
+const serverDate = () => "";
+
 export default function FerrySchedulesPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTerminal, setSelectedTerminal] = useState("all");
+  const displayedDate = useSyncExternalStore(subscribeDate, todayWib, serverDate);
 
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/schedules`);
-      const data = await res.json();
-      setSchedules(data.schedules || []);
+      setSchedules(await readSchedules());
     } catch (error) {
       console.error("Failed to fetch schedules", error);
     } finally {
@@ -48,7 +60,12 @@ export default function FerrySchedulesPage() {
   };
 
   useEffect(() => {
-    fetchSchedules();
+    let active = true;
+    readSchedules()
+      .then(data => { if (active) setSchedules(data); })
+      .catch(error => console.error("Failed to fetch schedules", error))
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, []);
 
   const filteredSchedules = selectedTerminal === "all" 
@@ -134,7 +151,7 @@ export default function FerrySchedulesPage() {
                 
                 <div className="flex items-center bg-white px-4 py-2 rounded-lg border border-[#E2E8F0]">
                   <Calendar className="w-4 h-4 text-[#5E6470] mr-2" />
-                  <span className="text-xs font-medium text-[#1A1D27]">{new Date().toLocaleDateString()}</span>
+                  <span className="text-xs font-medium text-[#1A1D27]">{displayedDate || "—"}</span>
                 </div>
               </div>
 

@@ -28,7 +28,7 @@ export default function LoginPage() {
     setError(null);
     
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -38,8 +38,8 @@ export default function LoginPage() {
       // Successfully logged in, AuthProvider will catch this via onAuthStateChange
       router.push("/dashboard");
       
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials.");
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : "Invalid credentials.");
     } finally {
       setLoading(false);
     }
@@ -54,8 +54,8 @@ export default function LoginPage() {
         }
       });
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || "An error occurred with Google Sign-In.");
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : "An error occurred with Google Sign-In.");
     }
   };
 

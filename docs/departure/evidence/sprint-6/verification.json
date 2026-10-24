@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "sprint": 6,
+  "overall_status": "IN_PROGRESS_WITH_EXPLICIT_PENDING_GATES",
+  "completed_full_task_ids": [
+    "D6-05"
+  ],
+  "tasks": {
+    "D6-01": {
+      "status": "PARTIAL",
+      "synthetic_criteria_passed": 13,
+      "failed": 0,
+      "pending_criteria": [
+        "DEP-14"
+      ]
+    },
+    "D6-02": {
+      "status": "PENDING_USER_MANUAL_SANITIZED_RESULTS",
+      "live_requests_attempted": false,
+      "manual_checklist": "docs/departure/reports/D6_02_MANUAL_CHECKLIST.md"
+    },
+    "D6-03": {
+      "status": "PARTIAL",
+      "backend_checks_passed": 431,
+      "browser_groups_passed": 26,
+      "helper_groups_passed": [
+        18,
+        8
+      ],
+      "typecheck_exit_code": 0,
+      "scoped_lint_exit_code": 0,
+      "build_exit_code": 0,
+      "full_lint_exit_code": 0,
+      "full_lint_existing_errors": 0,
+      "synthetic_success_timing_samples": 63,
+      "injected_failure_timing_samples": 9,
+      "live_latency_pending": true,
+      "full_lint_warnings": 16,
+      "U4_browser_groups_passed": 5,
+      "shared_browser_groups_passed": 5,
+      "route_browser_groups_passed": 13
+    },
+    "D6-04": {
+      "status": "DEFERRED_BY_USER_FOCUS_ON_FEATURE_IMPLEMENTATION",
+      "sessions_recorded": 0,
+      "fixture_setup": "U4_VERIFIED_SYNTHETIC; participant/institutional gate still pending",
+      "blocks_feature_implementation": false
+    },
+    "D6-05": {
+      "status": "COMPLETE_FOR_CURRENTLY_EVIDENCED_ISSUES",
+      "new_departure_defects": 0,
+      "app_code_fixes": 4,
+      "known_lint_errors": 0,
+      "shared_hydration_issue": "FIXED_AND_RETESTED",
+      "fixture_gap": "FIXED_AND_RETESTED_SYNTHETIC"
+    },
+    "D6-06": {
+      "status": "PARTIAL_EVIDENCE_MAP_PREPARED",
+      "live_and_participant_findings_missing": true
+    },
+    "D6-07": {
+      "status": "PARTIAL_GUIDE_PREPARED",
+      "release_readiness_complete": false
+    }
+  },
+  "simulation_label": "All executed application checks/data are synthetic simulation, except actual local elapsed test-processing measurements with fake dependencies. No real login, live backend, real sailing, observed traffic or participant evidence.",
+  "app_code_changed": true,
+  "frozen_sources_changed": false,
+  "prior_staged_work_preserved": true,
+  "env_files_read_or_printed": false,
+  "live_writes": false,
+  "deployment": false,
+  "commit_created": false,
+  "servers_stopped": true,
+  "follow_up_evidence": "follow-up-verification.json",
+  "current_priority": "User-managed local signed-in D6-02 acceptance; wait for sanitized manual results. .env read/load prohibition remains. D6-04 deferred."
+}

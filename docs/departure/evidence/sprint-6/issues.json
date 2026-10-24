@@ -1,0 +1,130 @@
+{
+  "date": "2026-10-24",
+  "task": "D6-05",
+  "new_departure_defects_observed": [],
+  "app_fixes_made": [
+    {
+      "issue_ids": [
+        "S6-LINT-01"
+      ],
+      "change": "Separate asynchronous initial schedule read from event-driven refresh; remove unused import."
+    },
+    {
+      "issue_ids": [
+        "S6-LINT-02",
+        "S6-LINT-03"
+      ],
+      "change": "Narrow unknown errors, remove unused response values, escape displayed apostrophe."
+    },
+    {
+      "issue_ids": [
+        "S6-LINT-04"
+      ],
+      "change": "Subscribe to matchMedia with useSyncExternalStore and stable server snapshot."
+    },
+    {
+      "issue_ids": [
+        "S6-UI-01"
+      ],
+      "change": "Render a hydration-stable WIB date and update at midnight."
+    }
+  ],
+  "status": "OBSERVED_ISSUES_FIXED_AND_RETESTED_LIVE_AND_USABILITY_GATES_STILL_PENDING",
+  "known_issues": [
+    {
+      "id": "S6-LINT-01",
+      "file": "frontend/src/app/(dashboard)/schedules/page.tsx",
+      "line": 51,
+      "errors": 1,
+      "kind": "set-state-in-effect",
+      "scope": "Existing shared schedule UI; minimal frontend lint fix",
+      "status": "FIXED_AND_RETESTED",
+      "verification": [
+        "full-lint-final.log",
+        "shared-browser-acceptance.json"
+      ]
+    },
+    {
+      "id": "S6-LINT-02",
+      "file": "frontend/src/app/login/page.tsx",
+      "lines": [
+        41,
+        57
+      ],
+      "errors": 2,
+      "kind": "explicit-any",
+      "scope": "Existing authentication UI; minimal frontend lint fix",
+      "status": "FIXED_AND_RETESTED",
+      "verification": [
+        "full-lint-final.log",
+        "shared-browser-acceptance.json"
+      ]
+    },
+    {
+      "id": "S6-LINT-03",
+      "file": "frontend/src/app/register/page.tsx",
+      "lines": [
+        61,
+        77,
+        261
+      ],
+      "errors": 3,
+      "kind": "explicit-any and unescaped apostrophe",
+      "scope": "Existing authentication UI; minimal frontend lint fix",
+      "status": "FIXED_AND_RETESTED",
+      "verification": [
+        "full-lint-final.log",
+        "shared-browser-acceptance.json"
+      ]
+    },
+    {
+      "id": "S6-LINT-04",
+      "file": "frontend/src/hooks/use-mobile.ts",
+      "line": 14,
+      "errors": 1,
+      "kind": "set-state-in-effect",
+      "scope": "Existing shared hook; minimal frontend lint fix",
+      "status": "FIXED_AND_RETESTED",
+      "verification": [
+        "full-lint-final.log",
+        "shared-browser-acceptance.json"
+      ]
+    }
+  ],
+  "disposition": "All currently observed lint errors, fixture gap and schedules hydration defect fixed and retested. Future actual integration/usability findings must be recorded and can reopen D6-05; no such findings are fabricated.",
+  "evidence": "full-lint-final.log",
+  "full_project_lint_exit_code": 0,
+  "scoped_departure_lint_exit_code": 0,
+  "usability_findings_available": false,
+  "live_findings_available": false,
+  "preparation_gaps": [
+    {
+      "id": "S6-FIXTURE-01",
+      "task": "D6-04",
+      "status": "FIXED_AND_RETESTED_SYNTHETIC",
+      "file": "frontend/scripts/departure-ui-fixture.mjs",
+      "finding": "Existing UI fixture supports same-date daytime only, with no source-zone control; U4 overnight/source-zone participant setup is incomplete.",
+      "evidence": "Source inspection: SCHEDULE_MISMATCH guard rejects different departure/service dates or road time after 21:00.",
+      "impact": "Full U1-U5 participant collection is not ready. Backend midnight/source-zone assertions remain valid independent synthetic evidence.",
+      "disposition": "Explicit overnight/source-zone modes added; five headless U4 groups pass, zero page errors. No backend or contract change.",
+      "verification": "u4-browser-acceptance.json"
+    }
+  ],
+  "new_shared_defects_observed": [
+    {
+      "id": "S6-UI-01",
+      "file": "frontend/src/app/(dashboard)/schedules/page.tsx",
+      "finding": "React hydration error #418 on schedules: default server/browser date formatting differed.",
+      "status": "FIXED_AND_RETESTED",
+      "fix": "Hydration-stable date snapshot with explicit en-GB/Asia/Jakarta formatting and minute subscription.",
+      "evidence": [
+        "shared-browser-attempt-2.json",
+        "shared-browser-acceptance.json"
+      ],
+      "retest": "Zero uncaught page errors and actual date change across simulated Jakarta midnight."
+    }
+  ],
+  "full_project_lint_errors_remaining": 0,
+  "full_project_lint_warnings_remaining": 16,
+  "historical_evidence": "full-lint.log retains initial 7 errors/19 warnings; failed shared browser attempts retained."
+}

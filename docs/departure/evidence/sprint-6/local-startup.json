@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-24",
+  "timezone": "Asia/Jakarta",
+  "task": "D6-02_LOCAL_PREFLIGHT",
+  "api_base": "http://127.0.0.1:8080",
+  "mode": "Actual existing local FastAPI application; no mocked Auth/API",
+  "health": {
+    "http_status": 200,
+    "body": {
+      "status": "ok"
+    }
+  },
+  "departure_post_registered": true,
+  "exported_supabase_config_available": false,
+  "real_login_tested": false,
+  "schedule_or_route_data_read": false,
+  "env_files_read": false,
+  "live_data_written": false,
+  "D6_02_complete": false,
+  "user_selected_backend_location": "local",
+  "backend_running_at_capture": true,
+  "frontend_started": false,
+  "folder_discovery": {
+    "supabase_config": "supabase/config.toml",
+    "project_id": "hackathon",
+    "configured_local_supabase_api_port": 54321,
+    "configured_local_postgres_port": 54322,
+    "local_supabase_listener_observed": false,
+    "supabase_cli_on_PATH": false,
+    "docker_cli_on_PATH": false,
+    "env_files_exist": [
+      "backend/.env",
+      "frontend/.env.local"
+    ],
+    "env_contents_read": false,
+    "supabase_setup_reference": "supabase/README.md",
+    "bootstrap_limit": "Existing migrations extend the linked project; README documents a missing historical base migration and warns against treating this folder as a complete fresh-stack bootstrap."
+  },
+  "next_required": "User runs their own backend/frontend and signed-in checklist, then pastes sanitized manual results. No assistant .env access.",
+  "shutdown_follow_up": {
+    "reason": "User will own local backend/frontend processes; release assistant-owned 8080 listener.",
+    "method": "SIGINT to the known assistant exec session; graceful Uvicorn shutdown observed",
+    "listener_check_command": "lsof -nP -iTCP:8080 -sTCP:LISTEN",
+    "listener_check_exit_code": 1,
+    "listener_check_output_empty": true,
+    "assistant_backend_running": false,
+    "user_processes_stopped": false
+  }
+}
