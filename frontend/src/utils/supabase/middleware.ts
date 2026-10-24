@@ -2,13 +2,31 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? ''
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? ''
+  let configured = false
+  try {
+    const url = new URL(supabaseUrl)
+    configured = Boolean(supabaseKey) &&
+      (url.protocol === 'https:' || url.protocol === 'http:') &&
+      !/\s/.test(supabaseUrl) && !url.username && !url.password && !url.search && !url.hash
+  } catch {
+    // Never expose the configured URL/key in the response or diagnostics.
+  }
+  if (!configured) {
+    return new NextResponse(
+      'Authentication configuration is invalid. Set NEXT_PUBLIC_SUPABASE_URL to the Supabase Project URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to its public key, then restart the frontend.',
+      { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } }
+    )
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
