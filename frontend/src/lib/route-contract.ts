@@ -239,7 +239,14 @@ export function selectRouteOption(
   const selected =
     options.find((option) => option.route_id === routeId) ||
     options.find((option) => option.route_id === data.default_route_id);
-  return selected ? { ...data, ...selected } : data;
+  return selected
+    ? {
+        ...data,
+        ...Object.fromEntries(
+          Object.entries(selected).filter(([, value]) => value !== undefined),
+        ),
+      }
+    : data;
 }
 
 export function parseRouteAlternatives(value: unknown): PlannerRouteData {

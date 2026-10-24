@@ -16,7 +16,9 @@ import { RecordedSailingPicker } from "./RecordedSailingPicker";
 const selectClassName =
   "h-9 w-full rounded-lg border border-input bg-background px-3 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
-function LocationAutocomplete({
+const customCoordinatesOption = "__custom_coordinates__";
+
+function LocationSelect({
   id,
   label,
   value,
@@ -27,122 +29,64 @@ function LocationAutocomplete({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const query = value.trim().toLocaleLowerCase();
-  const options = batamLocations
-    .filter((location) =>
-      !query ||
-      [location.name, location.id, ...location.aliases].some((candidate) =>
-        candidate.toLocaleLowerCase().includes(query),
-      ),
-    )
-    .slice(0, 8);
-  const listId = `${id}-location-options`;
-  const choose = (name: string) => {
-    onChange(name);
-    setOpen(false);
-  };
-
-  useEffect(
-    () => () => {
-      if (blurTimer.current) clearTimeout(blurTimer.current);
-    },
-    [],
+  const [customCoordinatesSelected, setCustomCoordinatesSelected] = useState(
+    value.includes(","),
   );
+  const isSupportedLocation = batamLocations.some((location) =>
+    [location.id, location.name, ...location.aliases].includes(value),
+  );
+  const customCoordinates =
+    !isSupportedLocation && (customCoordinatesSelected || Boolean(value));
 
   return (
-    <div className="relative z-20 min-w-0 space-y-2">
+    <div className="min-w-0 space-y-2">
       <label htmlFor={id} className="text-sm font-medium capitalize">
         {label}
       </label>
-      <Input
+      <select
         id={id}
-        role="combobox"
-        aria-autocomplete="list"
-        aria-expanded={open}
-        aria-controls={open ? listId : undefined}
-        aria-activedescendant={
-          open && activeIndex >= 0 && options[activeIndex]
-            ? `${id}-location-option-${options[activeIndex].id}`
-            : undefined
-        }
-        aria-describedby={`${id}-location-hint`}
-        value={value}
+        value={customCoordinates ? customCoordinatesOption : value}
         onChange={(event) => {
-          onChange(event.target.value);
-          setActiveIndex(-1);
-          setOpen(true);
-        }}
-        onFocus={() => {
-          if (blurTimer.current) clearTimeout(blurTimer.current);
-          setOpen(true);
-        }}
-        onBlur={() => {
-          // Let a pointer selection fire before dismissing the list.
-          blurTimer.current = setTimeout(() => setOpen(false), 150);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowDown" && options.length) {
-            event.preventDefault();
-            setOpen(true);
-            setActiveIndex((index) => Math.min(index + 1, options.length - 1));
-          } else if (event.key === "ArrowUp" && options.length) {
-            event.preventDefault();
-            setOpen(true);
-            setActiveIndex((index) =>
-              index < 0 ? options.length - 1 : Math.max(index - 1, 0),
-            );
-          } else if (
-            event.key === "Enter" &&
-            open &&
-            options[activeIndex]
-          ) {
-            event.preventDefault();
-            choose(options[activeIndex].name);
-          } else if (event.key === "Escape" && open) {
-            event.preventDefault();
-            setOpen(false);
+          if (event.target.value === customCoordinatesOption) {
+            setCustomCoordinatesSelected(true);
+            onChange("");
+            return;
           }
+          setCustomCoordinatesSelected(false);
+          onChange(event.target.value);
         }}
-        required
-        maxLength={256}
-        autoComplete="off"
-      />
-      <p id={`${id}-location-hint`} className="text-xs text-muted-foreground">
-        Search supported Batam locations or enter latitude, longitude.
-      </p>
-      {open && (
-        <div
-          id={listId}
-          role="listbox"
-          aria-label={`${label} suggestions`}
-          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg"
-        >
-          {options.length ? (
-            options.map((location, index) => (
-              <button
-                id={`${id}-location-option-${location.id}`}
-                key={location.id}
-                type="button"
-                role="option"
-                aria-selected={index === activeIndex}
-                className={`w-full rounded-md px-3 py-2 text-left text-sm ${index === activeIndex ? "bg-accent text-accent-foreground" : "hover:bg-accent/70"}`}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => choose(location.name)}
-              >
-                {location.name}
-              </button>
-            ))
-          ) : (
-            <p role="status" className="px-3 py-2 text-sm text-muted-foreground">
-              No matching locations. You can enter coordinates as latitude,
-              longitude.
-            </p>
-          )}
-        </div>
+        className={selectClassName}
+        required={!customCoordinates}
+        aria-describedby={`${id}-location-hint`}
+      >
+        <option value="" disabled>
+          Select {label.toLocaleLowerCase()}
+        </option>
+        {batamLocations.map((location) => (
+          <option key={location.id} value={location.name}>
+            {location.name}
+          </option>
+        ))}
+        <option value={customCoordinatesOption}>Custom coordinates</option>
+      </select>
+      {customCoordinates && (
+        <Input
+          id={`${id}-coordinates`}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Latitude, longitude"
+          inputMode="decimal"
+          autoComplete="off"
+          maxLength={80}
+          required
+          aria-label={`${label} coordinates`}
+        />
       )}
+      <p id={`${id}-location-hint`} className="text-xs text-muted-foreground">
+        {customCoordinates
+          ? "Enter latitude, longitude within the supported Batam planning area."
+          : "Choose a supported Batam location or select Custom coordinates."}
+      </p>
     </div>
   );
 }
@@ -206,13 +150,13 @@ function PlannerWorkspace({ account }: { account: string }) {
               aria-label="Route planning inputs"
             >
               <div className="grid min-w-0 gap-4 md:grid-cols-2">
-                <LocationAutocomplete
+                <LocationSelect
                   id="origin"
                   label="Origin"
                   value={form.origin}
                   onChange={(value) => update("origin", value)}
                 />
-                <LocationAutocomplete
+                <LocationSelect
                   id="destination"
                   label="Destination"
                   value={form.destination}
@@ -376,11 +320,13 @@ function PlannerWorkspace({ account }: { account: string }) {
                     id="route-comparison-note"
                     className="text-xs leading-relaxed text-muted-foreground"
                   >
-                    These are the distinct routes returned by the routing
-                    service. Travel time and congestion are estimates, not
-                    verified live traffic.
+                    {result.routing_source === "Synthetic UI fixture"
+                      ? "These synthetic route options are supplied by the local UI fixture. Travel time and congestion are estimates, not verified live traffic."
+                      : "These are the distinct routes returned by the routing service. Travel time and congestion are estimates, not verified live traffic."}
                     {routeOptions.length === 1
-                      ? " The routing service did not return an alternative."
+                      ? result.routing_source === "Synthetic UI fixture"
+                        ? " The local fixture does not include an alternative."
+                        : " The routing service did not return an alternative."
                       : " Select a route to update the map and estimate below."}
                   </p>
                   <div className="grid min-w-0 gap-3 md:grid-cols-2">
@@ -471,15 +417,19 @@ function PlannerWorkspace({ account }: { account: string }) {
                 emissionFormulaProvenance="current"
               />
               <p className="mt-4 text-xs text-muted-foreground">
-                Calculated:{" "}
+                {selectedResult?.routing_source === "Synthetic UI fixture"
+                  ? "Sample fixture timestamp: "
+                  : "Calculated: "}
                 {selectedResult?.calculation_time
                   ? new Date(selectedResult.calculation_time).toLocaleString("en-GB", {
                       timeZone: "Asia/Jakarta",
                     }) + " WIB"
                   : "not supplied"}
-                . Observation freshness is unverified. Congestion uses synthetic
-                project data or an explicit default. Emissions are simplified
-                estimates; no measured savings claim.
+                {selectedResult?.routing_source === "Synthetic UI fixture"
+                  ? selectedResult.calculation_time
+                    ? ". Sample timestamp follows the requested departure date; no live routing request was made."
+                    : ". No departure date was supplied, so the fixture did not provide a timestamp; no live routing request was made."
+                  : ". Observation freshness is unverified. Congestion uses synthetic project data or an explicit default. Emissions are simplified estimates; no measured savings claim."}
               </p>
             </>
           ) : (

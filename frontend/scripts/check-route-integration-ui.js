@@ -33,7 +33,7 @@ async (page) => {
     await calculate();
     assert(await page.getByRole("radio", { name: "Select Route 1" }).count() === 1, "single route option missing");
     assert(await page.getByRole("radio", { name: "Select Route 2" }).count() === 0, "an alternative was fabricated");
-    await page.getByText("The routing service did not return an alternative.", { exact: false }).waitFor();
+    await page.getByText("The local fixture does not include an alternative.", { exact: false }).waitFor();
     await control({ singleRoute: false });
   });
   await check("unknown location is actionable and never reaches routing", async () => {

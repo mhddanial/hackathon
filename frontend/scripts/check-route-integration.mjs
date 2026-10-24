@@ -101,7 +101,7 @@ await check("API uses validated request, preserves fields and rejects errors or 
     await assert.rejects(api.estimateRoute(input, new AbortController().signal));
   } finally { globalThis.fetch = original; }
 });
-await check("route alternatives validate independently and selection keeps geometry and metrics together", () => {
+await check("route selection keeps option fields and preserves response-level cutoff data omitted by options", () => {
   const first = {
     route_id: "route-1", display_label: "Route 1", routing_source: "OSRM API",
     distance_km: 5, base_time_min: 10, final_time_min: 15, emission_kg: 1.5,
@@ -116,13 +116,23 @@ await check("route alternatives validate independently and selection keeps geome
     route_geometry: { type: "LineString", coordinates: [[104, 1], [104.05, 1.04], [104.1, 1.1]] },
   };
   const parsed = contract.parseRouteAlternatives({
-    ...first, default_route_id: "route-1", route_options: [first, second],
+    ...first, departure_feasible: true, cutoff_slack_min: 5,
+    default_route_id: "route-1", route_options: [first, second],
   });
   const selected = contract.selectRouteOption(parsed, "route-2");
   assert.equal(selected.distance_km, second.distance_km);
   assert.equal(selected.final_time_min, second.final_time_min);
   assert.deepEqual(selected.route_geometry, second.route_geometry);
+  assert.equal(selected.departure_feasible, true);
+  assert.equal(selected.cutoff_slack_min, 5);
   assert.equal(contract.selectRouteOption(parsed, "unknown").distance_km, first.distance_km);
+  const optionCutoff = contract.parseRouteAlternatives({
+    ...first, departure_feasible: true, cutoff_slack_min: 5,
+    default_route_id: "route-1",
+    route_options: [first, { ...second, departure_feasible: false, cutoff_slack_min: -3 }],
+  });
+  assert.equal(contract.selectRouteOption(optionCutoff, "route-2").departure_feasible, false);
+  assert.equal(contract.selectRouteOption(optionCutoff, "route-2").cutoff_slack_min, -3);
   assert.equal(contract.parseRoute(route).route_options, undefined);
   assert.deepEqual(contract.parseRouteAlternatives(route).route_options, []);
   assert.throws(() => contract.parseRouteAlternatives({
