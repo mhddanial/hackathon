@@ -34,6 +34,162 @@ test.beforeEach(async ({ page }) => {
       await route.abort();
     }
   });
+  await setFixture(page, {
+    routeFailure: false,
+    routeDelay: 0,
+    singleRoute: false,
+    alternativesUnavailable: false,
+  });
+});
+
+test("location suggestions can be selected with pointer and keyboard", async ({
+  page,
+}) => {
+  await page.goto("/planner");
+
+  const origin = page.getByRole("combobox", { name: "Origin" });
+  await origin.fill("Batu Ampar");
+  await page.getByRole("option", { name: "Batu Ampar Port" }).click();
+  await expect(origin).toHaveValue("Batu Ampar Port");
+
+  const destination = page.getByRole("combobox", { name: "Destination" });
+  await destination.fill("Batamindo");
+  await destination.press("ArrowDown");
+  await destination.press("Enter");
+  await expect(destination).toHaveValue("Batamindo Industrial Park");
+
+  await page.getByRole("button", { name: "Calculate estimate" }).click();
+  await expect(page.getByRole("status").getByText(/Estimate ready/)).toBeVisible();
+  const requests = await routeRequests(page);
+  expect(requests.at(-1).body.origin_name).toBe("Batu Ampar Port");
+  expect(requests.at(-1).body.destination_name).toBe("Batamindo Industrial Park");
+
+  await destination.fill("not in the location catalog");
+  await expect(
+    page.getByRole("status").getByText(/No matching locations/),
+  ).toBeVisible();
+  await destination.press("Escape");
+  await expect(
+    page.getByRole("listbox", { name: "Destination suggestions" }),
+  ).toHaveCount(0);
+});
+
+test("recorded sailings and bounded planner choices update their displayed values", async ({
+  page,
+}) => {
+  await page.goto("/planner");
+
+  const sailing = page.getByLabel("Copy a recorded sailing time");
+  await expect(sailing).toBeEnabled();
+  await sailing.selectOption("fixture-sailing");
+  await expect(page.getByLabel("Vessel ETD")).toHaveValue("18:00");
+
+  const dayType = page.getByLabel("Day type");
+  await dayType.selectOption("weekend");
+  await expect(dayType).toHaveValue("weekend");
+
+  const cargoType = page.getByLabel("Cargo planning category");
+  await cargoType.selectOption("FAST_FREIGHT");
+  await expect(cargoType).toHaveValue("FAST_FREIGHT");
+  await cargoType.selectOption("CONTAINER");
+  await expect(cargoType).toHaveValue("CONTAINER");
+
+  await page.getByRole("button", { name: "Calculate estimate" }).click();
+  await expect(page.getByRole("status").getByText(/Estimate ready/)).toBeVisible();
+  const requests = await routeRequests(page);
+  expect(requests.at(-1).body.day_type).toBe("weekend");
+  expect(requests.at(-1).body.cargo_type).toBe("CONTAINER");
+  expect(requests.at(-1).body.vessel_etd).toBe("18:00");
+});
+
+test("route calculation exposes loading, success, and failure feedback", async ({
+  page,
+}) => {
+  await setFixture(page, { routeDelay: 3000, routeFailure: false });
+  await page.goto("/planner");
+  const requestStarted = page.waitForRequest((request) =>
+    request.url().endsWith("/route/alternatives"),
+  );
+  await page.getByRole("button", { name: "Calculate estimate" }).click();
+  await requestStarted;
+
+  const calculating = page.getByRole("button", { name: /Calculating route/ });
+  await expect(calculating).toBeDisabled();
+  await expect(
+    page.getByRole("status").getByText(/Estimating the route/),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("status").getByText(/Estimate ready/),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Calculate estimate" }),
+  ).toBeEnabled();
+
+  await setFixture(page, { routeDelay: 0, routeFailure: true });
+  await page.getByRole("button", { name: "Calculate estimate" }).click();
+  await expect(
+    page
+      .getByRole("form", { name: "Route planning inputs" })
+      .getByRole("alert"),
+  ).toContainText(
+    "Route data is temporarily unavailable.",
+  );
+  await expect(
+    page.getByRole("button", { name: "Calculate estimate" }),
+  ).toBeEnabled();
+});
+
+test("route results use two desktop columns and enter view after mobile calculation", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/planner");
+  await page.getByRole("button", { name: "Calculate estimate" }).click();
+  const form = page.getByRole("form", { name: "Route planning inputs" });
+  const results = page.getByRole("region", { name: "Route estimate" });
+  const formBox = await form.boundingBox();
+  const resultBox = await results.boundingBox();
+  expect(formBox).not.toBeNull();
+  expect(resultBox).not.toBeNull();
+  expect(resultBox!.x).toBeGreaterThan(formBox!.x + formBox!.width / 2);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  await page.getByRole("button", { name: "Calculate estimate" }).click();
+  await expect(
+    page.getByRole("status").getByText(/Estimate ready/),
+  ).toBeInViewport();
+});
+
+test("landing page links to real workspaces and avoids unsupported product claims", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Plan a route. Understand the estimate." }),
+  ).toBeVisible();
+  const mainNavigation = page.getByRole("navigation", {
+    name: "Main navigation",
+  });
+  await expect(
+    mainNavigation.getByRole("link", { name: "Route Planner" }),
+  ).toHaveAttribute("href", "/planner");
+  await expect(
+    mainNavigation.getByRole("link", { name: "Ferry Schedules" }),
+  ).toHaveAttribute("href", "/schedules");
+  await expect(
+    mainNavigation.getByRole("link", { name: "Logistics Oracle" }),
+  ).toHaveAttribute("href", "/oracle");
+
+  const landingCopy = await page.locator("main").innerText();
+  expect(landingCopy).not.toMatch(
+    /99\.8%|-30%|missed cut-offs|real-time traffic|real-time port analytics|Scope 3|Tuas checkpoint|autonomous supply chain agent|predictive delay alerts|approve re-route/i,
+  );
+  expect(landingCopy).toMatch(/synthetic project estimates/i);
+  expect(landingCopy).toMatch(/not a measured emission value/i);
+
+  await page.getByRole("link", { name: "Open route planner" }).click();
+  await expect(page).toHaveURL(/\/planner$/);
 });
 
 test("Planner selects a real alternative and synchronizes route metrics and map", async ({
@@ -72,6 +228,14 @@ test("Planner selects a real alternative and synchronizes route metrics and map"
   await expect(second).toBeChecked();
   await expect(summary.getByText("14 min", { exact: true })).toBeVisible();
   await expect(summary.getByText("7 km", { exact: true })).toBeVisible();
+  const selectedCard = second.locator("xpath=..");
+  await expect(selectedCard.getByText("LOW · 1.17×", { exact: true })).toBeVisible();
+  await expect(
+    selectedCard.getByText("1.4 kg · simulation", { exact: true }),
+  ).toBeVisible();
+  const assumptions = page.getByRole("region", { name: "Route assumptions" });
+  await expect(assumptions.getByText("1.17×", { exact: true })).toBeVisible();
+  await expect(assumptions.getByText("1.4 kg", { exact: true })).toBeVisible();
   const selectedPolyline = page.locator(
     '.leaflet-overlay-pane path[stroke-width="6"]',
   );

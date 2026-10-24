@@ -1,13 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type Sailing = { id: string; label: string; etd: string };
 
@@ -18,6 +11,7 @@ export function RecordedSailingPicker({
 }) {
   const [rows, setRows] = useState<Sailing[]>([]);
   const [status, setStatus] = useState("Loading recorded sailings…");
+  const [selectedId, setSelectedId] = useState("");
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -75,26 +69,28 @@ export function RecordedSailingPicker({
       <label htmlFor="recorded-sailing" className="text-sm font-medium">
         Copy a recorded sailing time
       </label>
-      <Select
-        value={null}
+      <select
+        id="recorded-sailing"
+        value={selectedId}
         disabled={!rows.length}
-        onValueChange={(value) => {
+        onChange={(event) => {
+          const value = event.target.value;
           const row = rows.find((row) => row.id === value);
+          setSelectedId(value);
           if (row) onChoose(row.etd);
         }}
+        className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <SelectTrigger id="recorded-sailing" className="w-full">
-          <SelectValue placeholder="Choose a recorded sailing (optional)" />
-        </SelectTrigger>
-        <SelectContent>
+        <option value="">
+          {rows.length ? "Choose a recorded sailing (optional)" : status}
+        </option>
           {rows.map((row) => (
-            <SelectItem key={row.id} value={row.id}>
+            <option key={row.id} value={row.id}>
               {row.label}
-            </SelectItem>
+            </option>
           ))}
-        </SelectContent>
-      </Select>
-      <p className="text-xs text-muted-foreground">
+      </select>
+      <p role="status" aria-live="polite" className="text-xs text-muted-foreground">
         {status} This copies only the clock time. Confirm the route terminal and select cargo separately.
       </p>
     </div>
