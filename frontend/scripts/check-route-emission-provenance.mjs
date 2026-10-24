@@ -22,6 +22,7 @@ const dependencies = {
   "react/jsx-runtime": await import("react/jsx-runtime"),
   "lucide-react": {
     AlertTriangle: Icon,
+    ChevronDown: Icon,
     CheckCircle2: Icon,
     Clock3: Icon,
     Gauge: Icon,

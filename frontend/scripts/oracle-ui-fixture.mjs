@@ -1,4 +1,4 @@
-// Loopback-only synthetic Auth/API for browser verification. Never contacts Supabase/provider.
+// Loopback-only synthetic Auth/API for browser verification. Never contacts Supabase/provider, OSRM, or a cutoff calculator.
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -92,18 +92,21 @@ const server = createServer(async (req, res) => {
     if (routeFailure) { sendJson(res, { detail: "Synthetic failure" }, 503); return; }
     if (url.pathname === "/route/alternatives" && alternativesUnavailable) { sendJson(res, { detail: "Legacy fixture mode" }, 404); return; }
     const options = [
-      { route_id: "route-1", display_label: "Route 1", routing_source: "OSRM API", distance_km: 5, base_time_min: 10, final_time_min: 15,
+      { route_id: "route-1", display_label: "Route 1", routing_source: "Synthetic UI fixture", distance_km: 5, base_time_min: 10, final_time_min: 15,
         congestion_level: "HIGH", congestion_multiplier: 1.5, congestion_status: "synthetic_estimate", emission_kg: 1.5,
         matched_segment_id: "SEG001", route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] } },
-      { route_id: "route-2", display_label: "Route 2", routing_source: "OSRM API", distance_km: 7, base_time_min: 12, final_time_min: 14,
+      { route_id: "route-2", display_label: "Route 2", routing_source: "Synthetic UI fixture", distance_km: 7, base_time_min: 12, final_time_min: 14,
         congestion_level: "LOW", congestion_multiplier: 1.17, congestion_status: "synthetic_estimate", emission_kg: 1.4,
         matched_segment_id: "SEG002", route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.origin.lng + 0.01, body.origin.lat + 0.01], [body.destination.lng, body.destination.lat]] } },
     ];
+    const sampleCalculationTime = typeof body.departure_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.departure_date)
+      ? `${body.departure_date}T01:00:00.000Z`
+      : undefined;
     const response = { ...body, departure_time: body.time, distance_km: 5, final_time_min: 15, base_time_min: 10,
-      routing_source: "OSRM API", emission_kg: 1.5, congestion_multiplier: 1.5,
+      routing_source: "Synthetic UI fixture", emission_kg: 1.5, congestion_multiplier: 1.5,
       route_geometry: { type: "LineString", coordinates: [[body.origin.lng, body.origin.lat], [body.destination.lng, body.destination.lat]] },
-      congestion_status: "synthetic_estimate", calculation_time: "2026-10-17T01:00:00Z", planning_timezone: "Asia/Jakarta",
-      ...(body.vessel_etd ? { cutoff_slack_min: 5, departure_feasible: true, estimated_arrival_time: "10:15", latest_gate_in: "10:20" } : {}) };
+      congestion_status: "synthetic_estimate", planning_timezone: "Asia/Jakarta",
+      ...(sampleCalculationTime ? { calculation_time: sampleCalculationTime } : {}) };
     if (url.pathname === "/route/alternatives") {
       response.default_route_id = "route-1";
       response.route_options = singleRoute ? [options[0]] : options;

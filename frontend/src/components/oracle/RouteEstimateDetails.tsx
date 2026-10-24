@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  ChevronDown,
   CheckCircle2,
   Clock3,
   Gauge,
@@ -322,19 +323,27 @@ export function RouteEstimateDetails({
             aria-label="Route assumptions"
             className="rounded-xl border bg-muted/15 p-4"
           >
-            <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold">
-              <Gauge
-                aria-hidden="true"
-                className="size-4 text-muted-foreground"
-              />
-              Estimate breakdown
-            </h3>
-            <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+            <details className="group">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-sm text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center gap-2">
+                  <Gauge
+                    aria-hidden="true"
+                    className="size-4 text-muted-foreground"
+                  />
+                  Estimate breakdown
+                </span>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                />
+              </summary>
+              <div className="pt-4">
+                <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
               {congestionReferenceAvailable
                 ? "Congestion uses one reference corridor and does not establish traffic across the full route. Review the warning above for how the reference was selected."
                 : "No congestion reference is available for this estimate."}
-            </p>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
+                </p>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
               {facts
                 .filter(([, value]) => value !== undefined)
                 .map(([label, value]) => (
@@ -389,7 +398,9 @@ export function RouteEstimateDetails({
                     )}
                   </div>
                 ))}
-            </dl>
+                </dl>
+              </div>
+            </details>
           </section>
         </div>
 
@@ -437,6 +448,14 @@ export function RouteEstimateDetails({
                 <p className="mt-2 text-xs leading-relaxed text-foreground/75">
                   {action}
                 </p>
+                {data.routing_source === "Synthetic UI fixture" &&
+                  data.cargo_type &&
+                  data.vessel_etd && (
+                    <p className="mt-2 text-xs leading-relaxed text-foreground/75">
+                      Local fixture limitation: this test result does not
+                      calculate vessel cutoff feasibility.
+                    </p>
+                  )}
               </div>
               <dl className="space-y-3">
                 {suggested && (
