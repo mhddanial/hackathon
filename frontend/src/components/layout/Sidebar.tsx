@@ -14,10 +14,12 @@ import { NavUser } from "@/components/layout/NavUser";
 
 const navigation = [
   { label: "Overview", items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }] },
-  { label: "Operations", items: [
-    { title: "Route Planner", url: "/planner", icon: Map },
-    { title: "Ferry Schedules", url: "/schedules", icon: Ship },
-  ] },
+  {
+    label: "Operations", items: [
+      { title: "Route Planner", url: "/planner", icon: Map },
+      { title: "Ferry Schedules", url: "/schedules", icon: Ship },
+    ]
+  },
   { label: "Intelligence", items: [{ title: "Logistics Oracle", url: "/oracle", icon: MessageSquare }] },
 ];
 
@@ -33,7 +35,7 @@ export function AppSidebar() {
           <SidebarMenuItem className="flex items-center gap-1">
             <SidebarMenuButton
               size="lg"
-              render={<Link href="/dashboard" />}
+              render={<Link href="/" />}
               tooltip="SmartFlow dashboard"
               onClick={closeMobile}
               className="h-10 rounded-lg hover:bg-sidebar-accent"
