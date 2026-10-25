@@ -81,6 +81,7 @@ export function RecordedSailingPicker({
       <Select
         value={selectedId}
         disabled={!rows.length}
+        items={rows.map((r) => ({ value: r.id, label: r.label }))}
         onValueChange={(value) => {
           if (!value) return;
           const row = rows.find((r) => r.id === value);
@@ -93,7 +94,13 @@ export function RecordedSailingPicker({
             placeholder={
               rows.length ? "Choose a recorded sailing (optional)" : status
             }
-          />
+          >
+            {(val: string | null) => {
+              if (!val) return null;
+              const row = rows.find((r) => r.id === val);
+              return row ? row.label : val;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {rows.map((row) => (
