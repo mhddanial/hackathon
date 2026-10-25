@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-25",
+  "timezone": "Asia/Jakarta",
+  "tasks": [
+    "D6-06",
+    "D6-07"
+  ],
+  "scope": "Read-only Git revision and recorded source-hash verification; no application tests, sign-in, environment-file access, services, deployment or commit performed.",
+  "head_at_review": "40e1b29f8d7b05058e12fad4dd260d2fb6a926ef",
+  "worktree_clean_before_documentation_changes": true,
+  "commits": [
+    {
+      "revision": "eaca538a842aa7451793bfc233d0775f5381054a",
+      "committed_at": "2026-10-24T19:56:13+07:00",
+      "subject": "test(departure): add Sprint 6 acceptance evidence and shared UI fixes",
+      "verified_changed_paths": [
+        "docs/departure/evidence/sprint-6/backend-acceptance.json",
+        "docs/departure/evidence/sprint-6/follow-up-verification.json",
+        "frontend/src/app/login/page.tsx"
+      ]
+    },
+    {
+      "revision": "3dc6c6afea370b497ef9a00f3012a42787c3ce0b",
+      "committed_at": "2026-10-24T21:36:20+07:00",
+      "subject": "fix error SupabaseURL",
+      "verified_changed_paths": [
+        "frontend/src/utils/supabase/middleware.ts"
+      ]
+    },
+    {
+      "revision": "40e1b29f8d7b05058e12fad4dd260d2fb6a926ef",
+      "committed_at": "2026-10-24T22:21:53+07:00",
+      "subject": "chore(departure): add Supabase config diagnostics and evidence",
+      "verified_changed_paths": [
+        "frontend/scripts/diagnose-supabase-config.mjs",
+        "docs/departure/evidence/sprint-6/supabase-config-fix.json"
+      ]
+    }
+  ],
+  "source_hash_comparisons": [
+    {
+      "path": "frontend/scripts/departure-ui-fixture.mjs",
+      "recorded_in": "docs/departure/evidence/sprint-6/follow-up-verification.json",
+      "sha256": "e422b92ab2c098f7e5b53f7a11a207c41e33142bc75c31b0280d9a2e2e2b33ee",
+      "matches": true
+    },
+    {
+      "path": "frontend/scripts/check-departure-u4-ui.js",
+      "recorded_in": "docs/departure/evidence/sprint-6/follow-up-verification.json",
+      "sha256": "57762bd99bd3db8c9c0ac0aedf36dfd02952ce88ddec1b6c18502d8e64afb9fc",
+      "matches": true
+    },
+    {
+      "path": "frontend/scripts/check-departure-shared-ui.js",
+      "recorded_in": "docs/departure/evidence/sprint-6/follow-up-verification.json",
+      "sha256": "755837960880f74e4efbe89e4fa557cb5fcd727208a614ac7a872ef25d80b387",
+      "matches": true
+    },
+    {
+      "path": "frontend/src/hooks/use-mobile.ts",
+      "recorded_in": "docs/departure/evidence/sprint-6/follow-up-verification.json",
+      "sha256": "556cc4fbd1bb44ab9c379ea5c518edda758385019f99e31962aa0fccb5588f91",
+      "matches": true
+    },
+    {
+      "path": "frontend/src/app/(dashboard)/schedules/page.tsx",
+      "recorded_in": "docs/departure/evidence/sprint-6/follow-up-verification.json",
+      "sha256": "d79dca610f8660447e9149868e6e9dce8cbfe9c00446eab86acd010416b72f99",
+      "matches": true
+    },
+    {
+      "path": "frontend/src/app/login/page.tsx",
+      "recorded_in": "docs/departure/evidence/sprint-6/follow-up-verification.json",
+      "sha256": "62bde137646679c349e720d0f6eb360aff2f8aada4f6c0331132991263a8a9df",
+      "matches": true
+    },
+    {
+      "path": "frontend/src/app/register/page.tsx",
+      "recorded_in": "docs/departure/evidence/sprint-6/follow-up-verification.json",
+      "sha256": "5a34344d5ba373c4edd8fa69e9b284c0ab9147efe1fcbea52e2e56b65d693b84",
+      "matches": true
+    },
+    {
+      "path": "frontend/src/utils/supabase/middleware.ts",
+      "recorded_in": "docs/departure/evidence/sprint-6/supabase-config-fix.json",
+      "sha256": "f2941085446a1760acdcafef17e82e2575184f1ddff4fd77102fd71e78a084d0",
+      "matches": true
+    },
+    {
+      "path": "frontend/scripts/check-supabase-config.mjs",
+      "recorded_in": "docs/departure/evidence/sprint-6/supabase-config-fix.json",
+      "sha256": "0196208b47ab83dd0105d5b847a39d691c995b387377eec012eb2e9f8a99f049",
+      "matches": true
+    }
+  ],
+  "limitation": "Nine explicitly recorded source hashes match; this is not a fresh test run or a whole-repository source comparison. Historical source-context and commit_created=false fields remain correct at their original capture times. Commit inclusion does not prove personal authorship or release readiness.",
+  "user_reported_blocker": {
+    "symptom": "Cannot sign in; earlier report was Failed to fetch.",
+    "verification": "User report only; current auth method, failed request error and operator diagnostic booleans not supplied; root cause unconfirmed."
+  },
+  "full_tasks_closed": [],
+  "real_integration_verified": false,
+  "participant_sessions_recorded": 0
+}

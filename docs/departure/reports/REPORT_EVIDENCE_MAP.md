@@ -16,7 +16,21 @@
 | BAB IV — duration measurements | Actual wall time of 63 in-process ASGI requests and 9 injected errors, three synthetic catalog scenarios | [Timing samples](../evidence/sprint-6/synthetic-latency.json) | Mock I/O/model; no network/production latency, model accuracy, dispatch-time or traffic measurement claim |
 | BAB IV — usability | Protocol, moderator guide, readiness status and blank observation form prepared | [Protocol](USABILITY_PROTOCOL.md), [moderator guide](USABILITY_SESSION_GUIDE.md), [pending results](USABILITY_RESULTS.md) | 0 sessions recorded; institutional/participant readiness pending; U4 fixture preparation verified synthetically; no approval, scores, observations or benefits invented |
 | BAB IV — fixes/limitations | Seven lint errors and one observed schedules hydration error fixed/retested; U4 fixture gap closed synthetically | [Issue register](../evidence/sprint-6/issues.json), acceptance report | D6-05 complete for current observed issues; new actual integration/usability findings can reopen it |
-| Contribution/revision evidence | Current worktree is tested; prior staged Sprint 5 work preserved | [Initial source context](../evidence/sprint-6/source-context.json), [follow-up source hashes/results](../evidence/sprint-6/follow-up-verification.json) | No new commit created; base HEAD hash is not a commit containing this uncommitted evidence. Add actual attributable revisions later if authorized. |
+| Contribution/revision evidence | Existing Sprint 6 commits contain the evidence/fixes; nine recorded source hashes match current files on 25 October | [Revision verification](../evidence/sprint-6/revision-traceability.json), [initial source context](../evidence/sprint-6/source-context.json), [follow-up source hashes/results](../evidence/sprint-6/follow-up-verification.json) | Earlier uncommitted captures remain historical. Commit inclusion establishes source lineage, not personal authorship, a fresh whole-tree test run or a released artifact. |
+
+## Revision references verified 25 October 2026
+
+For D6-06, Git inspection now establishes these existing revisions. No commit was created during this review.
+
+| Revision | Verified report relevance |
+| --- | --- |
+| `eaca538a842aa7451793bfc233d0775f5381054a` | Sprint 6 acceptance outputs, follow-up verification and shared frontend fixes |
+| `3dc6c6afea370b497ef9a00f3012a42787c3ce0b` | Frontend Supabase configuration guard |
+| `40e1b29f8d7b05058e12fad4dd260d2fb6a926ef` | Operator configuration diagnostic and synthetic configuration-fix evidence |
+
+Read-only `git log`, `git show`, revision/path checks and SHA-256 comparisons verified three commits and all nine explicitly recorded source hashes from `follow-up-verification.json` and `supabase-config-fix.json`. This closes the missing revision-reference portion of D6-06. Existing application test counts remain attributed to their original runs; no application test was rerun. Real integration and participant findings remain absent, so D6-06 stays partial.
+
+The user currently reports inability to sign in, with an earlier “Failed to fetch” message. This is user-reported blocking evidence, not an assistant-reproduced defect or a confirmed configuration diagnosis. Actual authenticated outputs and network durations cannot be added until that blocker is resolved and the manual checks run.
 
 ## Implemented sequence (offline boundary exercised)
 

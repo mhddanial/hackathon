@@ -77,3 +77,36 @@ If the SDK reports `Invalid supabaseUrl: Provided URL is malformed`, correct the
 Your terminal's exported variables can override file settings. After correcting your own configuration, stop/restart your frontend dev server; for a production build, rebuild before starting because `NEXT_PUBLIC_*` values are bundled. The assistant does not inspect/load/edit either environment file or change your running processes. Middleware now returns a clear no-store 503 for invalid settings; this protects the route but does not make authentication operational. [Offline guard verification](../evidence/sprint-6/supabase-config-fix.json) passed; the real configuration and signed-in flow remain manual pending.
 
 For a copy-safe diagnostic, the **user** can run `node scripts/diagnose-supabase-config.mjs` from `frontend/`. This operator-only command uses Next's development environment loading order and prints only `urlPresent`, `urlValid`, and `keyPresent` booleans. It neither starts a service nor verifies credentials/connectivity. The assistant must not directly execute this CLI under the retained `.env` rule. Syntax/lint and a synthetic harness with a stubbed environment loader were checked; no real configuration was loaded by the assistant. Paste only its boolean result, never configuration values.
+
+## Current sign-in blocker — operator triage
+
+25 October 2026: the user reports being unable to sign in, with an earlier “Failed to fetch” message. The exact current error and auth method remain unknown. The login page uses the Supabase browser client directly; the FastAPI favicon 404 does not diagnose this request failure.
+
+1. In the frontend terminal, the operator runs the diagnostic above and supplies only its three booleans. All `true` means presence/basic URL syntax passed; it does not verify the correct project, key validity, project availability or browser connectivity.
+2. Report whether the failing action is email/password or Google, and the exact displayed error. For a browser fetch failure, use Developer Tools → Network and supply only the failed hostname/path and browser error code or HTTP status. Do not export HAR files, headers, request bodies, credentials or tokens.
+3. Use that evidence to choose a fix. A failed fetch alone does not establish wrong credentials, CORS, an unavailable project or an incorrect URL. If the operator corrects public frontend settings, restart development or rebuild production before retrying.
+4. After sign-in works, resume the manual checklist on local 3000/8080 with existing approved read-only records. Record actual outcomes and durations; a working login alone does not complete D6-02.
+
+The [revision review](../evidence/sprint-6/revision-traceability.json) supplies existing source/evidence commit IDs for D6-06/D6-07. These are not deployed artifact IDs or proof of an exercised rollback. No full task is closed by this documentation update.
+
+### Optional operator network diagnostic
+
+If all three configuration booleans are true but requests still fail, the **operator** can run this from `frontend/`:
+
+```sh
+node scripts/diagnose-supabase-config.mjs --network
+```
+
+The default command still prints only three booleans. `--network` adds one read-only, unauthenticated GET to `/auth/v1/health`, with a five-second timeout and redirects disabled. It sends no API key, password, bearer token or cookies, discards the response body and prints only booleans, an HTTP status and a static failure category. The assistant must not run this CLI with real settings because its direct entry point loads environment files. A response such as 401 means the server responded to an unauthenticated probe; even 200 does not verify the configured key, providers, browser CORS or a login. `loginVerified` always remains false.
+
+| Diagnostic output | Next operator check |
+| --- | --- |
+| `INVALID_URL` | Correct the effective Project URL, then restart/rebuild the frontend |
+| `DNS_ERROR` | Compare the Project URL against the dashboard, check whether the intended project is paused, and check local DNS/network access; the category alone does not identify which cause applies |
+| `CONNECTION_REFUSED` | Verify the configured host/port; if it is a local Supabase instance, confirm that instance is running |
+| `TLS_ERROR`, `TIMEOUT`, `CONNECTION_ERROR` | Check the network/proxy/certificate problem indicated by the category; do not disable TLS verification |
+| HTTP response | Use the exact browser failure and Auth/provider settings to continue; this Node probe does not reproduce browser authentication |
+
+Reference: [Supabase DNS troubleshooting](https://supabase.com/kb/troubleshooting/nxdomain-error-connecting-to-a-supabase-project), [Google provider setup](https://supabase.com/docs/guides/auth/social-sign-in/auth-google), [redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls). Do not change shared project/provider settings without the appropriate project owner's authorization.
+
+For Chrome/Edge on macOS: open the login page, press **Command + Option + I**, select **Network**, and retry one sign-in. Inspect the failed request's **Headers → General**, or its error in **Console**. Share only the hostname/path and status/error, omitting query strings and all headers/bodies. No HAR export is needed.
